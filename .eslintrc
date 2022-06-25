@@ -1,0 +1,25 @@
+{
+  "extends": [
+    "react-app",
+    "prettier",
+    "plugin:prettier/recommended",
+    "plugin:@typescript-eslint/eslint-recommended"
+  ],
+  "settings": {
+    "react": {
+      // Fix for https://github.com/jaredpalmer/tsdx/issues/279
+      "version": "999.999.999"
+    }
+  },
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "off",
+    "import/no-anonymous-default-export": "off",
+    "@typescript-eslint/prefer-ts-expect-error": "error",
+    "@typescript-eslint/ban-types": "error",
+    "@typescript-eslint/explicit-module-boundary-types": [
+      "error",
+      { "allowArgumentsExplicitlyTypedAsAny": true }
+    ],
+    "no-eval": "off"
+  }
+}
