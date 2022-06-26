@@ -7,7 +7,7 @@
 
 // console.log(result);
 
-const result = require('@babel/parser').parse('function foo (hello: Foo) {}', {
+const result = require('@babel/parser').parse('[]', {
   sourceType: 'module',
   plugins: [
     ['typescript', { disallowAmbiguousJSXLike: undefined }],
@@ -16,7 +16,8 @@ const result = require('@babel/parser').parse('function foo (hello: Foo) {}', {
   ],
   ranges: false,
   //   sourceFilename: 'foo.ts',
-  // tokens: true,
+  tokens: true,
 });
 
+// console.log(result.tokens);
 console.log(JSON.stringify(result.program.body, null, 2));
