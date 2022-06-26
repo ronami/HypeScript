@@ -5,72 +5,42 @@ import type {
   ConcatStrings,
 } from './utils/stringUtils';
 import type { Numbers, Symbols } from './utils/generalUtils';
-import type {} from './dataTypes';
+import type {
+  CurlyToken,
+  ParenToken,
+  DotToken,
+  SemicolonToken,
+  ColonToken,
+  Token,
+  NumberToken,
+  SymbolToken,
+  StringToken,
+} from './dataTypes';
 
 type TokenizeInput<I extends string> = FirstChar<I> extends infer F
   ? EatFirstChar<I> extends infer E
     ? F extends ' ' | '\n'
       ? ['', E]
       : F extends '('
-      ? [
-          {
-            type: 'paren';
-            value: '(';
-          },
-          E,
-        ]
+      ? [ParenToken<'('>, E]
       : F extends ')'
-      ? [
-          {
-            type: 'paren';
-            value: ')';
-          },
-          E,
-        ]
+      ? [ParenToken<')'>, E]
       : F extends '{'
-      ? [
-          {
-            type: 'curly';
-            value: '{';
-          },
-          E,
-        ]
+      ? [CurlyToken<'{'>, E]
       : F extends '}'
-      ? [
-          {
-            type: 'curly';
-            value: '}';
-          },
-          E,
-        ]
+      ? [CurlyToken<'}'>, E]
       : F extends '.'
-      ? [
-          {
-            type: 'dot';
-            value: '.';
-          },
-          E,
-        ]
+      ? [DotToken, E]
       : F extends ';'
-      ? [
-          {
-            type: ';';
-            value: ';';
-          },
-          E,
-        ]
+      ? [SemicolonToken, E]
       : F extends ':'
-      ? [
-          {
-            type: ':';
-            value: ':';
-          },
-          E,
-        ]
+      ? [ColonToken, E]
       : F extends Numbers
       ? TokenizeNumber<I, '', F>
       : F extends '"'
-      ? TokenizeString<E>
+      ? TokenizeString<E, '"'>
+      : F extends "'"
+      ? TokenizeString<E, "'">
       : F extends Symbols
       ? TokenizeSymbol<I, '', F>
       : never
@@ -83,11 +53,12 @@ type TokenizeNumber<
   C extends string = FirstChar<I>,
 > = C extends Numbers
   ? TokenizeNumber<EatFirstChar<I>, ConcatStrings<A, C>>
-  : [{ type: 'number'; value: A }, I];
+  : [NumberToken<A>, I];
 
-type TokenizeString<I> = I extends `${infer H}"${infer G}`
-  ? [{ type: 'string'; value: H }, G]
-  : never;
+type TokenizeString<
+  I,
+  W extends '"' | "'",
+> = I extends `${infer H}${W}${infer G}` ? [StringToken<H>, G] : never;
 
 type TokenizeSymbol<
   I extends string,
@@ -95,7 +66,7 @@ type TokenizeSymbol<
   C extends string = FirstChar<I>,
 > = C extends Symbols
   ? TokenizeSymbol<EatFirstChar<I>, ConcatStrings<A, C>>
-  : [{ type: 'symbol'; value: A }, I];
+  : [SymbolToken<A>, I];
 
 export type TokenizeSequence<
   I extends string,
