@@ -79,48 +79,56 @@ type ParseVariableDeclaration<T extends Array<Token<any>>> =
       : never
     : never;
 
-type ParseObject<T extends Array<Token<any>>> =
-  ParseObjectBody<T> extends infer G
-    ? [ObjectExpression<Cast<G, Array<any>>[0]>, Cast<G, Array<any>>[1]]
-    : never;
-
-type ParseObjectBody<
+type ParseObject<
   T extends Array<Token<any>>,
   R extends Array<any> = [],
+  N extends boolean = false,
   F extends Token<any> = T[0],
 > = F extends CurlyToken<'}'>
-  ? [Reverse<R>, Tail<T>]
+  ? [ObjectExpression<Reverse<R>>, Tail<T>]
   : T extends []
   ? never
-  : T[0] extends CommaToken
-  ? ParseObjectBody<Tail<T>, R>
-  : T[0] extends SymbolToken<infer H>
+  : N extends true
+  ? F extends CommaToken
+    ? ParseObjectItem<Tail<T>, R>
+    : never
+  : ParseObjectItem<T, R>;
+
+type ParseObjectItem<
+  T extends Array<Token<any>>,
+  R extends Array<any> = [],
+> = T[0] extends SymbolToken<infer K>
   ? T[1] extends ColonToken
     ? ParseLiteral<Tail<Tail<T>>> extends infer G
-      ? ParseObjectBody<
+      ? ParseObject<
           Cast<G, Array<any>>[1],
-          Unshift<R, ObjectProperty<H, Cast<G, Array<any>>[0]>>
+          Unshift<R, ObjectProperty<K, Cast<G, Array<any>>[0]>>,
+          true
         >
       : never
     : never
   : never;
 
-type ParseArray<T extends Array<Token<any>>> = ParseArrayBody<T> extends infer G
-  ? [ArrayExpression<Cast<G, Array<any>>[0]>, Cast<G, Array<any>>[1]]
-  : never;
-
-type ParseArrayBody<
+type ParseArray<
   T extends Array<Token<any>>,
   R extends Array<any> = [],
+  N extends boolean = false,
   F extends Token<any> = T[0],
 > = F extends BracketToken<']'>
-  ? [Reverse<R>, Tail<T>]
+  ? [ArrayExpression<Reverse<R>>, Tail<T>]
   : T extends []
   ? never
-  : T[0] extends CommaToken
-  ? ParseArrayBody<Tail<T>, R>
-  : ParseLiteral<T> extends infer G
-  ? ParseArrayBody<Cast<G, Array<any>>[1], Unshift<R, Cast<G, Array<any>>[0]>>
+  : N extends true
+  ? F extends CommaToken
+    ? ParseArrayItem<Tail<T>, R>
+    : never
+  : ParseArrayItem<T, R>;
+
+type ParseArrayItem<
+  T extends Array<Token<any>>,
+  R extends Array<any> = [],
+> = ParseLiteral<T> extends infer G
+  ? ParseArray<Cast<G, Array<any>>[1], Unshift<R, Cast<G, Array<any>>[0]>, true>
   : never;
 
 export type ParseSequence<
