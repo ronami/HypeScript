@@ -29,5 +29,9 @@
     "semi": true,
     "singleQuote": true,
     "trailingComma": "all"
+  },
+  "dependencies": {
+    "@babel/parser": "^7.18.5",
+    "@babel/plugin-transform-typescript": "^7.18.4"
   }
 }
