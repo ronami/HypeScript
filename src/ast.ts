@@ -1,8 +1,3 @@
-export type VariableDeclaration<T> = {
-  type: 'VariableDeclaration';
-  declarations: T;
-};
-
 export type NumericLiteral<T> = {
   type: 'NumericLiteral';
   value: T;
@@ -32,4 +27,16 @@ export type ObjectProperty<K, T> = {
   type: 'ObjectProperty';
   key: K;
   value: T;
+};
+
+export type VariableDeclaration<D, K extends 'const' | 'let'> = {
+  type: 'VariableDeclaration';
+  declarations: D;
+  kind: K;
+};
+
+export type VariableDeclarator<N, I> = {
+  type: 'VariableDeclarator';
+  name: N;
+  init: I;
 };
