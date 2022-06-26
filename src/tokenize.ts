@@ -15,16 +15,24 @@ import type {
   NumberToken,
   SymbolToken,
   StringToken,
+  BracketToken,
+  CommaToken,
 } from './tokens';
 
 type TokenizeInput<I extends string> = FirstChar<I> extends infer F
   ? EatFirstChar<I> extends infer E
     ? F extends ' ' | '\n'
       ? ['', E]
+      : F extends ','
+      ? [CommaToken, E]
       : F extends '('
       ? [ParenToken<'('>, E]
       : F extends ')'
       ? [ParenToken<')'>, E]
+      : F extends '['
+      ? [BracketToken<'['>, E]
+      : F extends ']'
+      ? [BracketToken<']'>, E]
       : F extends '{'
       ? [CurlyToken<'{'>, E]
       : F extends '}'
