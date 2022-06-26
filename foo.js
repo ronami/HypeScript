@@ -7,7 +7,7 @@
 
 // console.log(result);
 
-const result = require('@babel/parser').parse('[]', {
+const result = require('@babel/parser').parse('const a = { hello: "world" }', {
   sourceType: 'module',
   plugins: [
     ['typescript', { disallowAmbiguousJSXLike: undefined }],

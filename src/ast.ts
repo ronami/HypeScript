@@ -17,3 +17,19 @@ export type StringLiteral<T> = {
   type: 'StringLiteral';
   value: T;
 };
+
+export type ArrayExpression<T> = {
+  type: 'ArrayExpression';
+  elements: T;
+};
+
+export type ObjectExpression<T> = {
+  type: 'ObjectExpression';
+  properties: T;
+};
+
+export type ObjectProperty<K, T> = {
+  type: 'ObjectProperty';
+  key: K;
+  value: T;
+};
