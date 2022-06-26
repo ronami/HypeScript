@@ -1,13 +1,25 @@
-export type Paren<V> = { type: 'paren'; value: V };
+export type ParenToken<V> = { type: 'paren'; value: V };
 
-export type Number<V> = { type: 'number'; value: V };
+export type CurlyToken<V> = { type: 'curly'; value: V };
 
-export type String<V> = { type: 'string'; value: V };
+export type DotToken = { type: 'dot' };
 
-export type Symbol<V> = { type: 'symbol'; value: V };
+export type SemicolonToken = { type: 'semicolon' };
 
-// export type Token<V> =
-//   | ParenToken<V>
-//   | NumberToken<V>
-//   | StringToken<V>
-//   | SymbolToken<V>;
+export type ColonToken = { type: 'colon' };
+
+export type NumberToken<V> = { type: 'number'; value: V };
+
+export type StringToken<V> = { type: 'string'; value: V };
+
+export type SymbolToken<V> = { type: 'symbol'; value: V };
+
+export type Token<V> =
+  | NumberToken<V>
+  | StringToken<V>
+  | SymbolToken<V>
+  | ParenToken<V>
+  | CurlyToken<V>
+  | DotToken
+  | SemicolonToken
+  | ColonToken;
