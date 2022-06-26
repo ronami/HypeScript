@@ -1,5 +1,5 @@
 import type { Tokenize } from './tokenize';
 import type { Parse } from './parse';
 
-type T = Tokenize<`{ hello: "world", foo: 123 }`>;
+type T = Tokenize<`const hello = "world"`>;
 type R = Parse<T>;
