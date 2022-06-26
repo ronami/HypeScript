@@ -15,7 +15,7 @@ import type {
   NumberToken,
   SymbolToken,
   StringToken,
-} from './dataTypes';
+} from './tokens';
 
 type TokenizeInput<I extends string> = FirstChar<I> extends infer F
   ? EatFirstChar<I> extends infer E
