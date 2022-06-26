@@ -40,3 +40,10 @@ export type VariableDeclarator<N, I> = {
   name: N;
   init: I;
 };
+
+export type FunctionDeclaration<I, P, B> = {
+  type: 'FunctionDeclaration';
+  id: I;
+  params: P;
+  body: B;
+};

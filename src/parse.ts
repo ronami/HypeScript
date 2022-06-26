@@ -7,6 +7,7 @@ import type {
   ObjectProperty,
   VariableDeclaration,
   VariableDeclarator,
+  FunctionDeclaration,
 } from './ast';
 import type {
   BracketToken,
@@ -14,6 +15,7 @@ import type {
   CommaToken,
   CurlyToken,
   NumberToken,
+  ParenToken,
   StringToken,
   SymbolToken,
   Token,
@@ -44,9 +46,28 @@ export type ParseExpression<
   T extends Array<Token<any>>,
   F = T[0],
 > = F extends SymbolToken<'const'>
-  ? T[1] extends SymbolToken<infer K>
-    ? T[2] extends SymbolToken<'='>
-      ? ParseLiteral<Tail<Tail<Tail<T>>>> extends infer G
+  ? ParseVariableDeclaration<Tail<T>>
+  : F extends SymbolToken<'function'>
+  ? ParseFunctionDeclaration<Tail<T>>
+  : never;
+
+type ParseFunctionDeclaration<T extends Array<Token<any>>> =
+  T[0] extends SymbolToken<infer I>
+    ? T[1] extends ParenToken<'('>
+      ? T[2] extends ParenToken<')'>
+        ? T[3] extends CurlyToken<'{'>
+          ? T[4] extends CurlyToken<'}'>
+            ? [FunctionDeclaration<I, [], []>, Tail<Tail<Tail<Tail<Tail<T>>>>>]
+            : never
+          : never
+        : never
+      : never
+    : never;
+
+type ParseVariableDeclaration<T extends Array<Token<any>>> =
+  T[0] extends SymbolToken<infer K>
+    ? T[1] extends SymbolToken<'='>
+      ? ParseLiteral<Tail<Tail<T>>> extends infer G
         ? [
             VariableDeclaration<
               [VariableDeclarator<K, Cast<G, Array<any>>[0]>],
@@ -56,8 +77,7 @@ export type ParseExpression<
           ]
         : never
       : never
-    : never
-  : never;
+    : never;
 
 type ParseObject<T extends Array<Token<any>>> =
   ParseObjectBody<T> extends infer G
