@@ -56,3 +56,24 @@ export type Identifier<N> = {
 export type NullLiteral = {
   type: 'NullLiteral';
 };
+
+export type ExpressionStatement<E> = {
+  type: 'ExpressionStatement';
+  expression: E;
+};
+
+export type CallExpression<C, A> = {
+  type: 'CallExpression';
+  callee: C;
+  arguments: A;
+};
+
+export type MemberExpression<O, P> = {
+  type: 'MemberExpression';
+  object: O;
+  property: P;
+};
+
+// ReturnStatement
+// IfStatement
+// BlockStatement
