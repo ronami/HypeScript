@@ -37,7 +37,7 @@ export type VariableDeclaration<D, K extends 'const' | 'let'> = {
 
 export type VariableDeclarator<N, I> = {
   type: 'VariableDeclarator';
-  name: N;
+  id: N;
   init: I;
 };
 
@@ -46,4 +46,13 @@ export type FunctionDeclaration<I, P, B> = {
   id: I;
   params: P;
   body: B;
+};
+
+export type Identifier<N> = {
+  type: 'Identifier';
+  name: N;
+};
+
+export type NullLiteral = {
+  type: 'NullLiteral';
 };

@@ -8,6 +8,8 @@ import type {
   VariableDeclaration,
   VariableDeclarator,
   FunctionDeclaration,
+  Identifier,
+  NullLiteral,
 } from './ast';
 import type {
   BracketToken,
@@ -32,7 +34,7 @@ export type ParseLiteral<
   : F extends SymbolToken<'false'>
   ? [BooleanLiteral<false>, Tail<T>]
   : F extends SymbolToken<'null'>
-  ? [{ type: 'null'; value: null }, Tail<T>]
+  ? [NullLiteral, Tail<T>]
   : F extends NumberToken<infer V>
   ? [NumericLiteral<V>, Tail<T>]
   : F extends StringToken<infer V>
@@ -41,6 +43,8 @@ export type ParseLiteral<
   ? ParseArray<Tail<T>>
   : F extends CurlyToken<'{'>
   ? ParseObject<Tail<T>>
+  : F extends SymbolToken<infer V>
+  ? [Identifier<V>, Tail<T>]
   : [never, []];
 
 export type ParseExpression<
@@ -55,18 +59,39 @@ export type ParseExpression<
 type OptionalSemicolon<T extends Array<Token<any>>> =
   T[0] extends SemicolonToken ? Tail<T> : T;
 
-type ParseFunctionDeclaration<T extends Array<Token<any>>> =
-  T[0] extends SymbolToken<infer I>
-    ? T[1] extends ParenToken<'('>
-      ? T[2] extends ParenToken<')'>
-        ? T[3] extends CurlyToken<'{'>
-          ? T[4] extends CurlyToken<'}'>
-            ? [FunctionDeclaration<I, [], []>, Tail<Tail<Tail<Tail<Tail<T>>>>>]
-            : never
-          : never
+type ParseFunctionDeclaration<
+  T extends Array<Token<any>>,
+  G extends [any, Array<Token<any>>] = ParseFunctionParams<Tail<Tail<T>>>,
+> = T[0] extends SymbolToken<infer I>
+  ? T[1] extends ParenToken<'('>
+    ? G[1][0] extends CurlyToken<'{'>
+      ? G[1][1] extends CurlyToken<'}'>
+        ? [FunctionDeclaration<Identifier<I>, G[0], []>, Tail<Tail<G[1]>>]
         : never
       : never
-    : never;
+    : never
+  : never;
+
+type ParseFunctionParams<
+  T extends Array<Token<any>>,
+  R extends Array<any> = [],
+  N extends boolean = false,
+> = T[0] extends ParenToken<')'>
+  ? [Reverse<R>, Tail<T>]
+  : T extends []
+  ? never
+  : N extends true
+  ? T[0] extends CommaToken
+    ? ParseFunctionParamsItem<Tail<T>, R>
+    : never
+  : ParseFunctionParamsItem<T, R>;
+
+type ParseFunctionParamsItem<
+  T extends Array<Token<any>>,
+  R extends Array<any> = [],
+> = T[0] extends SymbolToken<infer V>
+  ? ParseFunctionParams<Tail<T>, Unshift<R, Identifier<V>>, true>
+  : never;
 
 type ParseVariableDeclaration<T extends Array<Token<any>>> =
   T[0] extends SymbolToken<infer K>
@@ -74,7 +99,7 @@ type ParseVariableDeclaration<T extends Array<Token<any>>> =
       ? ParseLiteral<Tail<Tail<T>>> extends infer G
         ? [
             VariableDeclaration<
-              [VariableDeclarator<K, Cast<G, Array<any>>[0]>],
+              [VariableDeclarator<Identifier<K>, Cast<G, Array<any>>[0]>],
               'const'
             >,
             OptionalSemicolon<Cast<G, Array<any>>[1]>,
@@ -106,7 +131,7 @@ type ParseObjectItem<
     ? ParseLiteral<Tail<Tail<T>>> extends infer G
       ? ParseObject<
           Cast<G, Array<any>>[1],
-          Unshift<R, ObjectProperty<K, Cast<G, Array<any>>[0]>>,
+          Unshift<R, ObjectProperty<Identifier<K>, Cast<G, Array<any>>[0]>>,
           true
         >
       : never
