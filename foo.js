@@ -7,7 +7,7 @@
 
 // console.log(result);
 
-const result = require('@babel/parser').parse('function foo (a, b) {}', {
+const result = require('@babel/parser').parse('const a = 5;', {
   sourceType: 'module',
   plugins: [
     ['typescript', { disallowAmbiguousJSXLike: undefined }],

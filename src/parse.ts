@@ -16,6 +16,7 @@ import type {
   CurlyToken,
   NumberToken,
   ParenToken,
+  SemicolonToken,
   StringToken,
   SymbolToken,
   Token,
@@ -51,6 +52,9 @@ export type ParseExpression<
   ? ParseFunctionDeclaration<Tail<T>>
   : never;
 
+type OptionalSemicolon<T extends Array<Token<any>>> =
+  T[0] extends SemicolonToken ? Tail<T> : T;
+
 type ParseFunctionDeclaration<T extends Array<Token<any>>> =
   T[0] extends SymbolToken<infer I>
     ? T[1] extends ParenToken<'('>
@@ -73,7 +77,7 @@ type ParseVariableDeclaration<T extends Array<Token<any>>> =
               [VariableDeclarator<K, Cast<G, Array<any>>[0]>],
               'const'
             >,
-            Cast<G, Array<any>>[1],
+            OptionalSemicolon<Cast<G, Array<any>>[1]>,
           ]
         : never
       : never
