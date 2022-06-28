@@ -10,12 +10,15 @@ import type {
   FunctionDeclaration,
   Identifier,
   NullLiteral,
+  ExpressionStatement,
+  CallExpression,
 } from './ast';
 import type {
   BracketToken,
   ColonToken,
   CommaToken,
   CurlyToken,
+  DotToken,
   NumberToken,
   ParenToken,
   SemicolonToken,
@@ -54,6 +57,48 @@ export type ParseExpression<
   ? ParseVariableDeclaration<Tail<T>>
   : F extends SymbolToken<'function'>
   ? ParseFunctionDeclaration<Tail<T>>
+  : F extends SymbolToken<infer V>
+  ? ParseExpressionStatement<Tail<T>, V>
+  : never;
+
+type ParseExpressionStatement<T extends Array<Token<any>>, V> = T extends []
+  ? [ExpressionStatement<Identifier<V>>, []]
+  : T[0] extends ParenToken<'('>
+  ? ParseFunctionArguments<Tail<T>> extends infer G
+    ? [
+        ExpressionStatement<
+          CallExpression<Identifier<V>, Cast<G, Array<any>>[0]>
+        >,
+        Cast<G, Array<any>>[1],
+      ]
+    : never
+  : T[0] extends DotToken
+  ? []
+  : never;
+
+type ParseFunctionArguments<
+  T extends Array<Token<any>>,
+  R extends Array<any> = [],
+  N extends boolean = false,
+> = T[0] extends ParenToken<')'>
+  ? [Reverse<R>, Tail<T>]
+  : T extends []
+  ? never
+  : N extends true
+  ? T[0] extends CommaToken
+    ? ParseFunctionArgumentsItem<Tail<T>, R>
+    : never
+  : ParseFunctionArgumentsItem<T, R>;
+
+type ParseFunctionArgumentsItem<
+  T extends Array<Token<any>>,
+  R extends Array<any> = [],
+> = ParseLiteral<T> extends infer G
+  ? ParseFunctionArguments<
+      Cast<G, Array<any>>[1],
+      Unshift<R, Cast<G, Array<any>>[0]>,
+      true
+    >
   : never;
 
 type OptionalSemicolon<T extends Array<Token<any>>> =
