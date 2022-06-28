@@ -69,6 +69,39 @@ export type ParseExpression<
         Unshift<Tail<R>, MemberExpression<R[0], Identifier<K>>>,
       ]
     : never
+  : T[0] extends ParenToken<'('>
+  ? ParseFunctionArguments<Tail<T>> extends infer G
+    ? [
+        [],
+        Cast<G, Array<any>>[1],
+        Unshift<Tail<R>, CallExpression<R[0], Cast<G, Array<any>>[0]>>,
+      ]
+    : never
+  : never;
+
+type ParseFunctionArguments<
+  T extends Array<Token<any>>,
+  R extends Array<any> = [],
+  N extends boolean = false,
+> = T[0] extends ParenToken<')'>
+  ? [Reverse<R>, Tail<T>]
+  : T extends []
+  ? never
+  : N extends true
+  ? T[0] extends CommaToken
+    ? ParseFunctionArgumentsItem<Tail<T>, R>
+    : never
+  : ParseFunctionArgumentsItem<T, R>;
+
+type ParseFunctionArgumentsItem<
+  T extends Array<Token<any>>,
+  R extends Array<any> = [],
+> = ParseLiteral<T> extends infer G
+  ? ParseFunctionArguments<
+      Cast<G, Array<any>>[1],
+      Unshift<R, Cast<G, Array<any>>[0]>,
+      true
+    >
   : never;
 
 type ParseFunctionDeclaration<
