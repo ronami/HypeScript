@@ -12,6 +12,7 @@ import type {
   NullLiteral,
   ExpressionStatement,
   CallExpression,
+  MemberExpression,
 } from './ast';
 import type {
   BracketToken,
@@ -52,57 +53,23 @@ export type ParseLiteral<
 
 export type ParseExpression<
   T extends Array<Token<any>>,
+  R extends Array<any>,
   F = T[0],
 > = F extends SymbolToken<'const'>
   ? ParseVariableDeclaration<Tail<T>>
   : F extends SymbolToken<'function'>
   ? ParseFunctionDeclaration<Tail<T>>
   : F extends SymbolToken<infer V>
-  ? ParseExpressionStatement<Tail<T>, V>
-  : never;
-
-type ParseExpressionStatement<T extends Array<Token<any>>, V> = T extends []
-  ? [ExpressionStatement<Identifier<V>>, []]
-  : T[0] extends ParenToken<'('>
-  ? ParseFunctionArguments<Tail<T>> extends infer G
+  ? [Identifier<V>, Tail<T>]
+  : F extends DotToken
+  ? T[1] extends SymbolToken<infer K>
     ? [
-        ExpressionStatement<
-          CallExpression<Identifier<V>, Cast<G, Array<any>>[0]>
-        >,
-        Cast<G, Array<any>>[1],
+        [],
+        Tail<Tail<T>>,
+        Unshift<Tail<R>, MemberExpression<R[0], Identifier<K>>>,
       ]
     : never
-  : T[0] extends DotToken
-  ? []
   : never;
-
-type ParseFunctionArguments<
-  T extends Array<Token<any>>,
-  R extends Array<any> = [],
-  N extends boolean = false,
-> = T[0] extends ParenToken<')'>
-  ? [Reverse<R>, Tail<T>]
-  : T extends []
-  ? never
-  : N extends true
-  ? T[0] extends CommaToken
-    ? ParseFunctionArgumentsItem<Tail<T>, R>
-    : never
-  : ParseFunctionArgumentsItem<T, R>;
-
-type ParseFunctionArgumentsItem<
-  T extends Array<Token<any>>,
-  R extends Array<any> = [],
-> = ParseLiteral<T> extends infer G
-  ? ParseFunctionArguments<
-      Cast<G, Array<any>>[1],
-      Unshift<R, Cast<G, Array<any>>[0]>,
-      true
-    >
-  : never;
-
-type OptionalSemicolon<T extends Array<Token<any>>> =
-  T[0] extends SemicolonToken ? Tail<T> : T;
 
 type ParseFunctionDeclaration<
   T extends Array<Token<any>>,
@@ -147,7 +114,7 @@ type ParseVariableDeclaration<T extends Array<Token<any>>> =
               [VariableDeclarator<Identifier<K>, Cast<G, Array<any>>[0]>],
               'const'
             >,
-            OptionalSemicolon<Cast<G, Array<any>>[1]>,
+            Cast<G, Array<any>>[1],
           ]
         : never
       : never
@@ -208,7 +175,11 @@ type ParseArrayItem<
 export type ParseSequence<
   T extends Array<Token<any>>,
   R extends Array<any> = [],
-  P extends [any, Array<Token<any>>] = ParseExpression<T>,
-> = T extends [] ? R : ParseSequence<P[1], Unshift<R, P[0]>>;
+  P extends [any, Array<Token<any>>, Array<any>?] = ParseExpression<T, R>,
+> = T extends []
+  ? R
+  : P[2] extends Array<any>
+  ? ParseSequence<P[1], P[2]>
+  : ParseSequence<P[1], Unshift<R, P[0]>>;
 
 export type Parse<T extends Array<Token<any>>> = Reverse<ParseSequence<T>>;

@@ -1,5 +1,5 @@
 import type { Tokenize } from './tokenize';
 import type { Parse } from './parse';
 
-type T = Tokenize<`console.log(1)`>;
+type T = Tokenize<`a.b.c`>;
 type R = Parse<T>;
