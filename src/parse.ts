@@ -30,15 +30,38 @@ import type {
 import type { Reverse, Tail, Unshift } from './utils/arrayUtils';
 import type { Cast } from './utils/generalUtils';
 
-type ParseLiteral<
+// type ParseExpression<
+//   T extends Array<Token<any>>,
+//   F = T[0],
+// > = ParseExpressionHelper<T, F> extends infer G
+//   ? G[1][0] extends DotToken
+//     ? ParseMemberExpression<G[0], Tail<G[1]>>
+//     : G[1][0] extends ParenToken<'('>
+//     ? ParseCallExpression<G[0], Tail<G[1]>>
+//     : G
+//   : never;
+
+type Wrap<T extends [any, Array<Token<any>>]> = T[1][0] extends DotToken
+  ? T[1][1] extends SymbolToken<infer V>
+    ? Wrap<[MemberExpression<T[0], Identifier<V>>, Tail<Tail<T[1]>>]>
+    : T
+  : T[1][0] extends ParenToken<'('>
+  ? ParseFunctionArguments<Tail<T[1]>> extends infer G
+    ? Wrap<
+        [CallExpression<T[0], Cast<G, Array<any>>[0]>, Cast<G, Array<any>>[1]]
+      >
+    : never
+  : T;
+
+type ParseExpression<
   T extends Array<Token<any>>,
   F = T[0],
 > = F extends SymbolToken<'true'>
-  ? [BooleanLiteral<true>, Tail<T>]
+  ? Wrap<[BooleanLiteral<true>, Tail<T>]>
   : F extends SymbolToken<'false'>
-  ? [BooleanLiteral<false>, Tail<T>]
+  ? Wrap<[BooleanLiteral<false>, Tail<T>]>
   : F extends SymbolToken<'null'>
-  ? [NullLiteral, Tail<T>]
+  ? Wrap<[NullLiteral, Tail<T>]>
   : F extends NumberToken<infer V>
   ? [NumericLiteral<V>, Tail<T>]
   : F extends StringToken<infer V>
@@ -48,43 +71,37 @@ type ParseLiteral<
   : F extends CurlyToken<'{'>
   ? ParseObject<Tail<T>>
   : F extends SymbolToken<infer V>
-  ? [Identifier<V>, Tail<T>]
-  : [never, []];
+  ? Wrap<[Identifier<V>, Tail<T>]>
+  : [T, []];
 
-type ParseExpression<
+type ParseStatement<
   T extends Array<Token<any>>,
   F = T[0],
 > = F extends SymbolToken<'const'>
   ? ParseVariableDeclaration<Tail<T>>
   : F extends SymbolToken<'function'>
   ? ParseFunctionDeclaration<Tail<T>>
-  : F extends SymbolToken<infer V>
-  ? ParseIdentifier<Tail<T>, V>
-  : never;
+  : ParseExpression<T>;
 
-type ParseIdentifier<T extends Array<Token<any>>, V> = T[0] extends DotToken
-  ? ParseMemberExpression<Identifier<V>, Tail<T>>
-  : T[0] extends ParenToken<'('>
-  ? ParseCallExpression<Identifier<V>, Tail<T>>
-  : [Identifier<V>, T];
+// type Wrap<T extends Array<Token<any>>, V> =
 
-type ParseMemberExpression<
-  I,
-  T extends Array<Token<any>>,
-> = T[0] extends SymbolToken<infer V>
-  ? T[1] extends DotToken
-    ? ParseMemberExpression<MemberExpression<I, Identifier<V>>, Tail<Tail<T>>>
-    : T[1] extends ParenToken<'('>
-    ? ParseCallExpression<MemberExpression<I, Identifier<V>>, Tail<Tail<T>>>
-    : [MemberExpression<I, Identifier<V>>, Tail<T>]
-  : never;
+// type ParseMemberExpression<
+//   I,
+//   T extends Array<Token<any>>,
+// > = T[0] extends SymbolToken<infer V>
+//   ? T[1] extends DotToken
+//     ? ParseMemberExpression<MemberExpression<I, Identifier<V>>, Tail<Tail<T>>>
+//     : T[1] extends ParenToken<'('>
+//     ? ParseCallExpression<MemberExpression<I, Identifier<V>>, Tail<Tail<T>>>
+//     : [MemberExpression<I, Identifier<V>>, Tail<T>]
+//   : never;
 
-type ParseCallExpression<
-  I,
-  T extends Array<Token<any>>,
-> = ParseFunctionArguments<T> extends infer G
-  ? [CallExpression<I, Cast<G, Array<any>>[0]>, Cast<G, Array<any>>[1]]
-  : never;
+// type ParseCallExpression<
+//   I,
+//   T extends Array<Token<any>>,
+// > = ParseFunctionArguments<T> extends infer G
+//   ? [CallExpression<I, Cast<G, Array<any>>[0]>, Cast<G, Array<any>>[1]]
+//   : never;
 
 type ParseFunctionArguments<
   T extends Array<Token<any>>,
@@ -103,7 +120,7 @@ type ParseFunctionArguments<
 type ParseFunctionArgumentsItem<
   T extends Array<Token<any>>,
   R extends Array<any> = [],
-> = ParseLiteral<T> extends infer G
+> = ParseExpression<T> extends infer G
   ? ParseFunctionArguments<
       Cast<G, Array<any>>[1],
       Unshift<R, Cast<G, Array<any>>[0]>,
@@ -148,7 +165,7 @@ type ParseFunctionParamsItem<
 type ParseVariableDeclaration<T extends Array<Token<any>>> =
   T[0] extends SymbolToken<infer K>
     ? T[1] extends SymbolToken<'='>
-      ? ParseLiteral<Tail<Tail<T>>> extends infer G
+      ? ParseExpression<Tail<Tail<T>>> extends infer G
         ? [
             VariableDeclaration<
               [VariableDeclarator<Identifier<K>, Cast<G, Array<any>>[0]>],
@@ -180,7 +197,7 @@ type ParseObjectItem<
   R extends Array<any> = [],
 > = T[0] extends SymbolToken<infer K>
   ? T[1] extends ColonToken
-    ? ParseLiteral<Tail<Tail<T>>> extends infer G
+    ? ParseExpression<Tail<Tail<T>>> extends infer G
       ? ParseObject<
           Cast<G, Array<any>>[1],
           Unshift<R, ObjectProperty<Identifier<K>, Cast<G, Array<any>>[0]>>,
@@ -208,14 +225,18 @@ type ParseArray<
 type ParseArrayItem<
   T extends Array<Token<any>>,
   R extends Array<any> = [],
-> = ParseLiteral<T> extends infer G
+> = ParseExpression<T> extends infer G
   ? ParseArray<Cast<G, Array<any>>[1], Unshift<R, Cast<G, Array<any>>[0]>, true>
   : never;
 
 type ParseSequence<
   T extends Array<Token<any>>,
   R extends Array<any> = [],
-  P extends [any, Array<Token<any>>] = ParseExpression<T>,
-> = T extends [] ? R : ParseSequence<P[1], Unshift<R, P[0]>>;
+> = T extends []
+  ? R
+  : ParseStatement<T> extends infer P
+  ? ParseSequence<Cast<P, Array<any>>[1], Unshift<R, Cast<P, Array<any>>[0]>>
+  : never;
 
-export type Parse<T extends Array<Token<any>>> = Reverse<ParseSequence<T>>;
+export type Parse<T extends Array<Token<any>>> =
+  ParseSequence<T> extends infer P ? Reverse<Cast<P, Array<any>>> : never;
