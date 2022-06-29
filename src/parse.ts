@@ -30,7 +30,7 @@ import type {
 import type { Reverse, Tail, Unshift } from './utils/arrayUtils';
 import type { Cast } from './utils/generalUtils';
 
-export type ParseLiteral<
+type ParseLiteral<
   T extends Array<Token<any>>,
   F = T[0],
 > = F extends SymbolToken<'true'>
@@ -51,32 +51,39 @@ export type ParseLiteral<
   ? [Identifier<V>, Tail<T>]
   : [never, []];
 
-export type ParseExpression<
+type ParseExpression<
   T extends Array<Token<any>>,
-  R extends Array<any>,
   F = T[0],
 > = F extends SymbolToken<'const'>
   ? ParseVariableDeclaration<Tail<T>>
   : F extends SymbolToken<'function'>
   ? ParseFunctionDeclaration<Tail<T>>
   : F extends SymbolToken<infer V>
-  ? [Identifier<V>, Tail<T>]
-  : F extends DotToken
-  ? T[1] extends SymbolToken<infer K>
-    ? [
-        [],
-        Tail<Tail<T>>,
-        Unshift<Tail<R>, MemberExpression<R[0], Identifier<K>>>,
-      ]
-    : never
+  ? ParseIdentifier<Tail<T>, V>
+  : never;
+
+type ParseIdentifier<T extends Array<Token<any>>, V> = T[0] extends DotToken
+  ? ParseMemberExpression<Identifier<V>, Tail<T>>
   : T[0] extends ParenToken<'('>
-  ? ParseFunctionArguments<Tail<T>> extends infer G
-    ? [
-        [],
-        Cast<G, Array<any>>[1],
-        Unshift<Tail<R>, CallExpression<R[0], Cast<G, Array<any>>[0]>>,
-      ]
-    : never
+  ? ParseCallExpression<Identifier<V>, Tail<T>>
+  : [Identifier<V>, T];
+
+type ParseMemberExpression<
+  I,
+  T extends Array<Token<any>>,
+> = T[0] extends SymbolToken<infer V>
+  ? T[1] extends DotToken
+    ? ParseMemberExpression<MemberExpression<I, Identifier<V>>, Tail<Tail<T>>>
+    : T[1] extends ParenToken<'('>
+    ? ParseCallExpression<MemberExpression<I, Identifier<V>>, Tail<Tail<T>>>
+    : [MemberExpression<I, Identifier<V>>, Tail<T>]
+  : never;
+
+type ParseCallExpression<
+  I,
+  T extends Array<Token<any>>,
+> = ParseFunctionArguments<T> extends infer G
+  ? [CallExpression<I, Cast<G, Array<any>>[0]>, Cast<G, Array<any>>[1]]
   : never;
 
 type ParseFunctionArguments<
@@ -205,14 +212,10 @@ type ParseArrayItem<
   ? ParseArray<Cast<G, Array<any>>[1], Unshift<R, Cast<G, Array<any>>[0]>, true>
   : never;
 
-export type ParseSequence<
+type ParseSequence<
   T extends Array<Token<any>>,
   R extends Array<any> = [],
-  P extends [any, Array<Token<any>>, Array<any>?] = ParseExpression<T, R>,
-> = T extends []
-  ? R
-  : P[2] extends Array<any>
-  ? ParseSequence<P[1], P[2]>
-  : ParseSequence<P[1], Unshift<R, P[0]>>;
+  P extends [any, Array<Token<any>>] = ParseExpression<T>,
+> = T extends [] ? R : ParseSequence<P[1], Unshift<R, P[0]>>;
 
 export type Parse<T extends Array<Token<any>>> = Reverse<ParseSequence<T>>;
