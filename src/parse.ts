@@ -22,24 +22,12 @@ import type {
   DotToken,
   NumberToken,
   ParenToken,
-  SemicolonToken,
   StringToken,
   SymbolToken,
   Token,
 } from './tokens';
 import type { Reverse, Tail, Unshift } from './utils/arrayUtils';
 import type { Cast } from './utils/generalUtils';
-
-// type ParseExpression<
-//   T extends Array<Token<any>>,
-//   F = T[0],
-// > = ParseExpressionHelper<T, F> extends infer G
-//   ? G[1][0] extends DotToken
-//     ? ParseMemberExpression<G[0], Tail<G[1]>>
-//     : G[1][0] extends ParenToken<'('>
-//     ? ParseCallExpression<G[0], Tail<G[1]>>
-//     : G
-//   : never;
 
 type Wrap<T extends [any, Array<Token<any>>]> = T[1][0] extends DotToken
   ? T[1][1] extends SymbolToken<infer V>
@@ -82,26 +70,6 @@ type ParseStatement<
   : F extends SymbolToken<'function'>
   ? ParseFunctionDeclaration<Tail<T>>
   : ParseExpression<T>;
-
-// type Wrap<T extends Array<Token<any>>, V> =
-
-// type ParseMemberExpression<
-//   I,
-//   T extends Array<Token<any>>,
-// > = T[0] extends SymbolToken<infer V>
-//   ? T[1] extends DotToken
-//     ? ParseMemberExpression<MemberExpression<I, Identifier<V>>, Tail<Tail<T>>>
-//     : T[1] extends ParenToken<'('>
-//     ? ParseCallExpression<MemberExpression<I, Identifier<V>>, Tail<Tail<T>>>
-//     : [MemberExpression<I, Identifier<V>>, Tail<T>]
-//   : never;
-
-// type ParseCallExpression<
-//   I,
-//   T extends Array<Token<any>>,
-// > = ParseFunctionArguments<T> extends infer G
-//   ? [CallExpression<I, Cast<G, Array<any>>[0]>, Cast<G, Array<any>>[1]]
-//   : never;
 
 type ParseFunctionArguments<
   T extends Array<Token<any>>,
