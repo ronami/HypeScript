@@ -77,3 +77,9 @@ export type MemberExpression<O, P> = {
 // ReturnStatement
 // IfStatement
 // BlockStatement
+
+// Add unit-tests
+// Fn-calls, member-access on expressions
+// Parse statements, parse expressions, no parse literal
+// Show parse errors
+// Type check and inference
