@@ -63,9 +63,9 @@ type ParseExpression<
   : F extends SymbolToken<'null'>
   ? Wrap<[NullLiteral, Tail<T>]>
   : F extends NumberToken<infer V>
-  ? [NumericLiteral<V>, Tail<T>]
+  ? Wrap<[NumericLiteral<V>, Tail<T>]>
   : F extends StringToken<infer V>
-  ? [StringLiteral<V>, Tail<T>]
+  ? Wrap<[StringLiteral<V>, Tail<T>]>
   : F extends BracketToken<'['>
   ? ParseArray<Tail<T>>
   : F extends CurlyToken<'{'>
