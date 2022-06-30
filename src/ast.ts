@@ -91,12 +91,6 @@ export type BlockStatement<B> = {
   body: B;
 };
 
-// ReturnStatement
-// IfStatement
-// BlockStatement
-
-// Add unit-tests
-// Fn-calls, member-access on expressions
-// Parse statements, parse expressions, no parse literal
+// Parse type annotations
 // Show parse errors
 // Type check and inference
