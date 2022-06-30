@@ -122,7 +122,3 @@ export type GenericTypeAnnotation<I> = {
   type: 'GenericTypeAnnotation';
   id: I;
 };
-
-// Parse type annotations
-// Show parse errors
-// Type check and inference
