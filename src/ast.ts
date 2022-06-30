@@ -74,6 +74,13 @@ export type MemberExpression<O, P> = {
   property: P;
 };
 
+export type IfStatement<T, C> = {
+  type: 'IfStatement';
+  test: T;
+  consequent: C;
+  // alternate: A;
+};
+
 // ReturnStatement
 // IfStatement
 // BlockStatement
