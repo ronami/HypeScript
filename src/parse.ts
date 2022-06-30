@@ -74,7 +74,9 @@ type ParseStatement<
   ? ParseVariableDeclaration<Tail<T>>
   : F extends SymbolToken<'function'>
   ? ParseFunctionDeclaration<Tail<T>>
-  : ParseExpression<T>;
+  : ParseExpression<T> extends infer G
+  ? [ExpressionStatement<Cast<G, Array<any>>[0]>, Cast<G, Array<any>>[1]]
+  : never;
 
 type ParseFunctionArguments<
   T extends Array<Token<any>>,
