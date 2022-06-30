@@ -215,18 +215,36 @@ type ParseFunctionParamsItem<
     : ParseFunctionParams<Tail<T>, Unshift<R, Identifier<V>>, true>
   : never;
 
+type ParseVariableDeclarationHelper<
+  T extends Array<Token<any>>,
+  K,
+  Q = null,
+> = ParseExpression<T> extends infer G
+  ? [
+      VariableDeclaration<
+        [VariableDeclarator<Identifier<K, Q>, Cast<G, Array<any>>[0]>],
+        'const'
+      >,
+      Cast<G, Array<any>>[1],
+    ]
+  : never;
+
 type ParseVariableDeclaration<T extends Array<Token<any>>> =
   T[0] extends SymbolToken<infer K>
-    ? T[1] extends SymbolToken<'='>
-      ? ParseExpression<Tail<Tail<T>>> extends infer G
-        ? [
-            VariableDeclaration<
-              [VariableDeclarator<Identifier<K>, Cast<G, Array<any>>[0]>],
-              'const'
-            >,
-            Cast<G, Array<any>>[1],
-          ]
+    ? T[1] extends ColonToken
+      ? ParseTypeAnnotation<Tail<Tail<T>>> extends infer G
+        ? Cast<G, Array<any>>[1][0] extends SymbolToken<'='>
+          ? Cast<G, Array<any>>[1] extends infer J
+            ? ParseVariableDeclarationHelper<
+                Tail<Cast<J, Array<any>>>,
+                K,
+                Cast<G, Array<any>>[0]
+              >
+            : never
+          : never
         : never
+      : T[1] extends SymbolToken<'='>
+      ? ParseVariableDeclarationHelper<Tail<Tail<T>>, K>
       : never
     : never;
 
