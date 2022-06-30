@@ -101,17 +101,26 @@ type ParseFunctionArgumentsItem<
     >
   : never;
 
-type ParseFunctionDeclaration<
-  T extends Array<Token<any>>,
-  G extends [any, Array<Token<any>>] = ParseFunctionParams<Tail<Tail<T>>>,
-> = T[0] extends SymbolToken<infer I>
-  ? T[1] extends ParenToken<'('>
-    ? G[1][0] extends CurlyToken<'{'>
-      ? G[1][1] extends CurlyToken<'}'>
-        ? [FunctionDeclaration<Identifier<I>, G[0], []>, Tail<Tail<G[1]>>]
+type ParseFunctionDeclaration<T extends Array<Token<any>>> =
+  T[0] extends SymbolToken<infer I>
+    ? T[1] extends ParenToken<'('>
+      ? ParseFunctionParams<Tail<Tail<T>>> extends infer G
+        ? G[1][0] extends CurlyToken<'{'>
+          ? ParseFunctionBody<Tail<G[1]>> extends infer H
+            ? [FunctionDeclaration<Identifier<I>, G[0], H[0]>, H[1]]
+            : never
+          : never
         : never
       : never
-    : never
+    : never;
+
+type ParseFunctionBody<
+  T extends Array<Token<any>>,
+  R extends Array<any> = [],
+> = T[0] extends CurlyToken<'}'>
+  ? [Reverse<R>, Tail<T>]
+  : ParseStatement<T> extends infer F
+  ? ParseFunctionBody<F[1], Unshift<R, F[0]>>
   : never;
 
 type ParseFunctionParams<

@@ -2,20 +2,23 @@
   "compilerOptions": {
     "target": "es2019",
     "module": "es2022",
-    "lib": ["esnext", "dom"],
-    "declaration": true,
-    "composite": true,
+    "lib": ["esnext"],
+    "declaration": false,
+    "composite": false,
     "isolatedModules": true,
     "importsNotUsedAsValues": "error",
-    "jsx": "react",
+    "diagnostics": false,
 
     "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
 
     "moduleResolution": "node",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
+    "resolveJsonModule": false,
 
     "rootDir": "src",
     "outDir": "build"
