@@ -48,10 +48,16 @@ export type FunctionDeclaration<I, P, B> = {
   body: B;
 };
 
-export type Identifier<N> = {
-  type: 'Identifier';
-  name: N;
-};
+export type Identifier<N, T = null> = T extends null
+  ? {
+      type: 'Identifier';
+      name: N;
+    }
+  : {
+      type: 'Identifier';
+      name: N;
+      typeAnnotation: T;
+    };
 
 export type NullLiteral = {
   type: 'NullLiteral';
@@ -89,6 +95,32 @@ export type ReturnStatement<T> = {
 export type BlockStatement<B> = {
   type: 'BlockStatement';
   body: B;
+};
+
+export type TypeAnnotation<T> = {
+  type: 'TypeAnnotation';
+  typeAnnotation: T;
+};
+
+export type StringTypeAnnotation = {
+  type: 'StringTypeAnnotation';
+};
+
+export type NumberTypeAnnotation = {
+  type: 'NumberTypeAnnotation';
+};
+
+export type NullLiteralTypeAnnotation = {
+  type: 'NullLiteralTypeAnnotation';
+};
+
+export type BooleanTypeAnnotation = {
+  type: 'BooleanTypeAnnotation';
+};
+
+export type GenericTypeAnnotation<I> = {
+  type: 'GenericTypeAnnotation';
+  id: I;
 };
 
 // Parse type annotations
