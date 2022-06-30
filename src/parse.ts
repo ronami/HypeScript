@@ -105,17 +105,15 @@ type ParseFunctionDeclaration<T extends Array<Token<any>>> =
   T[0] extends SymbolToken<infer I>
     ? T[1] extends ParenToken<'('>
       ? ParseFunctionParams<Tail<Tail<T>>> extends infer G
-        ? Cast<G, Array<any>>[1][0] extends CurlyToken<'{'>
-          ? ParseFunctionBody<Tail<G[1]>> extends infer H
-            ? [
-                FunctionDeclaration<
-                  Identifier<I>,
-                  Cast<G, Array<any>>[0],
-                  Cast<H, Array<any>>[0]
-                >,
-                Cast<H, Array<any>>[1],
-              ]
-            : never
+        ? ParseFunctionBody<Cast<G, Array<any>>[1]> extends infer H
+          ? [
+              FunctionDeclaration<
+                Identifier<I>,
+                Cast<G, Array<any>>[0],
+                Cast<H, Array<any>>[0]
+              >,
+              Cast<H, Array<any>>[1],
+            ]
           : never
         : never
       : never
@@ -138,7 +136,9 @@ type ParseFunctionParams<
   R extends Array<any> = [],
   N extends boolean = false,
 > = T[0] extends ParenToken<')'>
-  ? [Reverse<R>, Tail<T>]
+  ? T[1] extends CurlyToken<'{'>
+    ? [Reverse<R>, Tail<Tail<T>>]
+    : never
   : T extends []
   ? never
   : N extends true
