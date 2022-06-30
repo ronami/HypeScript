@@ -4,10 +4,11 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 function foo () {
-  const a = "1"
+  const a = true
   const b = a
+  const c = b
   
-  return b
+  return c
 }
 `>;
 type R = Parse<T>[0]['body'];
