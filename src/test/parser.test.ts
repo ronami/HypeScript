@@ -18,6 +18,30 @@ expectType<ParseAst<`hello.world`>>([
   },
 ]);
 
+expectType<ParseAst<`"hello".world`>>([
+  {
+    type: 'MemberExpression',
+    object: { type: 'StringLiteral', value: 'hello' },
+    property: { type: 'Identifier', name: 'world' },
+  },
+]);
+
+expectType<ParseAst<`null.world`>>([
+  {
+    type: 'MemberExpression',
+    object: { type: 'NullLiteral' },
+    property: { type: 'Identifier', name: 'world' },
+  },
+]);
+
+expectType<ParseAst<`"hello"()`>>([
+  {
+    type: 'CallExpression',
+    callee: { type: 'StringLiteral', value: 'hello' },
+    arguments: [],
+  },
+]);
+
 expectType<ParseAst<`hello()`>>([
   {
     type: 'CallExpression',
@@ -26,6 +50,84 @@ expectType<ParseAst<`hello()`>>([
       name: 'hello',
     },
     arguments: [],
+  },
+]);
+
+expectType<ParseAst<`hello()()`>>([
+  {
+    type: 'CallExpression',
+    callee: {
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'hello',
+      },
+      arguments: [],
+    },
+    arguments: [],
+  },
+]);
+
+expectType<ParseAst<`hello().world()`>>([
+  {
+    type: 'CallExpression',
+    callee: {
+      type: 'MemberExpression',
+      object: {
+        type: 'CallExpression',
+        callee: { type: 'Identifier', name: 'hello' },
+        arguments: [],
+      },
+      property: {
+        type: 'Identifier',
+        name: 'world',
+      },
+    },
+    arguments: [],
+  },
+]);
+
+expectType<ParseAst<`hello(world(1))`>>([
+  {
+    type: 'CallExpression',
+    callee: {
+      type: 'Identifier',
+      name: 'hello',
+    },
+    arguments: [
+      {
+        type: 'CallExpression',
+        callee: { type: 'Identifier', name: 'world' },
+        arguments: [
+          {
+            type: 'NumericLiteral',
+            value: '1',
+          },
+        ],
+      },
+    ],
+  },
+]);
+
+expectType<ParseAst<`hello("world"(1))`>>([
+  {
+    type: 'CallExpression',
+    callee: {
+      type: 'Identifier',
+      name: 'hello',
+    },
+    arguments: [
+      {
+        type: 'CallExpression',
+        callee: { type: 'StringLiteral', value: 'world' },
+        arguments: [
+          {
+            type: 'NumericLiteral',
+            value: '1',
+          },
+        ],
+      },
+    ],
   },
 ]);
 
@@ -156,6 +258,27 @@ expectType<ParseAst<`const hello = { hey: "ho" }`>>([
               value: { type: 'StringLiteral', value: 'ho' },
             },
           ],
+        },
+        id: { type: 'Identifier', name: 'hello' },
+      },
+    ],
+  },
+]);
+
+expectType<ParseAst<`const hello = foo()`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'const',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        init: {
+          type: 'CallExpression',
+          callee: {
+            type: 'Identifier',
+            name: 'foo',
+          },
+          arguments: [],
         },
         id: { type: 'Identifier', name: 'hello' },
       },
