@@ -13,3 +13,11 @@ The implementation includes an EcmaScript tokenizer and parser, along with a lim
 ### Supported features and syntax
 
 Some syntax or type checking features aren't supported (yet), here's what currently works:
+
+### Additional links
+
+- [The Super Tiny Compiler](https://github.com/jamiebuilds/the-super-tiny-compiler)
+- [TypeScripts Type System is Turing Complete](https://github.com/microsoft/TypeScript/issues/14833)
+- [Typing the Technical Interview in TypeScript](https://gal.hagever.com/posts/typing-the-technical-interview-in-typescript/)
+- [Functions and algorithms implemented purely with TypeScript's type system](https://github.com/ronami/meta-typing)
+- [A SQL database implemented purely in TypeScript type annotations](https://github.com/codemix/ts-sql)
