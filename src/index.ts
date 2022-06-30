@@ -2,6 +2,8 @@ import type { Tokenize } from './tokenize';
 import type { Parse } from './parse';
 
 type T = Tokenize<`
-"hello"
+if (foo) {
+  log()
+}
 `>;
 type R = Parse<T>;

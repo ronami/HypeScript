@@ -415,3 +415,70 @@ expectType<ParseAst<`const hello = foo()`>>([
     ],
   },
 ]);
+
+expectType<ParseAst<`if (a) {}`>>([
+  {
+    type: 'IfStatement',
+    test: {
+      type: 'Identifier',
+      name: 'a',
+    },
+    consequent: [],
+  },
+]);
+
+expectType<ParseAst<`if ("a") {}`>>([
+  {
+    type: 'IfStatement',
+    test: {
+      type: 'StringLiteral',
+      value: 'a',
+    },
+    consequent: [],
+  },
+]);
+
+expectType<ParseAst<`if (a()) {}`>>([
+  {
+    type: 'IfStatement',
+    test: {
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'a',
+      },
+      arguments: [],
+    },
+    consequent: [],
+  },
+]);
+
+expectType<ParseAst<`if (a) { console.log() }`>>([
+  {
+    type: 'IfStatement',
+    test: {
+      type: 'Identifier',
+      name: 'a',
+    },
+    consequent: [
+      {
+        type: 'ExpressionStatement',
+        expression: {
+          type: 'CallExpression',
+          callee: {
+            type: 'MemberExpression',
+            object: {
+              type: 'Identifier',
+              name: 'console',
+            },
+            property: {
+              type: 'Identifier',
+              name: 'log',
+            },
+          },
+          arguments: [],
+        },
+      },
+    ],
+  },
+]);
