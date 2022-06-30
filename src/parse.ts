@@ -81,13 +81,25 @@ type ParseStatement<
   ? [ExpressionStatement<Cast<G, Array<any>>[0]>, Cast<G, Array<any>>[1]]
   : never;
 
+// type ParseExpressionHelperIf<G> = Cast<
+//   G,
+//   Array<any>
+// >[1][0] extends ParenToken<')'>
+//   ? Cast<G, Array<any>>[1][1] extends CurlyToken<'{'>
+//     ? Tail<Tail<Cast<G, Array<any>>[1]>>
+//     : never
+//   : never;
+
 type ParseIfStatement<T extends Array<Token<any>>> =
   T[0] extends ParenToken<'('>
     ? ParseExpression<Tail<T>> extends infer G
-      ? G[1][0] extends ParenToken<')'>
-        ? G[1][1] extends CurlyToken<'{'>
+      ? Cast<G, Array<any>>[1][0] extends ParenToken<')'>
+        ? Cast<G, Array<any>>[1][1] extends CurlyToken<'{'>
           ? ParseFunctionBody<Tail<Tail<G[1]>>> extends infer B
-            ? [IfStatement<G[0], B[0]>, B[1]]
+            ? [
+                IfStatement<Cast<G, Array<any>>[0], Cast<B, Array<any>>[0]>,
+                Cast<B, Array<any>>[1],
+              ]
             : never
           : never
         : never
