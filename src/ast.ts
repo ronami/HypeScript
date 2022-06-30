@@ -81,6 +81,11 @@ export type IfStatement<T, C> = {
   // alternate: A;
 };
 
+export type ReturnStatement<T> = {
+  type: 'ReturnStatement';
+  argument: T;
+};
+
 // ReturnStatement
 // IfStatement
 // BlockStatement

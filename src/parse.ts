@@ -14,6 +14,7 @@ import type {
   CallExpression,
   MemberExpression,
   IfStatement,
+  ReturnStatement,
 } from './ast';
 import type {
   BracketToken,
@@ -81,6 +82,13 @@ type ParseStatement<
   ? [ExpressionStatement<Cast<G, Array<any>>[0]>, Cast<G, Array<any>>[1]]
   : never;
 
+type ParseFunctionStatement<T extends Array<Token<any>>> =
+  T[0] extends SymbolToken<'return'>
+    ? ParseExpression<Tail<T>> extends infer G
+      ? [ReturnStatement<Cast<G, Array<any>>[0]>, Cast<G, Array<any>>[1]]
+      : never
+    : ParseStatement<T>;
+
 type ParseIfStatement<T extends Array<Token<any>>> =
   T[0] extends ParenToken<'('>
     ? ParseExpression<Tail<T>> extends infer G
@@ -147,7 +155,7 @@ type ParseFunctionBody<
   R extends Array<any> = [],
 > = T[0] extends CurlyToken<'}'>
   ? [Reverse<R>, Tail<T>]
-  : ParseStatement<T> extends infer F
+  : ParseFunctionStatement<T> extends infer F
   ? ParseFunctionBody<
       Cast<F, Array<any>>[1],
       Unshift<R, Cast<F, Array<any>>[0]>
