@@ -4,7 +4,7 @@
 
 ### Introduction
 
-This project includes a simplified implementation of TypeScript's type-system that's implemented in TypeScript's own type-system.
+This project includes a simplified implementation of TypeScript's type-system that's written in TypeScript's own type-system.
 
 The implementation includes an EcmaScript tokenizer and parser, along with a limited type-system. Here's an example of using it:
 
