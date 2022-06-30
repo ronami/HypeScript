@@ -212,7 +212,10 @@ expectType<ParseAst<`function foo() {}`>>([
       name: 'foo',
     },
     params: [],
-    body: [],
+    body: {
+      type: 'BlockStatement',
+      body: [],
+    },
   },
 ]);
 
@@ -227,7 +230,10 @@ expectType<ParseAst<`function foo(first, last) {}`>>([
       { type: 'Identifier', name: 'first' },
       { type: 'Identifier', name: 'last' },
     ],
-    body: [],
+    body: {
+      type: 'BlockStatement',
+      body: [],
+    },
   },
 ]);
 
@@ -239,15 +245,18 @@ expectType<ParseAst<`function foo() { return 5 }`>>([
       name: 'foo',
     },
     params: [],
-    body: [
-      {
-        type: 'ReturnStatement',
-        argument: {
-          type: 'NumericLiteral',
-          value: '5',
+    body: {
+      type: 'BlockStatement',
+      body: [
+        {
+          type: 'ReturnStatement',
+          argument: {
+            type: 'NumericLiteral',
+            value: '5',
+          },
         },
-      },
-    ],
+      ],
+    },
   },
 ]);
 
@@ -259,19 +268,22 @@ expectType<ParseAst<`function foo() { return bar() }`>>([
       name: 'foo',
     },
     params: [],
-    body: [
-      {
-        type: 'ReturnStatement',
-        argument: {
-          type: 'CallExpression',
-          callee: {
-            type: 'Identifier',
-            name: 'bar',
+    body: {
+      type: 'BlockStatement',
+      body: [
+        {
+          type: 'ReturnStatement',
+          argument: {
+            type: 'CallExpression',
+            callee: {
+              type: 'Identifier',
+              name: 'bar',
+            },
+            arguments: [],
           },
-          arguments: [],
         },
-      },
-    ],
+      ],
+    },
   },
 ]);
 
@@ -286,25 +298,28 @@ expectType<ParseAst<`function foo(first, last) { console.log(1) }`>>([
       { type: 'Identifier', name: 'first' },
       { type: 'Identifier', name: 'last' },
     ],
-    body: [
-      {
-        type: 'ExpressionStatement',
-        expression: {
-          type: 'CallExpression',
-          callee: {
-            type: 'MemberExpression',
-            object: { type: 'Identifier', name: 'console' },
-            property: { type: 'Identifier', name: 'log' },
-          },
-          arguments: [
-            {
-              type: 'NumericLiteral',
-              value: '1',
+    body: {
+      type: 'BlockStatement',
+      body: [
+        {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'CallExpression',
+            callee: {
+              type: 'MemberExpression',
+              object: { type: 'Identifier', name: 'console' },
+              property: { type: 'Identifier', name: 'log' },
             },
-          ],
+            arguments: [
+              {
+                type: 'NumericLiteral',
+                value: '1',
+              },
+            ],
+          },
         },
-      },
-    ],
+      ],
+    },
   },
 ]);
 
@@ -326,44 +341,50 @@ function foo(foo) {
       name: 'foo',
     },
     params: [{ type: 'Identifier', name: 'foo' }],
-    body: [
-      {
-        type: 'ExpressionStatement',
-        expression: {
-          type: 'CallExpression',
-          callee: {
-            type: 'MemberExpression',
-            object: { type: 'Identifier', name: 'console' },
-            property: { type: 'Identifier', name: 'log' },
-          },
-          arguments: [
-            {
-              type: 'Identifier',
-              name: 'foo',
+    body: {
+      type: 'BlockStatement',
+      body: [
+        {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'CallExpression',
+            callee: {
+              type: 'MemberExpression',
+              object: { type: 'Identifier', name: 'console' },
+              property: { type: 'Identifier', name: 'log' },
             },
-          ],
-        },
-      },
-      {
-        type: 'FunctionDeclaration',
-        id: { type: 'Identifier', name: 'bar' },
-        params: [],
-        body: [
-          {
-            type: 'ExpressionStatement',
-            expression: {
-              type: 'CallExpression',
-              callee: {
-                type: 'MemberExpression',
-                object: { type: 'Identifier', name: 'console' },
-                property: { type: 'Identifier', name: 'log' },
+            arguments: [
+              {
+                type: 'Identifier',
+                name: 'foo',
               },
-              arguments: [{ type: 'Identifier', name: 'foo' }],
-            },
+            ],
           },
-        ],
-      },
-    ],
+        },
+        {
+          type: 'FunctionDeclaration',
+          id: { type: 'Identifier', name: 'bar' },
+          params: [],
+          body: {
+            type: 'BlockStatement',
+            body: [
+              {
+                type: 'ExpressionStatement',
+                expression: {
+                  type: 'CallExpression',
+                  callee: {
+                    type: 'MemberExpression',
+                    object: { type: 'Identifier', name: 'console' },
+                    property: { type: 'Identifier', name: 'log' },
+                  },
+                  arguments: [{ type: 'Identifier', name: 'foo' }],
+                },
+              },
+            ],
+          },
+        },
+      ],
+    },
   },
 ]);
 
@@ -467,7 +488,10 @@ expectType<ParseAst<`if (a) {}`>>([
       type: 'Identifier',
       name: 'a',
     },
-    consequent: [],
+    consequent: {
+      type: 'BlockStatement',
+      body: [],
+    },
   },
 ]);
 
@@ -478,7 +502,10 @@ expectType<ParseAst<`if ("a") {}`>>([
       type: 'StringLiteral',
       value: 'a',
     },
-    consequent: [],
+    consequent: {
+      type: 'BlockStatement',
+      body: [],
+    },
   },
 ]);
 
@@ -493,7 +520,10 @@ expectType<ParseAst<`if (a()) {}`>>([
       },
       arguments: [],
     },
-    consequent: [],
+    consequent: {
+      type: 'BlockStatement',
+      body: [],
+    },
   },
 ]);
 
@@ -504,25 +534,28 @@ expectType<ParseAst<`if (a) { console.log() }`>>([
       type: 'Identifier',
       name: 'a',
     },
-    consequent: [
-      {
-        type: 'ExpressionStatement',
-        expression: {
-          type: 'CallExpression',
-          callee: {
-            type: 'MemberExpression',
-            object: {
-              type: 'Identifier',
-              name: 'console',
+    consequent: {
+      type: 'BlockStatement',
+      body: [
+        {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'CallExpression',
+            callee: {
+              type: 'MemberExpression',
+              object: {
+                type: 'Identifier',
+                name: 'console',
+              },
+              property: {
+                type: 'Identifier',
+                name: 'log',
+              },
             },
-            property: {
-              type: 'Identifier',
-              name: 'log',
-            },
+            arguments: [],
           },
-          arguments: [],
         },
-      },
-    ],
+      ],
+    },
   },
 ]);

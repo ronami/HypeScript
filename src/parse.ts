@@ -15,6 +15,7 @@ import type {
   MemberExpression,
   IfStatement,
   ReturnStatement,
+  BlockStatement,
 } from './ast';
 import type {
   BracketToken,
@@ -95,7 +96,9 @@ type ParseIfStatement<T extends Array<Token<any>>> =
       ? Cast<G, Array<any>>[1] extends infer J
         ? Cast<J, Array<any>>[0] extends ParenToken<')'>
           ? Cast<J, Array<any>>[1] extends CurlyToken<'{'>
-            ? ParseFunctionBody<Tail<Tail<Cast<J, Array<any>>>>> extends infer B
+            ? ParseBlockStatement<
+                Tail<Tail<Cast<J, Array<any>>>>
+              > extends infer B
               ? [
                   IfStatement<Cast<G, Array<any>>[0], Cast<B, Array<any>>[0]>,
                   Cast<B, Array<any>>[1],
@@ -136,7 +139,7 @@ type ParseFunctionDeclaration<T extends Array<Token<any>>> =
   T[0] extends SymbolToken<infer I>
     ? T[1] extends ParenToken<'('>
       ? ParseFunctionParams<Tail<Tail<T>>> extends infer G
-        ? ParseFunctionBody<Cast<G, Array<any>>[1]> extends infer H
+        ? ParseBlockStatement<Cast<G, Array<any>>[1]> extends infer H
           ? [
               FunctionDeclaration<
                 Identifier<I>,
@@ -150,13 +153,13 @@ type ParseFunctionDeclaration<T extends Array<Token<any>>> =
       : never
     : never;
 
-type ParseFunctionBody<
+type ParseBlockStatement<
   T extends Array<Token<any>>,
   R extends Array<any> = [],
 > = T[0] extends CurlyToken<'}'>
-  ? [Reverse<R>, Tail<T>]
+  ? [BlockStatement<Reverse<R>>, Tail<T>]
   : ParseFunctionStatement<T> extends infer F
-  ? ParseFunctionBody<
+  ? ParseBlockStatement<
       Cast<F, Array<any>>[1],
       Unshift<R, Cast<F, Array<any>>[0]>
     >
