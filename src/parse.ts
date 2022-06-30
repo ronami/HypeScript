@@ -16,6 +16,8 @@ import type {
   IfStatement,
   ReturnStatement,
   BlockStatement,
+  TypeAnnotation,
+  GenericTypeAnnotation,
 } from './ast';
 import type {
   BracketToken,
@@ -181,11 +183,24 @@ type ParseFunctionParams<
     : never
   : ParseFunctionParamsItem<T, R>;
 
+type ParseTypeAnnotation<T extends Array<Token<any>>> =
+  T[0] extends SymbolToken<infer E>
+    ? [TypeAnnotation<GenericTypeAnnotation<E>>, Tail<T>]
+    : never;
+
 type ParseFunctionParamsItem<
   T extends Array<Token<any>>,
   R extends Array<any> = [],
 > = T[0] extends SymbolToken<infer V>
-  ? ParseFunctionParams<Tail<T>, Unshift<R, Identifier<V>>, true>
+  ? T[1] extends ColonToken
+    ? T[2] extends SymbolToken<infer E>
+      ? ParseFunctionParams<
+          Tail<Tail<Tail<T>>>,
+          Unshift<R, Identifier<V, TypeAnnotation<GenericTypeAnnotation<E>>>>,
+          true
+        >
+      : never
+    : ParseFunctionParams<Tail<T>, Unshift<R, Identifier<V>>, true>
   : never;
 
 type ParseVariableDeclaration<T extends Array<Token<any>>> =
