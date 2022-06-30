@@ -122,3 +122,7 @@ export type GenericTypeAnnotation<I> = {
   type: 'GenericTypeAnnotation';
   id: I;
 };
+
+export type AnyTypeAnnotation = {
+  type: 'AnyTypeAnnotation';
+};

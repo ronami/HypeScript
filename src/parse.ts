@@ -22,6 +22,7 @@ import type {
   BooleanTypeAnnotation,
   NullLiteralTypeAnnotation,
   NumberTypeAnnotation,
+  AnyTypeAnnotation,
 } from './ast';
 import type {
   BracketToken,
@@ -196,6 +197,8 @@ type ParseTypeAnnotation<T extends Array<Token<any>>> =
     ? [TypeAnnotation<NullLiteralTypeAnnotation>, Tail<T>]
     : T[0] extends SymbolToken<'number'>
     ? [TypeAnnotation<NumberTypeAnnotation>, Tail<T>]
+    : T[0] extends SymbolToken<'any'>
+    ? [TypeAnnotation<AnyTypeAnnotation>, Tail<T>]
     : T[0] extends SymbolToken<infer E>
     ? [TypeAnnotation<GenericTypeAnnotation<E>>, Tail<T>]
     : never;
