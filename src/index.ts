@@ -2,8 +2,8 @@ import type { Tokenize } from './tokenize';
 import type { Parse } from './parse';
 
 type T = Tokenize<`
-if (foo) {
-  log()
+function foo() {
+    return 1
 }
 `>;
 type R = Parse<T>;
