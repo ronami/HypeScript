@@ -18,6 +18,10 @@ import type {
   BlockStatement,
   TypeAnnotation,
   GenericTypeAnnotation,
+  StringTypeAnnotation,
+  BooleanTypeAnnotation,
+  NullLiteralTypeAnnotation,
+  NumberTypeAnnotation,
 } from './ast';
 import type {
   BracketToken,
@@ -184,7 +188,15 @@ type ParseFunctionParams<
   : ParseFunctionParamsItem<T, R>;
 
 type ParseTypeAnnotation<T extends Array<Token<any>>> =
-  T[0] extends SymbolToken<infer E>
+  T[0] extends SymbolToken<'string'>
+    ? [TypeAnnotation<StringTypeAnnotation>, Tail<T>]
+    : T[0] extends SymbolToken<'boolean'>
+    ? [TypeAnnotation<BooleanTypeAnnotation>, Tail<T>]
+    : T[0] extends SymbolToken<'null'>
+    ? [TypeAnnotation<NullLiteralTypeAnnotation>, Tail<T>]
+    : T[0] extends SymbolToken<'number'>
+    ? [TypeAnnotation<NumberTypeAnnotation>, Tail<T>]
+    : T[0] extends SymbolToken<infer E>
     ? [TypeAnnotation<GenericTypeAnnotation<E>>, Tail<T>]
     : never;
 
@@ -193,10 +205,10 @@ type ParseFunctionParamsItem<
   R extends Array<any> = [],
 > = T[0] extends SymbolToken<infer V>
   ? T[1] extends ColonToken
-    ? T[2] extends SymbolToken<infer E>
+    ? ParseTypeAnnotation<Tail<Tail<T>>> extends infer G
       ? ParseFunctionParams<
-          Tail<Tail<Tail<T>>>,
-          Unshift<R, Identifier<V, TypeAnnotation<GenericTypeAnnotation<E>>>>,
+          Cast<G, Array<any>>[1],
+          Unshift<R, Identifier<V, Cast<G, Array<any>>[0]>>,
           true
         >
       : never
