@@ -231,6 +231,50 @@ expectType<ParseAst<`function foo(first, last) {}`>>([
   },
 ]);
 
+expectType<ParseAst<`function foo() { return 5 }`>>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+    },
+    params: [],
+    body: [
+      {
+        type: 'ReturnStatement',
+        argument: {
+          type: 'NumericLiteral',
+          value: '5',
+        },
+      },
+    ],
+  },
+]);
+
+expectType<ParseAst<`function foo() { return bar() }`>>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+    },
+    params: [],
+    body: [
+      {
+        type: 'ReturnStatement',
+        argument: {
+          type: 'CallExpression',
+          callee: {
+            type: 'Identifier',
+            name: 'bar',
+          },
+          arguments: [],
+        },
+      },
+    ],
+  },
+]);
+
 expectType<ParseAst<`function foo(first, last) { console.log(1) }`>>([
   {
     type: 'FunctionDeclaration',
