@@ -223,6 +223,59 @@ expectType<ParseAst<`function foo(first, last) { console.log(1) }`>>([
   },
 ]);
 
+expectType<
+  ParseAst<`
+function foo(foo) {
+  console.log(foo)
+
+  function bar() {
+    console.log(foo)
+  }
+}
+`>
+>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+    },
+    params: [{ type: 'Identifier', name: 'foo' }],
+    body: [
+      {
+        type: 'CallExpression',
+        callee: {
+          type: 'MemberExpression',
+          object: { type: 'Identifier', name: 'console' },
+          property: { type: 'Identifier', name: 'log' },
+        },
+        arguments: [
+          {
+            type: 'Identifier',
+            name: 'foo',
+          },
+        ],
+      },
+      {
+        type: 'FunctionDeclaration',
+        id: { type: 'Identifier', name: 'bar' },
+        params: [],
+        body: [
+          {
+            type: 'CallExpression',
+            callee: {
+              type: 'MemberExpression',
+              object: { type: 'Identifier', name: 'console' },
+              property: { type: 'Identifier', name: 'log' },
+            },
+            arguments: [{ type: 'Identifier', name: 'foo' }],
+          },
+        ],
+      },
+    ],
+  },
+]);
+
 expectType<ParseAst<`const hello = "world"`>>([
   {
     type: 'VariableDeclaration',
