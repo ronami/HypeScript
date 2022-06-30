@@ -41,26 +41,31 @@ type Wrap<T extends [any, Array<Token<any>>]> = T[1][0] extends DotToken
     : never
   : T;
 
-type ParseExpression<
+type DoParseExpression<
   T extends Array<Token<any>>,
   F = T[0],
 > = F extends SymbolToken<'true'>
-  ? Wrap<[BooleanLiteral<true>, Tail<T>]>
+  ? [BooleanLiteral<true>, Tail<T>]
   : F extends SymbolToken<'false'>
-  ? Wrap<[BooleanLiteral<false>, Tail<T>]>
+  ? [BooleanLiteral<false>, Tail<T>]
   : F extends SymbolToken<'null'>
-  ? Wrap<[NullLiteral, Tail<T>]>
+  ? [NullLiteral, Tail<T>]
   : F extends NumberToken<infer V>
-  ? Wrap<[NumericLiteral<V>, Tail<T>]>
+  ? [NumericLiteral<V>, Tail<T>]
   : F extends StringToken<infer V>
-  ? Wrap<[StringLiteral<V>, Tail<T>]>
+  ? [StringLiteral<V>, Tail<T>]
   : F extends BracketToken<'['>
   ? ParseArray<Tail<T>>
   : F extends CurlyToken<'{'>
   ? ParseObject<Tail<T>>
   : F extends SymbolToken<infer V>
-  ? Wrap<[Identifier<V>, Tail<T>]>
-  : [T, []];
+  ? [Identifier<V>, Tail<T>]
+  : [never, []];
+
+type ParseExpression<T extends Array<Token<any>>> =
+  DoParseExpression<T> extends infer G
+    ? Wrap<Cast<G, [any, Array<any>]>>
+    : never;
 
 type ParseStatement<
   T extends Array<Token<any>>,
