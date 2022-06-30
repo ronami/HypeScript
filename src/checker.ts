@@ -3,6 +3,7 @@ import type {
   BooleanLiteral,
   ExpressionStatement,
   Identifier,
+  IfStatement,
   NullLiteral,
   NumericLiteral,
   ReturnStatement,
@@ -10,7 +11,7 @@ import type {
   VariableDeclaration,
   VariableDeclarator,
 } from './ast';
-import type { Tail } from './utils/arrayUtils';
+import type { Concat, Tail, Unshift } from './utils/arrayUtils';
 import type { Cast, MergeWithOverride } from './utils/generalUtils';
 
 export type Check<T extends Array<any>> = CheckBlock<T>;
@@ -27,19 +28,30 @@ type InferExpression<T, S = {}> = T extends StringLiteral<any>
   ? S[Cast<N, keyof S>]
   : 'unknown';
 
-type InferBlock<T extends Array<any>, S = {}> = T extends []
-  ? 'void'
+type InferBlock<
+  T extends Array<any>,
+  S = {},
+  R extends Array<any> = [],
+> = T extends []
+  ? Unshift<R, 'void'>
   : T[0] extends ReturnStatement<infer E>
-  ? InferExpression<E, S>
+  ? Unshift<R, InferExpression<E, S>>
   : T[0] extends VariableDeclaration<
       [VariableDeclarator<Identifier<infer N>, infer I>],
       any
     >
   ? InferBlock<
       Tail<T>,
-      MergeWithOverride<S, { [a in Cast<N, string>]: InferExpression<I, S> }>
+      MergeWithOverride<S, { [a in Cast<N, string>]: InferExpression<I, S> }>,
+      R
     >
-  : InferBlock<Tail<T>, S>;
+  : T[0] extends IfStatement<any, BlockStatement<infer C>>
+  ? InferBlock<Cast<C, Array<any>>, S> extends infer J
+    ? Concat<R, Cast<J, Array<any>>> extends infer G
+      ? InferBlock<Tail<T>, S, Cast<G, Array<any>>>
+      : never
+    : never
+  : InferBlock<Tail<T>, S, R>;
 
 type CheckBlock<
   T extends Array<any>,
