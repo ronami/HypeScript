@@ -13,6 +13,7 @@ import type {
   ExpressionStatement,
   CallExpression,
   MemberExpression,
+  IfStatement,
 } from './ast';
 import type {
   BracketToken,
@@ -74,9 +75,24 @@ type ParseStatement<
   ? ParseVariableDeclaration<Tail<T>>
   : F extends SymbolToken<'function'>
   ? ParseFunctionDeclaration<Tail<T>>
+  : F extends SymbolToken<'if'>
+  ? ParseIfStatement<Tail<T>>
   : ParseExpression<T> extends infer G
   ? [ExpressionStatement<Cast<G, Array<any>>[0]>, Cast<G, Array<any>>[1]]
   : never;
+
+type ParseIfStatement<T extends Array<Token<any>>> =
+  T[0] extends ParenToken<'('>
+    ? ParseExpression<Tail<T>> extends infer G
+      ? G[1][0] extends ParenToken<')'>
+        ? G[1][1] extends CurlyToken<'{'>
+          ? ParseFunctionBody<Tail<Tail<G[1]>>> extends infer B
+            ? [IfStatement<G[0], B[0]>, B[1]]
+            : never
+          : never
+        : never
+      : never
+    : never;
 
 type ParseFunctionArguments<
   T extends Array<Token<any>>,
