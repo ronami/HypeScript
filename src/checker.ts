@@ -57,7 +57,7 @@ type CheckBlock<
   T extends Array<any>,
   S = {},
 > = T[0] extends ExpressionStatement<infer E>
-  ? InferExpression<E>
+  ? InferExpression<E, S>
   : T[0] extends BlockStatement<infer B>
-  ? InferBlock<Cast<B, Array<any>>>
+  ? InferBlock<Cast<B, Array<any>>, S>
   : [];
