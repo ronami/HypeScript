@@ -8,55 +8,61 @@ type ParseAst<T extends string> = Tokenize<T> extends infer G
   ? Parse<Cast<G, Array<any>>>
   : never;
 
-expectType<ParseAst<`hello`>>([{ type: 'Identifier', name: 'hello' }]);
+expectType<ParseAst<`hello`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: { type: 'Identifier', name: 'hello' },
+  },
+]);
 
 expectType<ParseAst<`hello.world`>>([
   {
-    type: 'MemberExpression',
-    object: { type: 'Identifier', name: 'hello' },
-    property: { type: 'Identifier', name: 'world' },
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'MemberExpression',
+      object: { type: 'Identifier', name: 'hello' },
+      property: { type: 'Identifier', name: 'world' },
+    },
   },
 ]);
 
 expectType<ParseAst<`"hello".world`>>([
   {
-    type: 'MemberExpression',
-    object: { type: 'StringLiteral', value: 'hello' },
-    property: { type: 'Identifier', name: 'world' },
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'MemberExpression',
+      object: { type: 'StringLiteral', value: 'hello' },
+      property: { type: 'Identifier', name: 'world' },
+    },
   },
 ]);
 
 expectType<ParseAst<`null.world`>>([
   {
-    type: 'MemberExpression',
-    object: { type: 'NullLiteral' },
-    property: { type: 'Identifier', name: 'world' },
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'MemberExpression',
+      object: { type: 'NullLiteral' },
+      property: { type: 'Identifier', name: 'world' },
+    },
   },
 ]);
 
 expectType<ParseAst<`"hello"()`>>([
   {
-    type: 'CallExpression',
-    callee: { type: 'StringLiteral', value: 'hello' },
-    arguments: [],
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'CallExpression',
+      callee: { type: 'StringLiteral', value: 'hello' },
+      arguments: [],
+    },
   },
 ]);
 
 expectType<ParseAst<`hello()`>>([
   {
-    type: 'CallExpression',
-    callee: {
-      type: 'Identifier',
-      name: 'hello',
-    },
-    arguments: [],
-  },
-]);
-
-expectType<ParseAst<`hello()()`>>([
-  {
-    type: 'CallExpression',
-    callee: {
+    type: 'ExpressionStatement',
+    expression: {
       type: 'CallExpression',
       callee: {
         type: 'Identifier',
@@ -64,105 +70,137 @@ expectType<ParseAst<`hello()()`>>([
       },
       arguments: [],
     },
-    arguments: [],
+  },
+]);
+
+expectType<ParseAst<`hello()()`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'CallExpression',
+      callee: {
+        type: 'CallExpression',
+        callee: {
+          type: 'Identifier',
+          name: 'hello',
+        },
+        arguments: [],
+      },
+      arguments: [],
+    },
   },
 ]);
 
 expectType<ParseAst<`hello().world()`>>([
   {
-    type: 'CallExpression',
-    callee: {
-      type: 'MemberExpression',
-      object: {
-        type: 'CallExpression',
-        callee: { type: 'Identifier', name: 'hello' },
-        arguments: [],
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'CallExpression',
+      callee: {
+        type: 'MemberExpression',
+        object: {
+          type: 'CallExpression',
+          callee: { type: 'Identifier', name: 'hello' },
+          arguments: [],
+        },
+        property: {
+          type: 'Identifier',
+          name: 'world',
+        },
       },
-      property: {
-        type: 'Identifier',
-        name: 'world',
-      },
+      arguments: [],
     },
-    arguments: [],
   },
 ]);
 
 expectType<ParseAst<`hello(world(1))`>>([
   {
-    type: 'CallExpression',
-    callee: {
-      type: 'Identifier',
-      name: 'hello',
-    },
-    arguments: [
-      {
-        type: 'CallExpression',
-        callee: { type: 'Identifier', name: 'world' },
-        arguments: [
-          {
-            type: 'NumericLiteral',
-            value: '1',
-          },
-        ],
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'hello',
       },
-    ],
+      arguments: [
+        {
+          type: 'CallExpression',
+          callee: { type: 'Identifier', name: 'world' },
+          arguments: [
+            {
+              type: 'NumericLiteral',
+              value: '1',
+            },
+          ],
+        },
+      ],
+    },
   },
 ]);
 
 expectType<ParseAst<`hello("world"(1))`>>([
   {
-    type: 'CallExpression',
-    callee: {
-      type: 'Identifier',
-      name: 'hello',
-    },
-    arguments: [
-      {
-        type: 'CallExpression',
-        callee: { type: 'StringLiteral', value: 'world' },
-        arguments: [
-          {
-            type: 'NumericLiteral',
-            value: '1',
-          },
-        ],
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'hello',
       },
-    ],
+      arguments: [
+        {
+          type: 'CallExpression',
+          callee: { type: 'StringLiteral', value: 'world' },
+          arguments: [
+            {
+              type: 'NumericLiteral',
+              value: '1',
+            },
+          ],
+        },
+      ],
+    },
   },
 ]);
 
 expectType<ParseAst<`hello(1, true)`>>([
   {
-    type: 'CallExpression',
-    callee: {
-      type: 'Identifier',
-      name: 'hello',
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'hello',
+      },
+      arguments: [
+        { type: 'NumericLiteral', value: '1' },
+        { type: 'BooleanLiteral', value: true },
+      ],
     },
-    arguments: [
-      { type: 'NumericLiteral', value: '1' },
-      { type: 'BooleanLiteral', value: true },
-    ],
   },
 ]);
 
 expectType<ParseAst<`hello.world(1, true)`>>([
   {
-    type: 'CallExpression',
-    callee: {
-      type: 'MemberExpression',
-      object: {
-        type: 'Identifier',
-        name: 'hello',
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'CallExpression',
+      callee: {
+        type: 'MemberExpression',
+        object: {
+          type: 'Identifier',
+          name: 'hello',
+        },
+        property: {
+          type: 'Identifier',
+          name: 'world',
+        },
       },
-      property: {
-        type: 'Identifier',
-        name: 'world',
-      },
+      arguments: [
+        { type: 'NumericLiteral', value: '1' },
+        { type: 'BooleanLiteral', value: true },
+      ],
     },
-    arguments: [
-      { type: 'NumericLiteral', value: '1' },
-      { type: 'BooleanLiteral', value: true },
-    ],
   },
 ]);
 
@@ -206,18 +244,21 @@ expectType<ParseAst<`function foo(first, last) { console.log(1) }`>>([
     ],
     body: [
       {
-        type: 'CallExpression',
-        callee: {
-          type: 'MemberExpression',
-          object: { type: 'Identifier', name: 'console' },
-          property: { type: 'Identifier', name: 'log' },
-        },
-        arguments: [
-          {
-            type: 'NumericLiteral',
-            value: '1',
+        type: 'ExpressionStatement',
+        expression: {
+          type: 'CallExpression',
+          callee: {
+            type: 'MemberExpression',
+            object: { type: 'Identifier', name: 'console' },
+            property: { type: 'Identifier', name: 'log' },
           },
-        ],
+          arguments: [
+            {
+              type: 'NumericLiteral',
+              value: '1',
+            },
+          ],
+        },
       },
     ],
   },
@@ -243,18 +284,21 @@ function foo(foo) {
     params: [{ type: 'Identifier', name: 'foo' }],
     body: [
       {
-        type: 'CallExpression',
-        callee: {
-          type: 'MemberExpression',
-          object: { type: 'Identifier', name: 'console' },
-          property: { type: 'Identifier', name: 'log' },
-        },
-        arguments: [
-          {
-            type: 'Identifier',
-            name: 'foo',
+        type: 'ExpressionStatement',
+        expression: {
+          type: 'CallExpression',
+          callee: {
+            type: 'MemberExpression',
+            object: { type: 'Identifier', name: 'console' },
+            property: { type: 'Identifier', name: 'log' },
           },
-        ],
+          arguments: [
+            {
+              type: 'Identifier',
+              name: 'foo',
+            },
+          ],
+        },
       },
       {
         type: 'FunctionDeclaration',
@@ -262,13 +306,16 @@ function foo(foo) {
         params: [],
         body: [
           {
-            type: 'CallExpression',
-            callee: {
-              type: 'MemberExpression',
-              object: { type: 'Identifier', name: 'console' },
-              property: { type: 'Identifier', name: 'log' },
+            type: 'ExpressionStatement',
+            expression: {
+              type: 'CallExpression',
+              callee: {
+                type: 'MemberExpression',
+                object: { type: 'Identifier', name: 'console' },
+                property: { type: 'Identifier', name: 'log' },
+              },
+              arguments: [{ type: 'Identifier', name: 'foo' }],
             },
-            arguments: [{ type: 'Identifier', name: 'foo' }],
           },
         ],
       },
