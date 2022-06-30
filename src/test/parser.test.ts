@@ -559,3 +559,201 @@ expectType<ParseAst<`if (a) { console.log() }`>>([
     },
   },
 ]);
+
+expectType<ParseAst<`const hello: string = "world"`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'const',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        init: { type: 'StringLiteral', value: 'world' },
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: {
+            type: 'TypeAnnotation',
+            typeAnnotation: { type: 'StringTypeAnnotation' },
+          },
+        },
+      },
+    ],
+  },
+]);
+
+expectType<ParseAst<`const hello: number = "world"`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'const',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        init: { type: 'StringLiteral', value: 'world' },
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: {
+            type: 'TypeAnnotation',
+            typeAnnotation: { type: 'NumberTypeAnnotation' },
+          },
+        },
+      },
+    ],
+  },
+]);
+
+expectType<ParseAst<`const hello: boolean = true`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'const',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        init: { type: 'BooleanLiteral', value: true },
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: {
+            type: 'TypeAnnotation',
+            typeAnnotation: { type: 'BooleanTypeAnnotation' },
+          },
+        },
+      },
+    ],
+  },
+]);
+
+expectType<ParseAst<`const hello: null = "world"`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'const',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        init: { type: 'StringLiteral', value: 'world' },
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: {
+            type: 'TypeAnnotation',
+            typeAnnotation: { type: 'NullLiteralTypeAnnotation' },
+          },
+        },
+      },
+    ],
+  },
+]);
+
+expectType<ParseAst<`function foo(bar: string) {}`>>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+    },
+    params: [
+      {
+        type: 'Identifier',
+        name: 'bar',
+        typeAnnotation: {
+          type: 'TypeAnnotation',
+          typeAnnotation: {
+            type: 'StringTypeAnnotation',
+          },
+        },
+      },
+    ],
+    body: {
+      type: 'BlockStatement',
+      body: [],
+    },
+  },
+]);
+
+expectType<ParseAst<`function foo(bar: boolean) {}`>>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+    },
+    params: [
+      {
+        type: 'Identifier',
+        name: 'bar',
+        typeAnnotation: {
+          type: 'TypeAnnotation',
+          typeAnnotation: {
+            type: 'BooleanTypeAnnotation',
+          },
+        },
+      },
+    ],
+    body: {
+      type: 'BlockStatement',
+      body: [],
+    },
+  },
+]);
+
+expectType<ParseAst<`function foo(bar: number) {}`>>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+    },
+    params: [
+      {
+        type: 'Identifier',
+        name: 'bar',
+        typeAnnotation: {
+          type: 'TypeAnnotation',
+          typeAnnotation: {
+            type: 'NumberTypeAnnotation',
+          },
+        },
+      },
+    ],
+    body: {
+      type: 'BlockStatement',
+      body: [],
+    },
+  },
+]);
+
+expectType<ParseAst<`function foo(bar: string, baz: null) {}`>>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+    },
+    params: [
+      {
+        type: 'Identifier',
+        name: 'bar',
+        typeAnnotation: {
+          type: 'TypeAnnotation',
+          typeAnnotation: {
+            type: 'StringTypeAnnotation',
+          },
+        },
+      },
+      {
+        type: 'Identifier',
+        name: 'baz',
+        typeAnnotation: {
+          type: 'TypeAnnotation',
+          typeAnnotation: {
+            type: 'NullLiteralTypeAnnotation',
+          },
+        },
+      },
+    ],
+    body: {
+      type: 'BlockStatement',
+      body: [],
+    },
+  },
+]);
