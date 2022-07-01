@@ -32,10 +32,9 @@ export type FunctionType<P, R> = {
   return: R;
 };
 
-export type ObjectType<K, V> = {
+export type ObjectType<O> = {
   type: 'ObjectType';
-  key: K;
-  value: V;
+  keys: O;
 };
 
 export type ArrayType<V> = {
