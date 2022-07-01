@@ -38,19 +38,21 @@ export type Check<T extends Array<any>> = CheckBlock<T>;
 
 type InferArrayElements<
   T extends Array<any>,
+  S extends {},
   R extends Array<any> = [],
 > = T extends []
   ? R
-  : InferArrayElements<Tail<T>, Unshift<R, InferExpression<T[0]>>>;
+  : InferArrayElements<Tail<T>, S, Unshift<R, InferExpression<T[0], S>>>;
 
 type InferCallArguments<
   T extends Array<any>,
+  S extends {},
   R extends Array<any> = [],
 > = T extends []
   ? Reverse<R>
-  : InferCallArguments<Tail<T>, Unshift<R, InferExpression<T[0]>>>;
+  : InferCallArguments<Tail<T>, S, Unshift<R, InferExpression<T[0], S>>>;
 
-type InferExpression<T, S = {}> = T extends StringLiteral<any>
+type InferExpression<T, S extends {}> = T extends StringLiteral<any>
   ? StringType
   : T extends NumericLiteral<any>
   ? NumberType
@@ -61,10 +63,10 @@ type InferExpression<T, S = {}> = T extends StringLiteral<any>
   : T extends Identifier<infer N>
   ? S[Cast<N, keyof S>]
   : T extends ArrayExpression<infer T>
-  ? ArrayType<InferArrayElements<Cast<T, Array<any>>>>
+  ? ArrayType<InferArrayElements<Cast<T, Array<any>>, S>>
   : T extends CallExpression<Identifier<infer I>, infer A>
   ? S[Cast<I, keyof S>] extends FunctionType<infer P, infer R>
-    ? InferCallArguments<Cast<A, Array<any>>> extends P
+    ? InferCallArguments<Cast<A, Array<any>>, S> extends P
       ? R
       : never
     : never
@@ -101,7 +103,7 @@ type InferFunctionParams<
 
 type InferBlock<
   T extends Array<any>,
-  S = {},
+  S extends {},
   R extends Array<any> = [],
 > = T extends []
   ? Unshift<R, VoidType>
@@ -149,7 +151,7 @@ type InferBlock<
 
 type CheckBlock<
   T extends Array<any>,
-  S = {},
+  S extends {} = {},
 > = T[0] extends ExpressionStatement<infer E>
   ? InferExpression<E, S>
   : T[0] extends BlockStatement<infer B>

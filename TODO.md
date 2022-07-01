@@ -8,7 +8,6 @@
 Errors:
 
 - `Expected 1 arguments, but got 0.`
-- `Expected 1 arguments, but got 2.`
 - `This expression is not callable. Type 'String' has no call signatures.`
 - `Argument of type 'number' is not assignable to parameter of type 'string'.`
 - `Parameter 'a' implicitly has an 'any' type.`
