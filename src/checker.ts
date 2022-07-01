@@ -43,6 +43,13 @@ type InferArrayElements<
   ? R
   : InferArrayElements<Tail<T>, Unshift<R, InferExpression<T[0]>>>;
 
+type InferCallArguments<
+  T extends Array<any>,
+  R extends Array<any> = [],
+> = T extends []
+  ? Reverse<R>
+  : InferCallArguments<Tail<T>, Unshift<R, InferExpression<T[0]>>>;
+
 type InferExpression<T, S = {}> = T extends StringLiteral<any>
   ? StringType
   : T extends NumericLiteral<any>
@@ -57,7 +64,7 @@ type InferExpression<T, S = {}> = T extends StringLiteral<any>
   ? ArrayType<InferArrayElements<Cast<T, Array<any>>>>
   : T extends CallExpression<Identifier<infer I>, infer A>
   ? S[Cast<I, keyof S>] extends FunctionType<infer P, infer R>
-    ? InferArrayElements<Cast<A, Array<any>>> extends P
+    ? InferCallArguments<Cast<A, Array<any>>> extends P
       ? R
       : never
     : never
