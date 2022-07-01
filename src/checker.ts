@@ -50,11 +50,15 @@ type InferArrayElements<
 type InferObjectValues<
   T extends Array<any>,
   S extends {},
-  R extends Array<any> = [],
+  R extends {} = {},
 > = T extends []
   ? R
-  : T[0] extends ObjectProperty<any, infer K>
-  ? InferObjectValues<Tail<T>, S, Unshift<R, InferExpression<K, S>>>
+  : T[0] extends ObjectProperty<Identifier<infer G>, infer K>
+  ? InferObjectValues<
+      Tail<T>,
+      S,
+      MergeWithOverride<R, { [a in Cast<G, string>]: InferExpression<K, S> }>
+    >
   : never;
 
 type InferCallArguments<
@@ -78,7 +82,7 @@ type InferExpression<T, S extends {}> = T extends StringLiteral<any>
   : T extends ArrayExpression<infer T>
   ? ArrayType<InferArrayElements<Cast<T, Array<any>>, S>>
   : T extends ObjectExpression<infer T>
-  ? ObjectType<StringType, InferObjectValues<Cast<T, Array<any>>, S>>
+  ? ObjectType<InferObjectValues<Cast<T, Array<any>>, S>>
   : T extends CallExpression<Identifier<infer I>, infer A>
   ? S[Cast<I, keyof S>] extends FunctionType<infer P, infer R>
     ? InferCallArguments<Cast<A, Array<any>>, S> extends P
