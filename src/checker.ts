@@ -2,6 +2,7 @@ import type {
   BlockStatement,
   BooleanLiteral,
   ExpressionStatement,
+  FunctionDeclaration,
   Identifier,
   IfStatement,
   NullLiteral,
@@ -43,6 +44,24 @@ type InferBlock<
   ? InferBlock<
       Tail<T>,
       MergeWithOverride<S, { [a in Cast<N, string>]: InferExpression<I, S> }>,
+      R
+    >
+  : T[0] extends FunctionDeclaration<
+      Identifier<infer I>,
+      infer P,
+      BlockStatement<infer B>
+    >
+  ? InferBlock<
+      Tail<T>,
+      MergeWithOverride<
+        S,
+        {
+          [a in Cast<I, string>]: InferBlock<
+            Cast<B, Array<any>>,
+            MergeWithOverride<S, {}>
+          >;
+        }
+      >,
       R
     >
   : T[0] extends IfStatement<any, BlockStatement<infer C>>
