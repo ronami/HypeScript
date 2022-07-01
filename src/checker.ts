@@ -1,5 +1,6 @@
 import type {
   AnyTypeAnnotation,
+  ArrayExpression,
   BlockStatement,
   BooleanLiteral,
   BooleanTypeAnnotation,
@@ -20,6 +21,7 @@ import type {
 } from './ast';
 import type {
   AnyType,
+  ArrayType,
   BooleanType,
   FunctionType,
   NullType,
@@ -33,6 +35,13 @@ import type { Cast, MergeWithOverride } from './utils/generalUtils';
 
 export type Check<T extends Array<any>> = CheckBlock<T>;
 
+type InferArrayElements<
+  T extends Array<any>,
+  R extends Array<any> = [],
+> = T extends []
+  ? R
+  : InferArrayElements<Tail<T>, Unshift<R, InferExpression<T[0]>>>;
+
 type InferExpression<T, S = {}> = T extends StringLiteral<any>
   ? StringType
   : T extends NumericLiteral<any>
@@ -43,6 +52,8 @@ type InferExpression<T, S = {}> = T extends StringLiteral<any>
   ? BooleanType
   : T extends Identifier<infer N>
   ? S[Cast<N, keyof S>]
+  : T extends ArrayExpression<infer T>
+  ? ArrayType<InferArrayElements<Cast<T, Array<any>>>>
   : UnknownType;
 
 type MapTypeAnnotationToType<A> = A extends StringTypeAnnotation
