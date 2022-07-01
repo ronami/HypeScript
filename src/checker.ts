@@ -97,20 +97,21 @@ type InferBlock<
       BlockStatement<infer B>
     >
   ? InferFunctionParams<Cast<P, Array<any>>> extends infer O
-    ? FunctionType<
-        Cast<O, Array<any>>[0],
-        InferBlock<
-          Tail<T>,
-          MergeWithOverride<
-            S,
-            {
-              [a in Cast<I, string>]: InferBlock<
+    ? InferBlock<
+        Tail<T>,
+        MergeWithOverride<
+          S,
+          {
+            [a in Cast<I, string>]: FunctionType<
+              Cast<O, Array<any>>[0],
+              InferBlock<
                 Cast<B, Array<any>>,
                 MergeWithOverride<S, Cast<O, Array<any>>[1]>
-              >;
-            }
-          >
-        >
+              >
+            >;
+          }
+        >,
+        R
       >
     : never
   : T[0] extends IfStatement<any, BlockStatement<infer C>>

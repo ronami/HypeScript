@@ -6,11 +6,7 @@ type T = Tokenize<`
 function foo () {
   const hey = null
 
-  function bar(num: string, hey: boolean) {
-    if (a) {
-        return num
-    }
-
+  function bar(num: string) {
     return hey
   }
 
