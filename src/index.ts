@@ -8,7 +8,9 @@ function foo () {
     return true
   }
 
-  return bar(1, "hello")
+  const a = bar(1, "hello")
+
+  return a
 }
 `>;
 type R = Parse<T>[0]['body'];
