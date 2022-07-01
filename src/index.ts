@@ -4,25 +4,7 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 function foo () {
-  function hey() {
-    if (a) {
-      return 1
-    }
-
-    if (a) {
-      return true
-    }
-  }
-
-  function ho() {
-    if (a) {
-      return null
-    }
-
-    return hey()
-  }
-
-  return ho()
+  return { hello: "world", foo: 5 }
 }
 `>;
 type R = Parse<T>[0]['body'];

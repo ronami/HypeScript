@@ -13,6 +13,8 @@ import type {
   NullLiteralTypeAnnotation,
   NumberTypeAnnotation,
   NumericLiteral,
+  ObjectExpression,
+  ObjectProperty,
   ReturnStatement,
   StringLiteral,
   StringTypeAnnotation,
@@ -27,6 +29,7 @@ import type {
   FunctionType,
   NullType,
   NumberType,
+  ObjectType,
   StringType,
   UnknownType,
   VoidType,
@@ -43,6 +46,16 @@ type InferArrayElements<
 > = T extends []
   ? R
   : InferArrayElements<Tail<T>, S, Unshift<R, InferExpression<T[0], S>>>;
+
+type InferObjectValues<
+  T extends Array<any>,
+  S extends {},
+  R extends Array<any> = [],
+> = T extends []
+  ? R
+  : T[0] extends ObjectProperty<any, infer K>
+  ? InferObjectValues<Tail<T>, S, Unshift<R, InferExpression<K, S>>>
+  : never;
 
 type InferCallArguments<
   T extends Array<any>,
@@ -64,6 +77,8 @@ type InferExpression<T, S extends {}> = T extends StringLiteral<any>
   ? S[Cast<N, keyof S>]
   : T extends ArrayExpression<infer T>
   ? ArrayType<InferArrayElements<Cast<T, Array<any>>, S>>
+  : T extends ObjectExpression<infer T>
+  ? ObjectType<StringType, InferObjectValues<Cast<T, Array<any>>, S>>
   : T extends CallExpression<Identifier<infer I>, infer A>
   ? S[Cast<I, keyof S>] extends FunctionType<infer P, infer R>
     ? InferCallArguments<Cast<A, Array<any>>, S> extends P
