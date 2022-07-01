@@ -6,9 +6,33 @@
 
 This project includes a (very) simplified implementation of TypeScript's type-system that's written in TypeScript's own type-system.
 
-The implementation includes an EcmaScript tokenizer and parser, along with a limited type-system. I used comments to describe how this is working.
+The implementation includes a tokenizer and parser, along with a simple type-system. That code itself is full with comments explaining what's going on.
 
 *☝ Please note that this project is meant to be used for fun and learning purposes and not for practical use.*
+
+### Try running the code
+
+See it live on your browser on the [TypeScript Playground]().
+
+Alternatively, clone the repository with the following:
+
+```
+git clone
+```
+
+Install dependencies with `Yarn` or `npm`:
+
+```
+yarn install
+```
+
+Open any file and hover over the types to see the results of "running" that them with some input (try hovering the resulting type).
+
+You can also run tests (written with [tsd]()) with:
+
+```
+yarn test
+```
 
 ### Supported features and syntax
 
