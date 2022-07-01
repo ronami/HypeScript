@@ -14,4 +14,4 @@ function foo () {
 }
 `>;
 type R = Parse<T>[0]['body'];
-type C = Check<[R]>[0];
+type C = Check<[R]>;
