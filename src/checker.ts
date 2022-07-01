@@ -108,7 +108,11 @@ type InferBlock<
 > = T extends []
   ? Unshift<R, VoidType>
   : T[0] extends ReturnStatement<infer E>
-  ? Unshift<R, InferExpression<E, S>>
+  ? InferExpression<E, S> extends infer G
+    ? G extends Array<any>
+      ? Concat<R, Cast<G, Array<any>>>
+      : Unshift<R, G>
+    : never
   : T[0] extends VariableDeclaration<
       [VariableDeclarator<Identifier<infer N>, infer I>],
       any

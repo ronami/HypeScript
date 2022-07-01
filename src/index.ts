@@ -6,11 +6,11 @@ type T = Tokenize<`
 function foo () {
   const c = 5
 
-  function bar (a: number) {
-    return true
+  function foo () {
+    return c
   }
 
-  return bar(c)
+  return foo()
 }
 `>;
 type R = Parse<T>[0]['body'];
