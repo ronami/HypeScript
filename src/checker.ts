@@ -9,6 +9,7 @@ import type {
   FunctionDeclaration,
   Identifier,
   IfStatement,
+  MemberExpression,
   NullLiteral,
   NullLiteralTypeAnnotation,
   NumberTypeAnnotation,
@@ -87,6 +88,14 @@ type InferExpression<T, S extends {}> = T extends StringLiteral<any>
   ? S[Cast<I, keyof S>] extends FunctionType<infer P, infer R>
     ? InferCallArguments<Cast<A, Array<any>>, S> extends P
       ? R
+      : never
+    : never
+  : T extends MemberExpression<infer O, Identifier<infer P>>
+  ? InferExpression<O, S> extends infer D
+    ? D extends ObjectType<infer Y>
+      ? P extends keyof Y
+        ? Y[P]
+        : never
       : never
     : never
   : UnknownType;
