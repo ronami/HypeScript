@@ -4,6 +4,7 @@ import type {
   BlockStatement,
   BooleanLiteral,
   BooleanTypeAnnotation,
+  CallExpression,
   ExpressionStatement,
   FunctionDeclaration,
   Identifier,
@@ -54,6 +55,12 @@ type InferExpression<T, S = {}> = T extends StringLiteral<any>
   ? S[Cast<N, keyof S>]
   : T extends ArrayExpression<infer T>
   ? ArrayType<InferArrayElements<Cast<T, Array<any>>>>
+  : T extends CallExpression<Identifier<infer I>, infer A>
+  ? S[Cast<I, keyof S>] extends FunctionType<infer P, infer R>
+    ? InferArrayElements<Cast<A, Array<any>>> extends P
+      ? R
+      : never
+    : never
   : UnknownType;
 
 type MapTypeAnnotationToType<A> = A extends StringTypeAnnotation
