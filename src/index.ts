@@ -4,8 +4,8 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 function foo () {
-  function bar(a) {
-    return 1
+  function bar(num: string) {
+    return 5
   }
 
   return bar
