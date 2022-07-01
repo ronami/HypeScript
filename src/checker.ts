@@ -12,29 +12,39 @@ import type {
   VariableDeclaration,
   VariableDeclarator,
 } from './ast';
+import type {
+  BooleanType,
+  NullType,
+  NumberType,
+  StringType,
+  UnknownType,
+  VoidType,
+} from './types';
 import type { Concat, Tail, Unshift } from './utils/arrayUtils';
 import type { Cast, MergeWithOverride } from './utils/generalUtils';
 
 export type Check<T extends Array<any>> = CheckBlock<T>;
 
 type InferExpression<T, S = {}> = T extends StringLiteral<any>
-  ? 'string'
+  ? StringType
   : T extends NumericLiteral<any>
-  ? 'number'
+  ? NumberType
   : T extends NullLiteral
-  ? 'null'
+  ? NullType
   : T extends BooleanLiteral<any>
-  ? 'boolean'
+  ? BooleanType
   : T extends Identifier<infer N>
   ? S[Cast<N, keyof S>]
-  : 'unknown';
+  : UnknownType;
+
+// type InferFunctionParams<T> = T;
 
 type InferBlock<
   T extends Array<any>,
   S = {},
   R extends Array<any> = [],
 > = T extends []
-  ? Unshift<R, 'void'>
+  ? Unshift<R, VoidType>
   : T[0] extends ReturnStatement<infer E>
   ? Unshift<R, InferExpression<E, S>>
   : T[0] extends VariableDeclaration<
