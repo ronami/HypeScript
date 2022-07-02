@@ -1,5 +1,5 @@
-import type { Tokenize } from '../tokenize';
-import type { Parse } from '../parse';
+import type { Tokenize } from '../tokenizer';
+import type { Parse } from '../parser';
 import type { Cast } from '../utils/generalUtils';
 
 const expectType = <T>(value: T) => {};
