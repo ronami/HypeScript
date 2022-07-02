@@ -70,6 +70,29 @@ type InferCallArguments<
   ? Reverse<R>
   : InferCallArguments<Tail<T>, S, Unshift<R, InferExpression<T[0], S>>>;
 
+type AssignableUnionType<A, B extends Array<any>> = B extends []
+  ? true
+  : AssignableTypes<A, B[0]> extends false
+  ? false
+  : AssignableUnionType<A, Tail<B>>;
+
+type AssignableTypes<A, B> = A extends AnyType
+  ? true
+  : B extends A
+  ? true
+  : B extends Array<any>
+  ? AssignableUnionType<A, B>
+  : false;
+
+type AssignableArgumentTypes<
+  I extends Array<any>,
+  P extends Array<any>,
+> = I extends []
+  ? true
+  : AssignableTypes<I[0], P[0]> extends false
+  ? false
+  : AssignableArgumentTypes<Tail<I>, Tail<P>>;
+
 type InferExpression<T, S extends {}> = T extends StringLiteral<any>
   ? StringType
   : T extends NumericLiteral<any>
@@ -87,8 +110,13 @@ type InferExpression<T, S extends {}> = T extends StringLiteral<any>
   : T extends CallExpression<infer K, infer A>
   ? InferExpression<K, S> extends infer I
     ? I extends FunctionType<infer P, infer R>
-      ? InferCallArguments<Cast<A, Array<any>>, S> extends P
-        ? R
+      ? InferCallArguments<Cast<A, Array<any>>, S> extends infer O
+        ? AssignableArgumentTypes<
+            Cast<P, Array<any>>,
+            Cast<O, Array<any>>
+          > extends true
+          ? R
+          : never
         : never
       : never
     : never

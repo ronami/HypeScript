@@ -4,8 +4,19 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 function foo () {
-  const a = "".length
-  return a.toString()
+  function bar(a: string) {
+    return 1
+  }
+
+  function bazz() {
+    if (b) {
+      return true
+    }
+
+    return 1
+  }
+
+  return bar(bazz())
 }
 `>;
 type R = Parse<T>[0]['body'];
