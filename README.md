@@ -6,7 +6,7 @@
 
 This project includes a (very) simplified implementation of TypeScript's type-system that's written in TypeScript's own type-system.
 
-The implementation include a tokenizer and parser, along with the type-system. The code contains comments explaining in detail what's how everything works.
+The implementation include a tokenizer and parser, along with the type-system. The code contains comments explaining in detail how everything works.
 
 *☝ Please note that this project is meant to be used for fun and learning purposes and not for practical use.*
 
