@@ -7,6 +7,7 @@ import type {
   CallExpression,
   ExpressionStatement,
   FunctionDeclaration,
+  GenericTypeAnnotation,
   Identifier,
   IfStatement,
   MemberExpression,
@@ -28,6 +29,7 @@ import type {
   ArrayType,
   BooleanType,
   FunctionType,
+  GenericType,
   NullType,
   NumberType,
   ObjectType,
@@ -94,15 +96,17 @@ type InferExpression<T, S extends {}> = T extends StringLiteral<any>
   : T extends BooleanLiteral<any>
   ? BooleanType
   : T extends Identifier<infer N>
-  ? S[Cast<N, keyof S>]
+  ? N extends keyof S
+    ? S[N]
+    : never
   : T extends ArrayExpression<infer T>
   ? ArrayType<InferArrayElements<Cast<T, Array<any>>, S>>
   : T extends ObjectExpression<infer T>
   ? ObjectType<InferObjectValues<Cast<T, Array<any>>, S>>
   : T extends CallExpression<infer K, infer A>
-  ? InferExpression<K, S> extends infer I
-    ? I extends FunctionType<infer P, infer R>
-      ? InferCallArguments<Cast<A, Array<any>>, S> extends infer O
+  ? InferCallArguments<Cast<A, Array<any>>, S> extends infer O
+    ? InferExpression<K, S> extends infer I
+      ? I extends FunctionType<infer P, infer R>
         ? AssignableArgumentTypes<
             Cast<P, Array<any>>,
             Cast<O, Array<any>>
@@ -140,6 +144,8 @@ type MapTypeAnnotationToType<A> = A extends StringTypeAnnotation
   ? NullType
   : A extends AnyTypeAnnotation
   ? AnyType
+  : A extends GenericTypeAnnotation<infer I>
+  ? GenericType<I>
   : never;
 
 type InferFunctionParams<
