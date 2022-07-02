@@ -4,10 +4,7 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 function foo () {
-  const b = { hey: 2 }
-  const a = { hello: { hi: b}, foo: 5 }
-
-  return a.hello.hi.hey
+  return 3.toString().length.toString().length.toString().length
 }
 `>;
 type R = Parse<T>[0]['body'];
