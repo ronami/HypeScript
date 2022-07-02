@@ -70,18 +70,10 @@ type InferCallArguments<
   ? Reverse<R>
   : InferCallArguments<Tail<T>, S, Unshift<R, InferExpression<T[0], S>>>;
 
-type AssignableUnionType<A, B extends Array<any>> = B extends []
-  ? true
-  : AssignableTypes<A, B[0]> extends false
-  ? false
-  : AssignableUnionType<A, Tail<B>>;
-
 type AssignableTypes<A, B> = A extends AnyType
   ? true
   : B extends A
   ? true
-  : B extends Array<any>
-  ? AssignableUnionType<A, B>
   : false;
 
 type AssignableArgumentTypes<
