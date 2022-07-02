@@ -84,10 +84,12 @@ type InferExpression<T, S extends {}> = T extends StringLiteral<any>
   ? ArrayType<InferArrayElements<Cast<T, Array<any>>, S>>
   : T extends ObjectExpression<infer T>
   ? ObjectType<InferObjectValues<Cast<T, Array<any>>, S>>
-  : T extends CallExpression<Identifier<infer I>, infer A>
-  ? S[Cast<I, keyof S>] extends FunctionType<infer P, infer R>
-    ? InferCallArguments<Cast<A, Array<any>>, S> extends P
-      ? R
+  : T extends CallExpression<infer K, infer A>
+  ? InferExpression<K, S> extends infer I
+    ? I extends FunctionType<infer P, infer R>
+      ? InferCallArguments<Cast<A, Array<any>>, S> extends P
+        ? R
+        : never
       : never
     : never
   : T extends MemberExpression<infer O, Identifier<infer P>>
@@ -95,6 +97,14 @@ type InferExpression<T, S extends {}> = T extends StringLiteral<any>
     ? D extends ObjectType<infer Y>
       ? P extends keyof Y
         ? Y[P]
+        : never
+      : D extends StringType
+      ? P extends 'length'
+        ? NumberType
+        : never
+      : D extends NumberType
+      ? P extends 'toString'
+        ? FunctionType<[], StringType>
         : never
       : never
     : never
