@@ -16,3 +16,7 @@ Errors:
 - `Property 'bar' does not exist on type '"hello"'.`
 - `Unreachable code detected.`
 - `Cannot find name 'bar'.`
+
+Bugs:
+
+- Don't return `void` type for empty `if` statements
