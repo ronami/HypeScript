@@ -46,3 +46,8 @@ export type UnionType<V> = {
   type: 'UnionType';
   values: V;
 };
+
+export type GenericType<T> = {
+  type: 'GenericType';
+  id: T;
+};
