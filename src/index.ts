@@ -1,14 +1,14 @@
-import type { Tokenize } from './tokenize';
-import type { Parse } from './parse';
+import type { Tokenize } from './tokenizer';
+import type { Parse } from './parser';
 import type { Check } from './checker';
 
 type T = Tokenize<`
 function foo () {
-  function bar(a: number) {
+  function bar(s: string, b: boolean) {
     return 1
   }
 
-  return bar(2)
+  return bar("", true)
 }
 `>;
 type R = Parse<T>[0]['body'];
