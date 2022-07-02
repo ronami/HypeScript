@@ -82,7 +82,9 @@ type AssignableArgumentTypes<
   I extends Array<any>,
   P extends Array<any>,
 > = I extends []
-  ? true
+  ? P extends []
+    ? true
+    : false
   : AssignableTypes<I[0], P[0]> extends false
   ? false
   : AssignableArgumentTypes<Tail<I>, Tail<P>>;
