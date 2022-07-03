@@ -20,7 +20,7 @@ Alternatively, clone the repository with the following:
 git clone
 ```
 
-Install dependencies with `Yarn` or `npm`:
+Install dependencies with `yarn` or `npm`:
 
 ```
 yarn install
