@@ -4,7 +4,7 @@ import type {
   FirstChar,
   ConcatStrings,
 } from './utils/stringUtils';
-import type { Numbers, Symbols } from './utils/generalUtils';
+import type { Cast, Numbers, Symbols } from './utils/generalUtils';
 import type {
   CurlyToken,
   ParenToken,
@@ -18,10 +18,11 @@ import type {
   BracketToken,
   CommaToken,
 } from './tokens';
+import type { Error, SyntaxError } from './errors';
 
 type TokenizeInput<I extends string> = FirstChar<I> extends infer F
   ? EatFirstChar<I> extends infer E
-    ? F extends ' ' | '\n'
+    ? F extends ' '
       ? ['', E]
       : F extends ','
       ? [CommaToken, E]
@@ -51,7 +52,7 @@ type TokenizeInput<I extends string> = FirstChar<I> extends infer F
       ? TokenizeString<E, "'">
       : F extends Symbols
       ? TokenizeSymbol<I, '', F>
-      : never
+      : SyntaxError<`Invalid character.`>
     : never
   : never;
 
@@ -66,7 +67,9 @@ type TokenizeNumber<
 type TokenizeString<
   I,
   W extends '"' | "'",
-> = I extends `${infer H}${W}${infer G}` ? [StringToken<H>, G] : never;
+> = I extends `${infer H}${W}${infer G}`
+  ? [StringToken<H>, G]
+  : SyntaxError<'Unterminated string literal.'>;
 
 type TokenizeSymbol<
   I extends string,
@@ -79,9 +82,23 @@ type TokenizeSymbol<
 export type TokenizeSequence<
   I extends string,
   R extends Array<Token<any>> = [],
-  P extends [any, string] = TokenizeInput<I>,
 > = I extends ''
   ? R
-  : TokenizeSequence<P[1], P[0] extends '' ? R : Unshift<R, P[0]>>;
+  : TokenizeInput<I> extends infer P
+  ? P extends SyntaxError<any>
+    ? P
+    : TokenizeSequence<
+        Cast<P, Array<any>>[1],
+        Cast<P, Array<any>>[0] extends ''
+          ? R
+          : Unshift<R, Cast<P, Array<any>>[0]>
+      >
+  : never;
 
-export type Tokenize<I extends string> = Reverse<TokenizeSequence<I>>;
+export type Tokenize<I extends string> = TokenizeSequence<I> extends infer G
+  ? G extends Array<any>
+    ? Reverse<G>
+    : G extends Error<any, any>
+    ? G
+    : never
+  : never;
