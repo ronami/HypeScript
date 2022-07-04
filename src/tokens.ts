@@ -10,19 +10,31 @@ export type SemicolonToken = { type: 'semicolon' };
 
 export type ColonToken = { type: 'colon' };
 
-export type NumberToken<V> = { type: 'number'; value: V };
+export type NumberToken<V, P> = {
+  type: 'number';
+  value: V;
+  precedingLinebreak: P;
+};
 
-export type StringToken<V> = { type: 'string'; value: V };
+export type StringToken<V, P> = {
+  type: 'string';
+  value: V;
+  precedingLinebreak: P;
+};
 
-export type SymbolToken<V> = { type: 'symbol'; value: V };
+export type SymbolToken<V, P> = {
+  type: 'symbol';
+  value: V;
+  precedingLinebreak: P;
+};
 
 export type CommaToken = { type: 'comma' };
 
 export type Token<V> =
-  | NumberToken<V>
+  | NumberToken<V, any>
   | BracketToken<V>
-  | StringToken<V>
-  | SymbolToken<V>
+  | StringToken<V, any>
+  | SymbolToken<V, any>
   | ParenToken<V>
   | CurlyToken<V>
   | DotToken
