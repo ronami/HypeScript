@@ -58,7 +58,7 @@ type TokenizeInput<
   ? TokenizeString<E, "'", D>
   : F extends Symbols
   ? TokenizeSymbol<I, '', D, F>
-  : SyntaxError<`Invalid character.`>;
+  : SyntaxError<`Invalid character.`, L>;
 
 type TokenizeNumber<
   I extends string,
@@ -75,9 +75,9 @@ type TokenizeString<
   G extends TokenData,
 > = I extends `${infer H}${W}${infer J}`
   ? StringContains<H, '\n'> extends true
-    ? SyntaxError<'Unterminated string literal.'>
+    ? SyntaxError<'Unterminated string literal.', G['lineNumber']>
     : [StringToken<H, G>, J]
-  : SyntaxError<'Unterminated string literal.'>;
+  : SyntaxError<'Unterminated string literal.', G['lineNumber']>;
 
 type TokenizeSymbol<
   I extends string,
