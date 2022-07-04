@@ -25,6 +25,7 @@ import type {
   AnyTypeAnnotation,
   NodeData,
 } from './ast';
+import type { SyntaxError } from './errors';
 import type {
   BracketToken,
   ColonToken,
@@ -33,6 +34,7 @@ import type {
   DotToken,
   NumberToken,
   ParenToken,
+  SemicolonToken,
   StringToken,
   SymbolToken,
   Token,
@@ -342,7 +344,7 @@ type ParseExpression<
 
 type ParseTopLevelStatement<
   T extends Array<Token<any, any>>,
-  F extends Token<any, any> = T[0],
+  F extends Token<any, any>,
   H extends NodeData = ExtractTokenData<F>,
 > = ParseExpression<T, F, H> extends infer G
   ? G extends Array<any>
@@ -350,15 +352,35 @@ type ParseTopLevelStatement<
     : never
   : never;
 
-type ParseSequence<
+type ParseTopLevel<
   T extends Array<Token<any, any>>,
   R extends Array<any>,
+  N extends boolean,
+  F extends Token<any, any> = T[0],
 > = T extends []
   ? R
-  : ParseTopLevelStatement<T> extends infer P
+  : F extends SemicolonToken<any>
+  ? ParseTopLevel<Tail<T>, R, false>
+  : N extends false
+  ? ParseSequenceHelper<T, R, F>
+  : F extends Token<any, infer D>
+  ? D['precedingLinebreak'] extends true
+    ? ParseSequenceHelper<T, R, F>
+    : SyntaxError<"';' expected.", D['lineNumber']>
+  : never;
+
+type ParseSequenceHelper<
+  T extends Array<Token<any, any>>,
+  R extends Array<any>,
+  F extends Token<any, any> = T[0],
+> = ParseTopLevelStatement<T, F> extends infer P
   ? P extends Array<any>
-    ? ParseSequence<P[1], Push<R, P[0]>>
+    ? ParseTopLevel<P[1], Push<R, P[0]>, true>
     : never
   : never;
 
-export type Parse<T extends Array<Token<any, any>>> = ParseSequence<T, []>;
+export type Parse<T extends Array<Token<any, any>>> = ParseTopLevel<
+  T,
+  [],
+  false
+>;
