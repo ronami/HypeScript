@@ -1,21 +1,264 @@
-export {};
+import type { Tokenize } from '../tokenizer';
+import type { Parse } from '../parser';
+import type { Cast } from '../utils/generalUtils';
 
-// import type { Tokenize } from '../tokenizer';
-// import type { Parse } from '../parser';
-// import type { Cast } from '../utils/generalUtils';
+const expectType = <T>(value: T) => {};
 
-// const expectType = <T>(value: T) => {};
+type ParseAst<T extends string> = Tokenize<T> extends infer G
+  ? Parse<Cast<G, Array<any>>>
+  : never;
 
-// type ParseAst<T extends string> = Tokenize<T> extends infer G
-//   ? Parse<Cast<G, Array<any>>>
-//   : never;
+expectType<ParseAst<`hello`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'Identifier',
+      name: 'hello',
+      typeAnnotation: null,
+      data: { startLineNumber: 1, endLineNumber: 1 },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
 
-// expectType<ParseAst<`hello`>>([
-//   {
-//     type: 'ExpressionStatement',
-//     expression: { type: 'Identifier', name: 'hello' },
-//   },
-// ]);
+expectType<ParseAst<`"hello"`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'StringLiteral',
+      value: 'hello',
+      data: { startLineNumber: 1, endLineNumber: 1 },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`123`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'NumericLiteral',
+      value: '123',
+      data: { startLineNumber: 1, endLineNumber: 1 },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`true`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'BooleanLiteral',
+      value: true,
+      data: { startLineNumber: 1, endLineNumber: 1 },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`\nfalse`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'BooleanLiteral',
+      value: false,
+      data: { startLineNumber: 2, endLineNumber: 2 },
+    },
+    data: {
+      startLineNumber: 2,
+      endLineNumber: 2,
+    },
+  },
+]);
+
+expectType<ParseAst<`null`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'NullLiteral',
+      data: { startLineNumber: 1, endLineNumber: 1 },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`\n\nnull`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'NullLiteral',
+      data: { startLineNumber: 3, endLineNumber: 3 },
+    },
+    data: {
+      startLineNumber: 3,
+      endLineNumber: 3,
+    },
+  },
+]);
+
+expectType<ParseAst<`hello world`>>({
+  type: 'SyntaxError',
+  message: "';' expected.",
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`hello "world"`>>({
+  type: 'SyntaxError',
+  message: "';' expected.",
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`hello\n "world"`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'Identifier',
+      name: 'hello',
+      typeAnnotation: null,
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'StringLiteral',
+      value: 'world',
+      data: {
+        startLineNumber: 2,
+        endLineNumber: 2,
+      },
+    },
+    data: {
+      startLineNumber: 2,
+      endLineNumber: 2,
+    },
+  },
+]);
+
+expectType<ParseAst<`hello; "world"`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'Identifier',
+      name: 'hello',
+      typeAnnotation: null,
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'StringLiteral',
+      value: 'world',
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`hello;;;"world"`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'Identifier',
+      name: 'hello',
+      typeAnnotation: null,
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'StringLiteral',
+      value: 'world',
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`hello  ; "world"`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'Identifier',
+      name: 'hello',
+      typeAnnotation: null,
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'StringLiteral',
+      value: 'world',
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
 
 // expectType<ParseAst<`hello.world`>>([
 //   {
