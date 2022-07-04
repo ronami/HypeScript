@@ -30,8 +30,6 @@ export type Concat<T1 extends Array<any>, T2 extends Array<any>> = [
 
 export type TailBy<
   T extends Array<any>,
-  B extends any,
+  B extends number,
   A extends Array<any> = [],
 > = B extends A['length'] ? T : TailBy<Tail<T>, B, Push<A, 0>>;
-
-type R = TailBy<[1, 2, 3, 4, 5], 2>;
