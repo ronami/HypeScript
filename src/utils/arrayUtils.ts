@@ -1,5 +1,3 @@
-import type { Cast } from './generalUtils';
-
 export type Tail<T extends Array<any>> = ((...t: T) => void) extends (
   h: any,
   ...rest: infer R
@@ -29,3 +27,11 @@ export type Concat<T1 extends Array<any>, T2 extends Array<any>> = [
   ...T1,
   ...T2,
 ];
+
+export type TailBy<
+  T extends Array<any>,
+  B extends any,
+  A extends Array<any> = [],
+> = B extends A['length'] ? T : TailBy<Tail<T>, B, Push<A, 0>>;
+
+type R = TailBy<[1, 2, 3, 4, 5], 2>;

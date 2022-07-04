@@ -306,47 +306,68 @@ import type { Cast, IsNever } from './utils/generalUtils';
 //   ? ParseArray<Cast<G, Array<any>>[1], Unshift<R, Cast<G, Array<any>>[0]>, true>
 //   : never;
 
-type ExtractTokenData<T extends Token<any, any>> = T extends Token<any, infer D>
-  ? {
-      startLineNumber: D['lineNumber'];
-      endLineNumber: D['lineNumber'];
-    }
+type ExtractTokenData<
+  T extends Token<any, any>,
+  R extends Token<any, any> = T,
+> = T extends Token<any, infer D>
+  ? R extends Token<any, infer H>
+    ? {
+        startLineNumber: D['lineNumber'];
+        endLineNumber: H['lineNumber'];
+      }
+    : never
   : never;
 
-// type ParseIfStatement<T extends Array<Token<any>>> =
-//   T[0] extends ParenToken<'('>
-//     ? ParseExpression<Tail<T>> extends infer G
-//       ? Cast<G, Array<any>>[1] extends infer J
-//         ? Cast<J, Array<any>>[0] extends ParenToken<')'>
-//           ? Cast<J, Array<any>>[1] extends CurlyToken<'{'>
-//             ? ParseBlockStatement<
-//                 Tail<Tail<Cast<J, Array<any>>>>
-//               > extends infer B
-//               ? [
-//                   IfStatement<Cast<G, Array<any>>[0], Cast<B, Array<any>>[0]>,
-//                   Cast<B, Array<any>>[1],
-//                 ]
-//               : never
-//             : never
-//           : never
-//         : never
-//       : never
-//     : never;
-
-type ParseIfStatement<
+type ParseVariableDeclaration<
   T extends Array<Token<any, any>>,
   F extends Token<any, any>,
-  H extends NodeData = ExtractTokenData<F>,
-  G extends Array<Token<any, any>> = Tail<T>,
-> = F extends SymbolToken<'if', any>
-  ? T[1] extends SymbolToken<'(', any>
-    ? [1, []]
-    : SyntaxError<"'(' expected.", H['startLineNumber']>
+> = F extends SymbolToken<'const', infer F_>
+  ? T[1] extends SymbolToken<infer N, infer N_>
+    ? T[2] extends SymbolToken<'=', infer K_>
+      ? ParseExpression<Tail<Tail<Tail<T>>>> extends infer L
+        ? L extends Array<any>
+          ? [
+              VariableDeclaration<
+                [
+                  VariableDeclarator<
+                    Identifier<
+                      N,
+                      null,
+                      {
+                        startLineNumber: N_['lineNumber'];
+                        endLineNumber: N_['lineNumber'];
+                      }
+                    >,
+                    L[0],
+                    {
+                      startLineNumber: N_['lineNumber'];
+                      endLineNumber: L[0]['data']['endLineNumber'];
+                    }
+                  >,
+                ],
+                'const',
+                {
+                  startLineNumber: F_['lineNumber'];
+                  endLineNumber: L[0]['data']['endLineNumber'];
+                }
+              >,
+              L[1],
+            ]
+          : SyntaxError<'Expression expected.', K_['lineNumber']>
+        : never
+      : SyntaxError<
+          "'const' declarations must be initialized.",
+          N_['lineNumber']
+        >
+    : SyntaxError<
+        'Variable declaration list cannot be empty.',
+        F_['lineNumber']
+      >
   : null;
 
 type ParseExpression<
   T extends Array<Token<any, any>>,
-  F extends Token<any, any>,
+  F extends Token<any, any> = T[0],
   H extends NodeData = ExtractTokenData<F>,
   G extends Array<Token<any, any>> = Tail<T>,
 > = F extends SymbolToken<'true', any>
@@ -394,9 +415,9 @@ type ParseTopLevelHelper<
   T extends Array<Token<any, any>>,
   R extends Array<any>,
   F extends Token<any, any> = T[0],
-> = ParseIfStatement<T, F> extends infer P
+> = ParseVariableDeclaration<T, F> extends infer P
   ? P extends Array<any>
-    ? ParseTopLevel<P[1], Push<R, P[0]>, false>
+    ? ParseTopLevel<P[1], Push<R, P[0]>, true>
     : P extends Error<any, any, any>
     ? P
     : ParseExpressionStatement<T, F> extends infer P
