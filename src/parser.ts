@@ -38,7 +38,7 @@ import type {
   Token,
 } from './tokens';
 import type { Push, Reverse, Tail, Unshift } from './utils/arrayUtils';
-import type { Cast } from './utils/generalUtils';
+import type { Cast, IsNever } from './utils/generalUtils';
 
 // type Wrap<T extends [any, Array<Token<any>>]> = T[1][0] extends DotToken
 //   ? T[1][1] extends SymbolToken<infer V>
@@ -324,8 +324,8 @@ type ExtractTokenData<T extends Token<any, any>> = T extends Token<any, infer D>
 type ParseExpression<
   T extends Array<Token<any, any>>,
   F extends Token<any, any>,
-  G extends Array<Token<any, any>> = Tail<T>,
   H extends NodeData = ExtractTokenData<F>,
+  G extends Array<Token<any, any>> = Tail<T>,
 > = F extends SymbolToken<'true', any>
   ? [BooleanLiteral<true, H>, G]
   : F extends SymbolToken<'false', any>
@@ -343,7 +343,12 @@ type ParseExpression<
 type ParseTopLevelStatement<
   T extends Array<Token<any, any>>,
   F extends Token<any, any> = T[0],
-> = ParseExpression<T, F>;
+  H extends NodeData = ExtractTokenData<F>,
+> = ParseExpression<T, F, H> extends infer G
+  ? G extends Array<any>
+    ? [ExpressionStatement<G[0], H>, G[1]]
+    : never
+  : never;
 
 type ParseSequence<
   T extends Array<Token<any, any>>,
