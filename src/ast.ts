@@ -1,128 +1,156 @@
-export type NumericLiteral<T> = {
+export type NodeData = {
+  startLineNumber: number;
+  endLineNumber: number;
+};
+
+export type NumericLiteral<T, D extends NodeData> = {
   type: 'NumericLiteral';
   value: T;
+  data: D;
 };
 
-export type BooleanLiteral<T> = {
+export type BooleanLiteral<T, D extends NodeData> = {
   type: 'BooleanLiteral';
   value: T;
+  data: D;
 };
 
-export type StringLiteral<T> = {
+export type StringLiteral<T, D extends NodeData> = {
   type: 'StringLiteral';
   value: T;
+  data: D;
 };
 
-export type ArrayExpression<T> = {
+export type ArrayExpression<T, D extends NodeData> = {
   type: 'ArrayExpression';
   elements: T;
+  data: D;
 };
 
-export type ObjectExpression<T> = {
+export type ObjectExpression<T, D extends NodeData> = {
   type: 'ObjectExpression';
   properties: T;
+  data: D;
 };
 
-export type ObjectProperty<K, T> = {
+export type ObjectProperty<K, T, D extends NodeData> = {
   type: 'ObjectProperty';
   key: K;
   value: T;
+  data: D;
 };
 
-export type VariableDeclaration<D, K extends 'const' | 'let'> = {
+export type VariableDeclaration<
+  H,
+  K extends 'const' | 'let',
+  D extends NodeData,
+> = {
   type: 'VariableDeclaration';
-  declarations: D;
+  declarations: H;
   kind: K;
+  data: D;
 };
 
-export type VariableDeclarator<N, I> = {
+export type VariableDeclarator<N, I, D extends NodeData> = {
   type: 'VariableDeclarator';
   id: N;
   init: I;
+  data: D;
 };
 
-export type FunctionDeclaration<I, P, B> = {
+export type FunctionDeclaration<I, P, B, D extends NodeData> = {
   type: 'FunctionDeclaration';
   id: I;
   params: P;
   body: B;
+  data: D;
 };
 
-export type Identifier<N, T = null> = T extends null
-  ? {
-      type: 'Identifier';
-      name: N;
-    }
-  : {
-      type: 'Identifier';
-      name: N;
-      typeAnnotation: T;
-    };
+export type Identifier<N, T, D extends NodeData> = {
+  type: 'Identifier';
+  name: N;
+  typeAnnotation: T;
+  data: D;
+};
 
-export type NullLiteral = {
+export type NullLiteral<D extends NodeData> = {
   type: 'NullLiteral';
+  data: D;
 };
 
-export type ExpressionStatement<E> = {
+export type ExpressionStatement<E, D extends NodeData> = {
   type: 'ExpressionStatement';
   expression: E;
+  data: D;
 };
 
-export type CallExpression<C, A> = {
+export type CallExpression<C, A, D extends NodeData> = {
   type: 'CallExpression';
   callee: C;
   arguments: A;
+  data: D;
 };
 
-export type MemberExpression<O, P> = {
+export type MemberExpression<O, P, D extends NodeData> = {
   type: 'MemberExpression';
   object: O;
   property: P;
+  data: D;
 };
 
-export type IfStatement<T, C> = {
+export type IfStatement<T, C, D extends NodeData> = {
   type: 'IfStatement';
   test: T;
   consequent: C;
+  data: D;
   // alternate: A;
 };
 
-export type ReturnStatement<T> = {
+export type ReturnStatement<T, D extends NodeData> = {
   type: 'ReturnStatement';
   argument: T;
+  data: D;
 };
 
-export type BlockStatement<B> = {
+export type BlockStatement<B, D extends NodeData> = {
   type: 'BlockStatement';
   body: B;
+  data: D;
 };
 
-export type TypeAnnotation<T> = {
+export type TypeAnnotation<T, D extends NodeData> = {
   type: 'TypeAnnotation';
   typeAnnotation: T;
+  data: D;
 };
 
-export type StringTypeAnnotation = {
+export type StringTypeAnnotation<D extends NodeData> = {
   type: 'StringTypeAnnotation';
+  data: D;
 };
 
-export type NumberTypeAnnotation = {
+export type NumberTypeAnnotation<D extends NodeData> = {
   type: 'NumberTypeAnnotation';
+  data: D;
 };
 
-export type NullLiteralTypeAnnotation = {
+export type NullLiteralTypeAnnotation<D extends NodeData> = {
   type: 'NullLiteralTypeAnnotation';
+  data: D;
 };
 
-export type BooleanTypeAnnotation = {
+export type BooleanTypeAnnotation<D extends NodeData> = {
   type: 'BooleanTypeAnnotation';
+  data: D;
 };
 
-export type GenericTypeAnnotation<I> = {
+export type GenericTypeAnnotation<I, D extends NodeData> = {
   type: 'GenericTypeAnnotation';
   id: I;
+  data: D;
 };
 
-export type AnyTypeAnnotation = {
+export type AnyTypeAnnotation<D extends NodeData> = {
   type: 'AnyTypeAnnotation';
+  data: D;
 };

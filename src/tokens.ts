@@ -3,70 +3,70 @@ export type TokenData = {
   lineNumber: number;
 };
 
-export type ParenToken<V, D> = {
+export type ParenToken<V, D extends TokenData> = {
   type: 'paren';
   value: V;
   data: D;
 };
 
-export type BracketToken<V, D> = {
+export type BracketToken<V, D extends TokenData> = {
   type: 'bracket';
   value: V;
   data: D;
 };
 
-export type CurlyToken<V, D> = {
+export type CurlyToken<V, D extends TokenData> = {
   type: 'curly';
   value: V;
   data: D;
 };
 
-export type DotToken<D> = {
+export type DotToken<D extends TokenData> = {
   type: 'dot';
   data: D;
 };
 
-export type SemicolonToken<D> = {
+export type SemicolonToken<D extends TokenData> = {
   type: 'semicolon';
   data: D;
 };
 
-export type ColonToken<D> = {
+export type ColonToken<D extends TokenData> = {
   type: 'colon';
   data: D;
 };
 
-export type NumberToken<V, T> = {
+export type NumberToken<V, D extends TokenData> = {
   type: 'number';
   value: V;
-  data: T;
+  data: D;
 };
 
-export type StringToken<V, T> = {
+export type StringToken<V, D extends TokenData> = {
   type: 'string';
   value: V;
-  data: T;
+  data: D;
 };
 
-export type SymbolToken<V, T> = {
+export type SymbolToken<V, D extends TokenData> = {
   type: 'symbol';
   value: V;
-  data: T;
+  data: D;
 };
 
-export type CommaToken<D> = {
+export type CommaToken<D extends TokenData> = {
   type: 'comma';
   data: D;
 };
 
-export type Token<V> =
-  | NumberToken<V, any>
-  | BracketToken<V, any>
-  | StringToken<V, any>
-  | SymbolToken<V, any>
-  | ParenToken<V, any>
-  | CurlyToken<V, any>
-  | DotToken<any>
-  | SemicolonToken<any>
-  | ColonToken<any>
-  | CommaToken<any>;
+export type Token<V, D extends TokenData> =
+  | NumberToken<V, D>
+  | BracketToken<V, D>
+  | StringToken<V, D>
+  | SymbolToken<V, D>
+  | ParenToken<V, D>
+  | CurlyToken<V, D>
+  | DotToken<D>
+  | SemicolonToken<D>
+  | ColonToken<D>
+  | CommaToken<D>;
