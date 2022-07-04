@@ -1,4 +1,4 @@
-import type { Reverse, Unshift } from './utils/arrayUtils';
+import type { Push } from './utils/arrayUtils';
 import type {
   EatFirstChar,
   FirstChar,
@@ -89,15 +89,13 @@ export type TokenizeSequence<
     ? P
     : TokenizeSequence<
         Cast<P, Array<any>>[1],
-        Cast<P, Array<any>>[0] extends ''
-          ? R
-          : Unshift<R, Cast<P, Array<any>>[0]>
+        Cast<P, Array<any>>[0] extends '' ? R : Push<R, Cast<P, Array<any>>[0]>
       >
   : never;
 
 export type Tokenize<I extends string> = TokenizeSequence<I> extends infer G
   ? G extends Array<any>
-    ? Reverse<G>
+    ? G
     : G extends Error<any, any>
     ? G
     : never
