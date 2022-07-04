@@ -1,6 +1,7 @@
-export type Error<T, M> = {
+export type Error<T, M, L> = {
   type: T;
   message: M;
+  lineNumber: L;
 };
 
-export type SyntaxError<T> = Error<'SyntaxError', T>;
+export type SyntaxError<T, L> = Error<'SyntaxError', T, L>;
