@@ -90,7 +90,7 @@ type TokenizeSymbol<
 
 export type TokenizeSequence<
   I extends string,
-  R extends Array<Token<any>>,
+  R extends Array<Token<any, any>>,
   L extends number,
   G extends boolean,
   F extends string = FirstChar<I>,
