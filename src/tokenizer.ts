@@ -5,7 +5,7 @@ import type {
   ConcatStrings,
   StringContains,
 } from './utils/stringUtils';
-import type { Cast, Numbers, Symbols } from './utils/generalUtils';
+import type { Numbers, Symbols } from './utils/generalUtils';
 import type {
   CurlyToken,
   ParenToken,
