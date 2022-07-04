@@ -363,24 +363,29 @@ expectType<Tokenize<`"foo"(\n)`>>([
 expectType<Tokenize<`"foo`>>({
   type: 'SyntaxError',
   message: 'Unterminated string literal.',
+  lineNumber: 1,
 });
 
-expectType<Tokenize<`foo"`>>({
+expectType<Tokenize<`foo\n\n"`>>({
   type: 'SyntaxError',
   message: 'Unterminated string literal.',
+  lineNumber: 3,
 });
 
 expectType<Tokenize<`%`>>({
   type: 'SyntaxError',
   message: 'Invalid character.',
+  lineNumber: 1,
 });
 
-expectType<Tokenize<`"hello" %`>>({
+expectType<Tokenize<`"hello"\n %`>>({
   type: 'SyntaxError',
   message: 'Invalid character.',
+  lineNumber: 2,
 });
 
-expectType<Tokenize<`"foo\n"`>>({
+expectType<Tokenize<`\n"foo\n"`>>({
   type: 'SyntaxError',
   message: 'Unterminated string literal.',
+  lineNumber: 2,
 });
