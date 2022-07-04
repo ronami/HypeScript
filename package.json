@@ -1,6 +1,5 @@
 {
-  "name": "type-sys",
-  "private": true,
+  "name": "hypescript",
   "version": "0.0.0",
   "license": "MIT",
   "author": "Ronen Amiel",
