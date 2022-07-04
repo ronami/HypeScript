@@ -1,6 +1,5 @@
 {
-  "name": "type-sys",
-  "private": true,
+  "name": "hypescript",
   "version": "0.0.0",
   "license": "MIT",
   "author": "Ronen Amiel",
@@ -29,9 +28,5 @@
     "semi": true,
     "singleQuote": true,
     "trailingComma": "all"
-  },
-  "dependencies": {
-    "@babel/parser": "^7.18.5",
-    "@babel/plugin-transform-typescript": "^7.18.4"
   }
 }
