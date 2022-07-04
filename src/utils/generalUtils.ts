@@ -68,8 +68,6 @@ export type Symbols =
   | '8'
   | '9'
   | '_'
-  | '-'
-  | '+'
-  | '='
-  | '|'
-  | '&';
+  | '$';
+
+export type IsNever<T> = [T] extends [never] ? true : false;
