@@ -352,7 +352,7 @@ type ParseTopLevelStatement<
 
 type ParseSequence<
   T extends Array<Token<any, any>>,
-  R extends Array<any> = [],
+  R extends Array<any>,
 > = T extends []
   ? R
   : ParseTopLevelStatement<T> extends infer P
@@ -361,4 +361,4 @@ type ParseSequence<
     : never
   : never;
 
-export type Parse<T extends Array<Token<any, any>>> = ParseSequence<T>;
+export type Parse<T extends Array<Token<any, any>>> = ParseSequence<T, []>;
