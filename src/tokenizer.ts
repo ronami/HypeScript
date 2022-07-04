@@ -68,11 +68,11 @@ type TokenizeNumber<
 type TokenizeString<
   I,
   W extends '"' | "'",
-  J extends boolean,
-> = I extends `${infer H}${W}${infer G}`
+  G extends boolean,
+> = I extends `${infer H}${W}${infer J}`
   ? StringContains<H, '\n'> extends true
     ? SyntaxError<'Unterminated string literal.'>
-    : [StringToken<H, J>, G]
+    : [StringToken<H, G>, J]
   : SyntaxError<'Unterminated string literal.'>;
 
 type TokenizeSymbol<
