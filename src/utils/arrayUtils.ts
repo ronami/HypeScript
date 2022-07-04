@@ -7,6 +7,8 @@ export type Tail<T extends Array<any>> = ((...t: T) => void) extends (
   ? R
   : never;
 
+export type Push<T extends Array<any>, E> = [...T, E];
+
 export type Unshift<T extends Array<any>, E> = ((
   h: E,
   ...t: T
@@ -23,6 +25,7 @@ export type Head<T extends Array<any>> = T extends [any, ...Array<any>]
   ? T['0']
   : never;
 
-export type Concat<T1 extends Array<any>, T2 extends Array<any>> = T2 extends []
-  ? T1
-  : Concat<Unshift<T1, Head<T2>>, Tail<T2>>;
+export type Concat<T1 extends Array<any>, T2 extends Array<any>> = [
+  ...T1,
+  ...T2,
+];
