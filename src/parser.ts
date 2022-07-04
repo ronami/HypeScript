@@ -1,45 +1,44 @@
-export {};
-
-// import type {
-//   ArrayExpression,
-//   BooleanLiteral,
-//   NumericLiteral,
-//   ObjectExpression,
-//   StringLiteral,
-//   ObjectProperty,
-//   VariableDeclaration,
-//   VariableDeclarator,
-//   FunctionDeclaration,
-//   Identifier,
-//   NullLiteral,
-//   ExpressionStatement,
-//   CallExpression,
-//   MemberExpression,
-//   IfStatement,
-//   ReturnStatement,
-//   BlockStatement,
-//   TypeAnnotation,
-//   GenericTypeAnnotation,
-//   StringTypeAnnotation,
-//   BooleanTypeAnnotation,
-//   NullLiteralTypeAnnotation,
-//   NumberTypeAnnotation,
-//   AnyTypeAnnotation,
-// } from './ast';
-// import type {
-//   BracketToken,
-//   ColonToken,
-//   CommaToken,
-//   CurlyToken,
-//   DotToken,
-//   NumberToken,
-//   ParenToken,
-//   StringToken,
-//   SymbolToken,
-//   Token,
-// } from './tokens';
-// import type { Reverse, Tail, Unshift } from './utils/arrayUtils';
-// import type { Cast } from './utils/generalUtils';
+import type {
+  ArrayExpression,
+  BooleanLiteral,
+  NumericLiteral,
+  ObjectExpression,
+  StringLiteral,
+  ObjectProperty,
+  VariableDeclaration,
+  VariableDeclarator,
+  FunctionDeclaration,
+  Identifier,
+  NullLiteral,
+  ExpressionStatement,
+  CallExpression,
+  MemberExpression,
+  IfStatement,
+  ReturnStatement,
+  BlockStatement,
+  TypeAnnotation,
+  GenericTypeAnnotation,
+  StringTypeAnnotation,
+  BooleanTypeAnnotation,
+  NullLiteralTypeAnnotation,
+  NumberTypeAnnotation,
+  AnyTypeAnnotation,
+  NodeData,
+} from './ast';
+import type {
+  BracketToken,
+  ColonToken,
+  CommaToken,
+  CurlyToken,
+  DotToken,
+  NumberToken,
+  ParenToken,
+  StringToken,
+  SymbolToken,
+  Token,
+} from './tokens';
+import type { Push, Reverse, Tail, Unshift } from './utils/arrayUtils';
+import type { Cast } from './utils/generalUtils';
 
 // type Wrap<T extends [any, Array<Token<any>>]> = T[1][0] extends DotToken
 //   ? T[1][1] extends SymbolToken<infer V>
@@ -305,14 +304,56 @@ export {};
 //   ? ParseArray<Cast<G, Array<any>>[1], Unshift<R, Cast<G, Array<any>>[0]>, true>
 //   : never;
 
-// type ParseSequence<
-//   T extends Array<Token<any>>,
-//   R extends Array<any> = [],
-// > = T extends []
-//   ? R
-//   : ParseStatement<T> extends infer P
-//   ? ParseSequence<Cast<P, Array<any>>[1], Unshift<R, Cast<P, Array<any>>[0]>>
-//   : never;
+// F extends SymbolToken<'const'>
+//   ? ParseVariableDeclaration<Tail<T>>
+//   : F extends SymbolToken<'function'>
+//   ? ParseFunctionDeclaration<Tail<T>>
+//   : F extends SymbolToken<'if'>
+//   ? ParseIfStatement<Tail<T>>
+//   : ParseExpression<T> extends infer G
+//   ? [ExpressionStatement<Cast<G, Array<any>>[0]>, Cast<G, Array<any>>[1]]
+//   : never
 
-// export type Parse<T extends Array<Token<any>>> =
-//   ParseSequence<T> extends infer P ? Reverse<Cast<P, Array<any>>> : never;
+type ExtractTokenData<T extends Token<any, any>> = T extends Token<any, infer D>
+  ? {
+      startLineNumber: D['lineNumber'];
+      endLineNumber: D['lineNumber'];
+    }
+  : never;
+
+type ParseExpression<
+  T extends Array<Token<any, any>>,
+  F extends Token<any, any>,
+  G extends Array<Token<any, any>> = Tail<T>,
+  H extends NodeData = ExtractTokenData<F>,
+> = F extends SymbolToken<'true', any>
+  ? [BooleanLiteral<true, H>, G]
+  : F extends SymbolToken<'false', any>
+  ? [BooleanLiteral<false, H>, G]
+  : F extends SymbolToken<'null', any>
+  ? [NullLiteral<H>, G]
+  : F extends NumberToken<infer V, any>
+  ? [NumericLiteral<V, H>, G]
+  : F extends StringToken<infer V, any>
+  ? [StringLiteral<V, H>, G]
+  : F extends SymbolToken<infer V, any>
+  ? [Identifier<V, null, H>, G]
+  : never;
+
+type ParseTopLevelStatement<
+  T extends Array<Token<any, any>>,
+  F extends Token<any, any> = T[0],
+> = ParseExpression<T, F>;
+
+type ParseSequence<
+  T extends Array<Token<any, any>>,
+  R extends Array<any> = [],
+> = T extends []
+  ? R
+  : ParseTopLevelStatement<T> extends infer P
+  ? P extends Array<any>
+    ? ParseSequence<P[1], Push<R, P[0]>>
+    : never
+  : never;
+
+export type Parse<T extends Array<Token<any, any>>> = ParseSequence<T>;

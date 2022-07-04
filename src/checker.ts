@@ -1,229 +1,231 @@
-import type {
-  AnyTypeAnnotation,
-  ArrayExpression,
-  BlockStatement,
-  BooleanLiteral,
-  BooleanTypeAnnotation,
-  CallExpression,
-  ExpressionStatement,
-  FunctionDeclaration,
-  GenericTypeAnnotation,
-  Identifier,
-  IfStatement,
-  MemberExpression,
-  NullLiteral,
-  NullLiteralTypeAnnotation,
-  NumberTypeAnnotation,
-  NumericLiteral,
-  ObjectExpression,
-  ObjectProperty,
-  ReturnStatement,
-  StringLiteral,
-  StringTypeAnnotation,
-  TypeAnnotation,
-  VariableDeclaration,
-  VariableDeclarator,
-} from './ast';
-import type {
-  AnyType,
-  ArrayType,
-  BooleanType,
-  FunctionType,
-  GenericType,
-  NullType,
-  NumberType,
-  ObjectType,
-  StringType,
-  UnknownType,
-  VoidType,
-} from './types';
-import type { Concat, Reverse, Tail, Unshift } from './utils/arrayUtils';
-import type { Cast, MergeWithOverride } from './utils/generalUtils';
+export {};
 
-export type Check<T extends Array<any>> = CheckBlock<T>;
+// import type {
+//   AnyTypeAnnotation,
+//   ArrayExpression,
+//   BlockStatement,
+//   BooleanLiteral,
+//   BooleanTypeAnnotation,
+//   CallExpression,
+//   ExpressionStatement,
+//   FunctionDeclaration,
+//   GenericTypeAnnotation,
+//   Identifier,
+//   IfStatement,
+//   MemberExpression,
+//   NullLiteral,
+//   NullLiteralTypeAnnotation,
+//   NumberTypeAnnotation,
+//   NumericLiteral,
+//   ObjectExpression,
+//   ObjectProperty,
+//   ReturnStatement,
+//   StringLiteral,
+//   StringTypeAnnotation,
+//   TypeAnnotation,
+//   VariableDeclaration,
+//   VariableDeclarator,
+// } from './ast';
+// import type {
+//   AnyType,
+//   ArrayType,
+//   BooleanType,
+//   FunctionType,
+//   GenericType,
+//   NullType,
+//   NumberType,
+//   ObjectType,
+//   StringType,
+//   UnknownType,
+//   VoidType,
+// } from './types';
+// import type { Concat, Reverse, Tail, Unshift } from './utils/arrayUtils';
+// import type { Cast, MergeWithOverride } from './utils/generalUtils';
 
-type InferArrayElements<
-  T extends Array<any>,
-  S extends {},
-  R extends Array<any> = [],
-> = T extends []
-  ? R
-  : InferArrayElements<Tail<T>, S, Unshift<R, InferExpression<T[0], S>>>;
+// export type Check<T extends Array<any>> = CheckBlock<T>;
 
-type InferObjectValues<
-  T extends Array<any>,
-  S extends {},
-  R extends {} = {},
-> = T extends []
-  ? R
-  : T[0] extends ObjectProperty<Identifier<infer G>, infer K>
-  ? InferObjectValues<
-      Tail<T>,
-      S,
-      MergeWithOverride<R, { [a in Cast<G, string>]: InferExpression<K, S> }>
-    >
-  : never;
+// type InferArrayElements<
+//   T extends Array<any>,
+//   S extends {},
+//   R extends Array<any> = [],
+// > = T extends []
+//   ? R
+//   : InferArrayElements<Tail<T>, S, Unshift<R, InferExpression<T[0], S>>>;
 
-type InferCallArguments<
-  T extends Array<any>,
-  S extends {},
-  R extends Array<any> = [],
-> = T extends []
-  ? Reverse<R>
-  : InferCallArguments<Tail<T>, S, Unshift<R, InferExpression<T[0], S>>>;
+// type InferObjectValues<
+//   T extends Array<any>,
+//   S extends {},
+//   R extends {} = {},
+// > = T extends []
+//   ? R
+//   : T[0] extends ObjectProperty<Identifier<infer G>, infer K>
+//   ? InferObjectValues<
+//       Tail<T>,
+//       S,
+//       MergeWithOverride<R, { [a in Cast<G, string>]: InferExpression<K, S> }>
+//     >
+//   : never;
 
-type AssignableTypes<A, B> = A extends AnyType
-  ? true
-  : B extends A
-  ? true
-  : false;
+// type InferCallArguments<
+//   T extends Array<any>,
+//   S extends {},
+//   R extends Array<any> = [],
+// > = T extends []
+//   ? Reverse<R>
+//   : InferCallArguments<Tail<T>, S, Unshift<R, InferExpression<T[0], S>>>;
 
-type AssignableArgumentTypes<
-  I extends Array<any>,
-  P extends Array<any>,
-> = I extends []
-  ? P extends []
-    ? true
-    : false
-  : AssignableTypes<I[0], P[0]> extends false
-  ? false
-  : AssignableArgumentTypes<Tail<I>, Tail<P>>;
+// type AssignableTypes<A, B> = A extends AnyType
+//   ? true
+//   : B extends A
+//   ? true
+//   : false;
 
-type InferExpression<T, S extends {}> = T extends StringLiteral<any>
-  ? StringType
-  : T extends NumericLiteral<any>
-  ? NumberType
-  : T extends NullLiteral
-  ? NullType
-  : T extends BooleanLiteral<any>
-  ? BooleanType
-  : T extends Identifier<infer N>
-  ? N extends keyof S
-    ? S[N]
-    : never
-  : T extends ArrayExpression<infer T>
-  ? ArrayType<InferArrayElements<Cast<T, Array<any>>, S>>
-  : T extends ObjectExpression<infer T>
-  ? ObjectType<InferObjectValues<Cast<T, Array<any>>, S>>
-  : T extends CallExpression<infer K, infer A>
-  ? InferCallArguments<Cast<A, Array<any>>, S> extends infer O
-    ? InferExpression<K, S> extends infer I
-      ? I extends FunctionType<infer P, infer R>
-        ? AssignableArgumentTypes<
-            Cast<P, Array<any>>,
-            Cast<O, Array<any>>
-          > extends true
-          ? R
-          : never
-        : never
-      : never
-    : never
-  : T extends MemberExpression<infer O, Identifier<infer P>>
-  ? InferExpression<O, S> extends infer D
-    ? D extends ObjectType<infer Y>
-      ? P extends keyof Y
-        ? Y[P]
-        : never
-      : D extends StringType
-      ? P extends 'length'
-        ? NumberType
-        : never
-      : D extends NumberType
-      ? P extends 'toString'
-        ? FunctionType<[], StringType>
-        : never
-      : never
-    : never
-  : UnknownType;
+// type AssignableArgumentTypes<
+//   I extends Array<any>,
+//   P extends Array<any>,
+// > = I extends []
+//   ? P extends []
+//     ? true
+//     : false
+//   : AssignableTypes<I[0], P[0]> extends false
+//   ? false
+//   : AssignableArgumentTypes<Tail<I>, Tail<P>>;
 
-type MapTypeAnnotationToType<A> = A extends StringTypeAnnotation
-  ? StringType
-  : A extends NumberTypeAnnotation
-  ? NumberType
-  : A extends BooleanTypeAnnotation
-  ? BooleanType
-  : A extends NullLiteralTypeAnnotation
-  ? NullType
-  : A extends AnyTypeAnnotation
-  ? AnyType
-  : A extends GenericTypeAnnotation<infer I>
-  ? GenericType<I>
-  : never;
+// type InferExpression<T, S extends {}> = T extends StringLiteral<any>
+//   ? StringType
+//   : T extends NumericLiteral<any>
+//   ? NumberType
+//   : T extends NullLiteral
+//   ? NullType
+//   : T extends BooleanLiteral<any>
+//   ? BooleanType
+//   : T extends Identifier<infer N>
+//   ? N extends keyof S
+//     ? S[N]
+//     : never
+//   : T extends ArrayExpression<infer T>
+//   ? ArrayType<InferArrayElements<Cast<T, Array<any>>, S>>
+//   : T extends ObjectExpression<infer T>
+//   ? ObjectType<InferObjectValues<Cast<T, Array<any>>, S>>
+//   : T extends CallExpression<infer K, infer A>
+//   ? InferCallArguments<Cast<A, Array<any>>, S> extends infer O
+//     ? InferExpression<K, S> extends infer I
+//       ? I extends FunctionType<infer P, infer R>
+//         ? AssignableArgumentTypes<
+//             Cast<P, Array<any>>,
+//             Cast<O, Array<any>>
+//           > extends true
+//           ? R
+//           : never
+//         : never
+//       : never
+//     : never
+//   : T extends MemberExpression<infer O, Identifier<infer P>>
+//   ? InferExpression<O, S> extends infer D
+//     ? D extends ObjectType<infer Y>
+//       ? P extends keyof Y
+//         ? Y[P]
+//         : never
+//       : D extends StringType
+//       ? P extends 'length'
+//         ? NumberType
+//         : never
+//       : D extends NumberType
+//       ? P extends 'toString'
+//         ? FunctionType<[], StringType>
+//         : never
+//       : never
+//     : never
+//   : UnknownType;
 
-type InferFunctionParams<
-  T extends Array<any>,
-  R extends Array<any> = [],
-  G = {},
-> = T extends []
-  ? [Reverse<R>, G]
-  : T[0] extends Identifier<infer N, TypeAnnotation<infer V>>
-  ? InferFunctionParams<
-      Tail<T>,
-      Unshift<R, MapTypeAnnotationToType<V>>,
-      MergeWithOverride<
-        G,
-        { [a in Cast<N, string>]: MapTypeAnnotationToType<V> }
-      >
-    >
-  : never;
+// type MapTypeAnnotationToType<A> = A extends StringTypeAnnotation
+//   ? StringType
+//   : A extends NumberTypeAnnotation
+//   ? NumberType
+//   : A extends BooleanTypeAnnotation
+//   ? BooleanType
+//   : A extends NullLiteralTypeAnnotation
+//   ? NullType
+//   : A extends AnyTypeAnnotation
+//   ? AnyType
+//   : A extends GenericTypeAnnotation<infer I>
+//   ? GenericType<I>
+//   : never;
 
-type InferBlock<
-  T extends Array<any>,
-  S extends {},
-  R extends Array<any> = [],
-> = T extends []
-  ? Unshift<R, VoidType>
-  : T[0] extends ReturnStatement<infer E>
-  ? InferExpression<E, S> extends infer G
-    ? G extends Array<any>
-      ? Concat<R, Cast<G, Array<any>>>
-      : Unshift<R, G>
-    : never
-  : T[0] extends VariableDeclaration<
-      [VariableDeclarator<Identifier<infer N>, infer I>],
-      any
-    >
-  ? InferBlock<
-      Tail<T>,
-      MergeWithOverride<S, { [a in Cast<N, string>]: InferExpression<I, S> }>,
-      R
-    >
-  : T[0] extends FunctionDeclaration<
-      Identifier<infer I>,
-      infer P,
-      BlockStatement<infer B>
-    >
-  ? InferFunctionParams<Cast<P, Array<any>>> extends infer O
-    ? InferBlock<
-        Tail<T>,
-        MergeWithOverride<
-          S,
-          {
-            [a in Cast<I, string>]: FunctionType<
-              Cast<O, Array<any>>[0],
-              InferBlock<
-                Cast<B, Array<any>>,
-                MergeWithOverride<S, Cast<O, Array<any>>[1]>
-              >
-            >;
-          }
-        >,
-        R
-      >
-    : never
-  : T[0] extends IfStatement<any, BlockStatement<infer C>>
-  ? InferBlock<Cast<C, Array<any>>, S> extends infer J
-    ? Concat<R, Cast<J, Array<any>>> extends infer G
-      ? InferBlock<Tail<T>, S, Cast<G, Array<any>>>
-      : never
-    : never
-  : InferBlock<Tail<T>, S, R>;
+// type InferFunctionParams<
+//   T extends Array<any>,
+//   R extends Array<any> = [],
+//   G = {},
+// > = T extends []
+//   ? [Reverse<R>, G]
+//   : T[0] extends Identifier<infer N, TypeAnnotation<infer V>>
+//   ? InferFunctionParams<
+//       Tail<T>,
+//       Unshift<R, MapTypeAnnotationToType<V>>,
+//       MergeWithOverride<
+//         G,
+//         { [a in Cast<N, string>]: MapTypeAnnotationToType<V> }
+//       >
+//     >
+//   : never;
 
-type CheckBlock<
-  T extends Array<any>,
-  S extends {} = {},
-> = T[0] extends ExpressionStatement<infer E>
-  ? InferExpression<E, S>
-  : T[0] extends BlockStatement<infer B>
-  ? InferBlock<Cast<B, Array<any>>, S>
-  : [];
+// type InferBlock<
+//   T extends Array<any>,
+//   S extends {},
+//   R extends Array<any> = [],
+// > = T extends []
+//   ? Unshift<R, VoidType>
+//   : T[0] extends ReturnStatement<infer E>
+//   ? InferExpression<E, S> extends infer G
+//     ? G extends Array<any>
+//       ? Concat<R, Cast<G, Array<any>>>
+//       : Unshift<R, G>
+//     : never
+//   : T[0] extends VariableDeclaration<
+//       [VariableDeclarator<Identifier<infer N>, infer I>],
+//       any
+//     >
+//   ? InferBlock<
+//       Tail<T>,
+//       MergeWithOverride<S, { [a in Cast<N, string>]: InferExpression<I, S> }>,
+//       R
+//     >
+//   : T[0] extends FunctionDeclaration<
+//       Identifier<infer I>,
+//       infer P,
+//       BlockStatement<infer B>
+//     >
+//   ? InferFunctionParams<Cast<P, Array<any>>> extends infer O
+//     ? InferBlock<
+//         Tail<T>,
+//         MergeWithOverride<
+//           S,
+//           {
+//             [a in Cast<I, string>]: FunctionType<
+//               Cast<O, Array<any>>[0],
+//               InferBlock<
+//                 Cast<B, Array<any>>,
+//                 MergeWithOverride<S, Cast<O, Array<any>>[1]>
+//               >
+//             >;
+//           }
+//         >,
+//         R
+//       >
+//     : never
+//   : T[0] extends IfStatement<any, BlockStatement<infer C>>
+//   ? InferBlock<Cast<C, Array<any>>, S> extends infer J
+//     ? Concat<R, Cast<J, Array<any>>> extends infer G
+//       ? InferBlock<Tail<T>, S, Cast<G, Array<any>>>
+//       : never
+//     : never
+//   : InferBlock<Tail<T>, S, R>;
+
+// type CheckBlock<
+//   T extends Array<any>,
+//   S extends {} = {},
+// > = T[0] extends ExpressionStatement<infer E>
+//   ? InferExpression<E, S>
+//   : T[0] extends BlockStatement<infer B>
+//   ? InferBlock<Cast<B, Array<any>>, S>
+//   : [];
