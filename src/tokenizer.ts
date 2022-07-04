@@ -18,48 +18,52 @@ import type {
   StringToken,
   BracketToken,
   CommaToken,
+  TokenData,
 } from './tokens';
 import type { SyntaxError } from './errors';
+import type { Succ } from './utils/math';
 
 type TokenizeInput<
   I extends string,
   F extends string,
   E extends string,
   G extends boolean,
+  L extends number,
+  D extends TokenData = { precedingLinebreak: G; lineNumber: L },
 > = F extends ','
-  ? [CommaToken, E]
+  ? [CommaToken<D>, E]
   : F extends '('
-  ? [ParenToken<'('>, E]
+  ? [ParenToken<'(', D>, E]
   : F extends ')'
-  ? [ParenToken<')'>, E]
+  ? [ParenToken<')', D>, E]
   : F extends '['
-  ? [BracketToken<'['>, E]
+  ? [BracketToken<'[', D>, E]
   : F extends ']'
-  ? [BracketToken<']'>, E]
+  ? [BracketToken<']', D>, E]
   : F extends '{'
-  ? [CurlyToken<'{'>, E]
+  ? [CurlyToken<'{', D>, E]
   : F extends '}'
-  ? [CurlyToken<'}'>, E]
+  ? [CurlyToken<'}', D>, E]
   : F extends '.'
-  ? [DotToken, E]
+  ? [DotToken<D>, E]
   : F extends ';'
-  ? [SemicolonToken, E]
+  ? [SemicolonToken<D>, E]
   : F extends ':'
-  ? [ColonToken, E]
+  ? [ColonToken<D>, E]
   : F extends Numbers
-  ? TokenizeNumber<I, '', G, F>
+  ? TokenizeNumber<I, '', D, F>
   : F extends '"'
-  ? TokenizeString<E, '"', G>
+  ? TokenizeString<E, '"', D>
   : F extends "'"
-  ? TokenizeString<E, "'", G>
+  ? TokenizeString<E, "'", D>
   : F extends Symbols
-  ? TokenizeSymbol<I, '', G, F>
+  ? TokenizeSymbol<I, '', D, F>
   : SyntaxError<`Invalid character.`>;
 
 type TokenizeNumber<
   I extends string,
   A extends string,
-  G extends boolean,
+  G extends TokenData,
   C extends string = FirstChar<I>,
 > = C extends Numbers
   ? TokenizeNumber<EatFirstChar<I>, ConcatStrings<A, C>, G>
@@ -68,7 +72,7 @@ type TokenizeNumber<
 type TokenizeString<
   I,
   W extends '"' | "'",
-  G extends boolean,
+  G extends TokenData,
 > = I extends `${infer H}${W}${infer J}`
   ? StringContains<H, '\n'> extends true
     ? SyntaxError<'Unterminated string literal.'>
@@ -78,7 +82,7 @@ type TokenizeString<
 type TokenizeSymbol<
   I extends string,
   A extends string,
-  G extends boolean,
+  G extends TokenData,
   C extends string = FirstChar<I>,
 > = C extends Symbols
   ? TokenizeSymbol<EatFirstChar<I>, ConcatStrings<A, C>, G>
@@ -86,22 +90,25 @@ type TokenizeSymbol<
 
 export type TokenizeSequence<
   I extends string,
-  R extends Array<Token<any>> = [],
-  G extends boolean = false,
+  R extends Array<Token<any>>,
+  L extends number,
+  G extends boolean,
   F extends string = FirstChar<I>,
   E extends string = EatFirstChar<I>,
 > = I extends ''
   ? R
   : F extends ' '
-  ? TokenizeSequence<E, R, G>
+  ? TokenizeSequence<E, R, L, G>
   : F extends '\n'
-  ? TokenizeSequence<E, R, true>
-  : TokenizeInput<I, F, E, G> extends infer P
-  ? TokenizeHelper<P, R>
+  ? TokenizeSequence<E, R, Succ<L>, true>
+  : TokenizeInput<I, F, E, G, L> extends infer P
+  ? TokenizeHelper<P, R, L>
   : never;
 
-export type TokenizeHelper<P, R extends Array<any>> = P extends Array<any>
-  ? TokenizeSequence<P[1], Push<R, P[0]>>
-  : P;
+export type TokenizeHelper<
+  P,
+  R extends Array<any>,
+  L extends number,
+> = P extends Array<any> ? TokenizeSequence<P[1], Push<R, P[0]>, L, false> : P;
 
-export type Tokenize<I extends string> = TokenizeSequence<I>;
+export type Tokenize<I extends string> = TokenizeSequence<I, [], 1, false>;

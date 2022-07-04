@@ -6,7 +6,10 @@ expectType<Tokenize<`hello`>>([
   {
     type: 'symbol',
     value: 'hello',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
 ]);
 
@@ -14,12 +17,18 @@ expectType<Tokenize<`hello world`>>([
   {
     type: 'symbol',
     value: 'hello',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'symbol',
     value: 'world',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
 ]);
 
@@ -27,12 +36,18 @@ expectType<Tokenize<`hello\n world`>>([
   {
     type: 'symbol',
     value: 'hello',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'symbol',
     value: 'world',
-    precedingLinebreak: true,
+    data: {
+      precedingLinebreak: true,
+      lineNumber: 2,
+    },
   },
 ]);
 
@@ -40,12 +55,18 @@ expectType<Tokenize<`hello\nworld`>>([
   {
     type: 'symbol',
     value: 'hello',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'symbol',
     value: 'world',
-    precedingLinebreak: true,
+    data: {
+      precedingLinebreak: true,
+      lineNumber: 2,
+    },
   },
 ]);
 
@@ -53,12 +74,18 @@ expectType<Tokenize<`hello\n\n world`>>([
   {
     type: 'symbol',
     value: 'hello',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'symbol',
     value: 'world',
-    precedingLinebreak: true,
+    data: {
+      precedingLinebreak: true,
+      lineNumber: 3,
+    },
   },
 ]);
 
@@ -66,12 +93,18 @@ expectType<Tokenize<`"hello" "world"`>>([
   {
     type: 'string',
     value: 'hello',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'string',
     value: 'world',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
 ]);
 
@@ -79,30 +112,45 @@ expectType<Tokenize<`"hello"\n "world"`>>([
   {
     type: 'string',
     value: 'hello',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'string',
     value: 'world',
-    precedingLinebreak: true,
+    data: {
+      precedingLinebreak: true,
+      lineNumber: 2,
+    },
   },
 ]);
 
-expectType<Tokenize<`\n123 456 \n789`>>([
+expectType<Tokenize<`\n123 456 \n\n789`>>([
   {
     type: 'number',
     value: '123',
-    precedingLinebreak: true,
+    data: {
+      precedingLinebreak: true,
+      lineNumber: 2,
+    },
   },
   {
     type: 'number',
     value: '456',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 2,
+    },
   },
   {
     type: 'number',
     value: '789',
-    precedingLinebreak: true,
+    data: {
+      precedingLinebreak: true,
+      lineNumber: 4,
+    },
   },
 ]);
 
@@ -110,12 +158,18 @@ expectType<Tokenize<`"hello"\n \n"world"`>>([
   {
     type: 'string',
     value: 'hello',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'string',
     value: 'world',
-    precedingLinebreak: true,
+    data: {
+      precedingLinebreak: true,
+      lineNumber: 3,
+    },
   },
 ]);
 
@@ -123,7 +177,10 @@ expectType<Tokenize<`"hello"`>>([
   {
     type: 'string',
     value: 'hello',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
 ]);
 
@@ -131,7 +188,10 @@ expectType<Tokenize<`123`>>([
   {
     type: 'number',
     value: '123',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
 ]);
 
@@ -139,31 +199,56 @@ expectType<Tokenize<`[1, 2, 3]`>>([
   {
     type: 'bracket',
     value: '[',
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'number',
     value: '1',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'comma',
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'number',
     value: '2',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'comma',
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'number',
     value: '3',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'bracket',
     value: ']',
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
 ]);
 
@@ -171,15 +256,26 @@ expectType<Tokenize<`foo()`>>([
   {
     type: 'symbol',
     value: 'foo',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'paren',
     value: '(',
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'paren',
     value: ')',
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
 ]);
 
@@ -187,15 +283,53 @@ expectType<Tokenize<`"foo"()`>>([
   {
     type: 'string',
     value: 'foo',
-    precedingLinebreak: false,
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'paren',
     value: '(',
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
   },
   {
     type: 'paren',
     value: ')',
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
+  },
+]);
+
+expectType<Tokenize<`"foo"\n()`>>([
+  {
+    type: 'string',
+    value: 'foo',
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
+  },
+  {
+    type: 'paren',
+    value: '(',
+    data: {
+      precedingLinebreak: true,
+      lineNumber: 2,
+    },
+  },
+  {
+    type: 'paren',
+    value: ')',
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 2,
+    },
   },
 ]);
 
