@@ -333,6 +333,33 @@ expectType<Tokenize<`"foo"\n()`>>([
   },
 ]);
 
+expectType<Tokenize<`"foo"(\n)`>>([
+  {
+    type: 'string',
+    value: 'foo',
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
+  },
+  {
+    type: 'paren',
+    value: '(',
+    data: {
+      precedingLinebreak: false,
+      lineNumber: 1,
+    },
+  },
+  {
+    type: 'paren',
+    value: ')',
+    data: {
+      precedingLinebreak: true,
+      lineNumber: 2,
+    },
+  },
+]);
+
 expectType<Tokenize<`"foo`>>({
   type: 'SyntaxError',
   message: 'Unterminated string literal.',
