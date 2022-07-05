@@ -172,4 +172,11 @@ export type Node<D extends NodeData<any, any>> =
   | MemberExpression<any, any, D>
   | IfStatement<any, any, D>
   | ReturnStatement<any, D>
-  | BlockStatement<any, D>;
+  | BlockStatement<any, D>
+  | TypeAnnotation<any, D>
+  | StringTypeAnnotation<D>
+  | NumberTypeAnnotation<D>
+  | NullLiteralTypeAnnotation<D>
+  | BooleanTypeAnnotation<D>
+  | GenericTypeAnnotation<any, D>
+  | AnyTypeAnnotation<D>;

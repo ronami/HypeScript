@@ -59,13 +59,13 @@ export type CommaToken<D extends TokenData<any, any>> = {
   data: D;
 };
 
-export type Token<V extends string, D extends TokenData<any, any>> =
-  | NumberToken<V, D>
-  | BracketToken<V, D>
-  | StringToken<V, D>
-  | SymbolToken<V, D>
-  | ParenToken<V, D>
-  | CurlyToken<V, D>
+export type Token<D extends TokenData<any, any>> =
+  | NumberToken<any, D>
+  | BracketToken<any, D>
+  | StringToken<any, D>
+  | SymbolToken<any, D>
+  | ParenToken<any, D>
+  | CurlyToken<any, D>
   | DotToken<D>
   | SemicolonToken<D>
   | ColonToken<D>
