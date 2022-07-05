@@ -24,6 +24,7 @@ import type {
   NumberTypeAnnotation,
   AnyTypeAnnotation,
   NodeData,
+  Node,
 } from './ast';
 import type { Error, SyntaxError } from './errors';
 import type {
@@ -38,8 +39,9 @@ import type {
   StringToken,
   SymbolToken,
   Token,
+  TokenData,
 } from './tokens';
-import type { Push, Reverse, Tail, Unshift } from './utils/arrayUtils';
+import type { Push, Reverse, Tail, TailBy, Unshift } from './utils/arrayUtils';
 import type { Cast, IsNever } from './utils/generalUtils';
 
 // type Wrap<T extends [any, Array<Token<any>>]> = T[1][0] extends DotToken
@@ -311,64 +313,54 @@ type ExtractTokenData<
   R extends Token<any, any> = T,
 > = T extends Token<any, infer D>
   ? R extends Token<any, infer H>
-    ? {
-        startLineNumber: D['lineNumber'];
-        endLineNumber: H['lineNumber'];
-      }
+    ? NodeData<D['lineNumber'], H['lineNumber']>
     : never
+  : never;
+
+type ParseVariableDeclarationHelper<
+  T extends Array<Token<any, any>>,
+  N extends string,
+  NL extends number,
+  FL extends number,
+  K extends Node<any>,
+> = K extends Node<NodeData<any, infer E>>
+  ? [
+      VariableDeclaration<
+        [
+          VariableDeclarator<
+            Identifier<N, null, NodeData<NL, NL>>,
+            K,
+            NodeData<NL, E>
+          >,
+        ],
+        'const',
+        NodeData<FL, E>
+      >,
+      T,
+    ]
   : never;
 
 type ParseVariableDeclaration<
   T extends Array<Token<any, any>>,
   F extends Token<any, any>,
-> = F extends SymbolToken<'const', infer F_>
-  ? T[1] extends SymbolToken<infer N, infer N_>
-    ? T[2] extends SymbolToken<'=', infer K_>
-      ? ParseExpression<Tail<Tail<Tail<T>>>> extends infer L
-        ? L extends Array<any>
-          ? [
-              VariableDeclaration<
-                [
-                  VariableDeclarator<
-                    Identifier<
-                      N,
-                      null,
-                      {
-                        startLineNumber: N_['lineNumber'];
-                        endLineNumber: N_['lineNumber'];
-                      }
-                    >,
-                    L[0],
-                    {
-                      startLineNumber: N_['lineNumber'];
-                      endLineNumber: L[0]['data']['endLineNumber'];
-                    }
-                  >,
-                ],
-                'const',
-                {
-                  startLineNumber: F_['lineNumber'];
-                  endLineNumber: L[0]['data']['endLineNumber'];
-                }
-              >,
-              L[1],
-            ]
-          : SyntaxError<'Expression expected.', K_['lineNumber']>
-        : never
-      : SyntaxError<
-          "'const' declarations must be initialized.",
-          N_['lineNumber']
-        >
-    : SyntaxError<
-        'Variable declaration list cannot be empty.',
-        F_['lineNumber']
-      >
+> = F extends SymbolToken<'const', TokenData<any, infer FL>>
+  ? T[1] extends SymbolToken<infer N, TokenData<any, infer NL>>
+    ? T[2] extends SymbolToken<'=', TokenData<any, infer KL>>
+      ? ParseExpression<TailBy<T, 3>> extends [infer L, infer T]
+        ? T extends Array<any>
+          ? L extends Node<any>
+            ? ParseVariableDeclarationHelper<T, N, NL, FL, L>
+            : never
+          : never
+        : SyntaxError<'Expression expected.', KL>
+      : SyntaxError<"'const' declarations must be initialized.", NL>
+    : SyntaxError<'Variable declaration list cannot be empty.', FL>
   : null;
 
 type ParseExpression<
   T extends Array<Token<any, any>>,
   F extends Token<any, any> = T[0],
-  H extends NodeData = ExtractTokenData<F>,
+  H extends NodeData<any, any> = ExtractTokenData<F>,
   G extends Array<Token<any, any>> = Tail<T>,
 > = F extends SymbolToken<'true', any>
   ? [BooleanLiteral<true, H>, G]
@@ -387,7 +379,7 @@ type ParseExpression<
 type ParseExpressionStatement<
   T extends Array<Token<any, any>>,
   F extends Token<any, any>,
-  H extends NodeData = ExtractTokenData<F>,
+  H extends NodeData<any, any> = ExtractTokenData<F>,
 > = ParseExpression<T, F, H> extends infer G
   ? G extends Array<any>
     ? [ExpressionStatement<G[0], H>, G[1]]
