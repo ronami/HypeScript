@@ -318,18 +318,18 @@ type ExtractTokenData<
   : never;
 
 type ParseVariableDeclarationHelper<
-  T extends Array<Token<any>>,
+  L extends Node<any>,
   N extends string,
   NL extends number,
   FL extends number,
-  K extends Node<any>,
-> = K extends Node<NodeData<any, infer E>>
+  T extends Array<Token<any>>,
+> = L extends Node<NodeData<any, infer E>>
   ? [
       VariableDeclaration<
         [
           VariableDeclarator<
             Identifier<N, null, NodeData<NL, NL>>,
-            K,
+            L,
             NodeData<NL, E>
           >,
         ],
@@ -340,47 +340,43 @@ type ParseVariableDeclarationHelper<
     ]
   : never;
 
-type ParseVariableDeclaration<
-  T extends Array<Token<any>>,
-  F extends Token<any>,
-> = F extends SymbolToken<'const', TokenData<any, infer FL>>
-  ? T[1] extends SymbolToken<infer N, TokenData<any, infer NL>>
-    ? T[2] extends SymbolToken<'=', TokenData<any, infer KL>>
-      ? ParseExpression<TailBy<T, 3>> extends [infer L, infer T]
-        ? T extends Array<Token<any>>
+type ParseVariableDeclaration<T extends Array<Token<any>>> =
+  T[0] extends SymbolToken<'const', TokenData<any, infer FL>>
+    ? T[1] extends SymbolToken<infer N, TokenData<any, infer NL>>
+      ? T[2] extends SymbolToken<'=', TokenData<any, infer KL>>
+        ? ParseExpression<TailBy<T, 3>> extends [infer L, infer T]
           ? L extends Node<any>
-            ? ParseVariableDeclarationHelper<T, N, NL, FL, L>
+            ? T extends Array<Token<any>>
+              ? ParseVariableDeclarationHelper<L, N, NL, FL, T>
+              : never
             : never
-          : never
-        : SyntaxError<'Expression expected.', KL>
-      : SyntaxError<"'const' declarations must be initialized.", NL>
-    : SyntaxError<'Variable declaration list cannot be empty.', FL>
-  : null;
+          : SyntaxError<'Expression expected.', KL>
+        : SyntaxError<"'const' declarations must be initialized.", NL>
+      : SyntaxError<'Variable declaration list cannot be empty.', FL>
+    : null;
 
 type ParseExpression<
   T extends Array<Token<any>>,
-  F extends Token<any> = T[0],
-  H extends NodeData<any, any> = ExtractTokenData<F>,
+  H extends NodeData<any, any> = ExtractTokenData<T[0]>,
   G extends Array<Token<any>> = Tail<T>,
-> = F extends SymbolToken<'true', any>
+> = T[0] extends SymbolToken<'true', any>
   ? [BooleanLiteral<true, H>, G]
-  : F extends SymbolToken<'false', any>
+  : T[0] extends SymbolToken<'false', any>
   ? [BooleanLiteral<false, H>, G]
-  : F extends SymbolToken<'null', any>
+  : T[0] extends SymbolToken<'null', any>
   ? [NullLiteral<H>, G]
-  : F extends NumberToken<infer V, any>
+  : T[0] extends NumberToken<infer V, any>
   ? [NumericLiteral<V, H>, G]
-  : F extends StringToken<infer V, any>
+  : T[0] extends StringToken<infer V, any>
   ? [StringLiteral<V, H>, G]
-  : F extends SymbolToken<infer V, any>
+  : T[0] extends SymbolToken<infer V, any>
   ? [Identifier<V, null, H>, G]
   : null;
 
 type ParseExpressionStatement<
   T extends Array<Token<any>>,
-  F extends Token<any>,
-  H extends NodeData<any, any> = ExtractTokenData<F>,
-> = ParseExpression<T, F, H> extends infer G
+  H extends NodeData<any, any> = ExtractTokenData<T[0]>,
+> = ParseExpression<T, H> extends infer G
   ? G extends Array<any>
     ? [ExpressionStatement<G[0], H>, G[1]]
     : null
@@ -390,29 +386,27 @@ type ParseTopLevel<
   T extends Array<Token<any>>,
   R extends Array<Node<any>>,
   N extends boolean,
-  F extends Token<any> = T[0],
 > = T extends []
   ? R
-  : F extends SemicolonToken<any>
+  : T[0] extends SemicolonToken<any>
   ? ParseTopLevel<Tail<T>, R, false>
   : N extends false
-  ? ParseTopLevelHelper<T, R, F>
-  : F extends Token<infer D>
-  ? D['precedingLinebreak'] extends true
-    ? ParseTopLevelHelper<T, R, F>
-    : SyntaxError<"';' expected.", D['lineNumber']>
+  ? ParseTopLevelHelper<T, R>
+  : T[0] extends Token<TokenData<infer P, infer L>>
+  ? P extends true
+    ? ParseTopLevelHelper<T, R>
+    : SyntaxError<"';' expected.", L>
   : never;
 
 type ParseTopLevelHelper<
   T extends Array<Token<any>>,
   R extends Array<Node<any>>,
-  F extends Token<any> = T[0],
-> = ParseVariableDeclaration<T, F> extends infer P
+> = ParseVariableDeclaration<T> extends infer P
   ? P extends Array<any>
     ? ParseTopLevel<P[1], Push<R, P[0]>, true>
     : P extends Error<any, any, any>
     ? P
-    : ParseExpressionStatement<T, F> extends infer P
+    : ParseExpressionStatement<T> extends infer P
     ? P extends Array<any>
       ? ParseTopLevel<P[1], Push<R, P[0]>, true>
       : P extends Error<any, any, any>
