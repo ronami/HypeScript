@@ -258,6 +258,85 @@ expectType<ParseAst<`hello  ; "world"`>>([
     },
   },
 ]);
+expectType<ParseAst<`const hello = "world"`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'const',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        init: {
+          type: 'StringLiteral',
+          value: 'world',
+          data: { startLineNumber: 1, endLineNumber: 1 },
+        },
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: null,
+          data: { startLineNumber: 1, endLineNumber: 1 },
+        },
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+    ],
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`\nconst \nhello\n = \n123;`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'const',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        init: {
+          type: 'NumericLiteral',
+          value: '123',
+          data: { startLineNumber: 5, endLineNumber: 5 },
+        },
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: null,
+          data: { startLineNumber: 3, endLineNumber: 3 },
+        },
+        data: { startLineNumber: 3, endLineNumber: 5 },
+      },
+    ],
+    data: { startLineNumber: 2, endLineNumber: 5 },
+  },
+]);
+
+expectType<ParseAst<`const`>>({
+  type: 'SyntaxError',
+  message: 'Variable declaration list cannot be empty.',
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`const hello`>>({
+  type: 'SyntaxError',
+  message: "'const' declarations must be initialized.",
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`const hello =`>>({
+  type: 'SyntaxError',
+  message: 'Expression expected.',
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`const hello \n = ;`>>({
+  type: 'SyntaxError',
+  message: 'Expression expected.',
+  lineNumber: 2,
+});
 
 // expectType<ParseAst<`hello.world`>>([
 //   {
@@ -629,34 +708,6 @@ expectType<ParseAst<`hello  ; "world"`>>([
 //         },
 //       ],
 //     },
-//   },
-// ]);
-
-// expectType<ParseAst<`const hello = "world"`>>([
-//   {
-//     type: 'VariableDeclaration',
-//     kind: 'const',
-//     declarations: [
-//       {
-//         type: 'VariableDeclarator',
-//         init: { type: 'StringLiteral', value: 'world' },
-//         id: { type: 'Identifier', name: 'hello' },
-//       },
-//     ],
-//   },
-// ]);
-
-// expectType<ParseAst<`const hello = 123`>>([
-//   {
-//     type: 'VariableDeclaration',
-//     kind: 'const',
-//     declarations: [
-//       {
-//         type: 'VariableDeclarator',
-//         init: { type: 'NumericLiteral', value: '123' },
-//         id: { type: 'Identifier', name: 'hello' },
-//       },
-//     ],
 //   },
 // ]);
 

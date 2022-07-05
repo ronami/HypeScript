@@ -29,7 +29,7 @@ type TokenizeInput<
   E extends string,
   G extends boolean,
   L extends number,
-  D extends TokenData = { precedingLinebreak: G; lineNumber: L },
+  D extends TokenData<any, any> = TokenData<G, L>,
 > = F extends ','
   ? [CommaToken<D>, E]
   : F extends '('
@@ -63,7 +63,7 @@ type TokenizeInput<
 type TokenizeNumber<
   I extends string,
   A extends string,
-  G extends TokenData,
+  G extends TokenData<any, any>,
   C extends string = FirstChar<I>,
 > = C extends Numbers
   ? TokenizeNumber<EatFirstChar<I>, ConcatStrings<A, C>, G>
@@ -72,7 +72,7 @@ type TokenizeNumber<
 type TokenizeString<
   I,
   W extends '"' | "'",
-  G extends TokenData,
+  G extends TokenData<any, any>,
 > = I extends `${infer H}${W}${infer J}`
   ? StringContains<H, '\n'> extends true
     ? SyntaxError<'Unterminated string literal.', G['lineNumber']>
@@ -82,7 +82,7 @@ type TokenizeString<
 type TokenizeSymbol<
   I extends string,
   A extends string,
-  G extends TokenData,
+  G extends TokenData<any, any>,
   C extends string = FirstChar<I>,
 > = C extends Symbols
   ? TokenizeSymbol<EatFirstChar<I>, ConcatStrings<A, C>, G>
