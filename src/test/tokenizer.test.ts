@@ -1,6 +1,5 @@
 import type { Tokenize } from '../tokenizer';
-
-const expectType = <T>(value: T) => {};
+import { expectType } from './utils';
 
 expectType<Tokenize<`hello`>>([
   {
