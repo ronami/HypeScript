@@ -339,12 +339,12 @@ type ParseCallExpressionArguments<
 > = T[0] extends F
   ? [R, Tail<T>, T[0]]
   : T extends []
-  ? SyntaxError<`Parsing error: '${J}' expected.`, E>
+  ? SyntaxError<`'${J}' expected.`, E>
   : N extends true
   ? T[0] extends CommaToken<any>
     ? ParseCallExpressionArgumentsHelper<Tail<T>, E, J, F, R>
     : T[0] extends Token<TokenData<any, infer L>>
-    ? SyntaxError<"Parsing error: ',' expected.", L>
+    ? SyntaxError<"',' expected.", L>
     : never
   : ParseCallExpressionArgumentsHelper<T, E, J, F, R>;
 
@@ -465,8 +465,8 @@ type ParseObjectItem<
         ? G
         : SyntaxError<'Expression expected.', E>
       : never
-    : SyntaxError<"Parsing error: '}' expected.", E>
-  : SyntaxError<"Parsing error: '}' expected.", E>;
+    : SyntaxError<"'}' expected.", E>
+  : SyntaxError<"'}' expected.", E>;
 
 type ParseArrayExpression<
   T extends Array<Token<any>>,
