@@ -499,6 +499,66 @@ expectType<ParseAst<`hello.\nworld..foo`>>({
   lineNumber: 2,
 });
 
+expectType<ParseAst<`hello.\nworld.`>>({
+  type: 'SyntaxError',
+  message: 'Identifier expected.',
+  lineNumber: 2,
+});
+
+expectType<ParseAst<`const hello = foo.bar;`>>([
+  {
+    type: 'VariableDeclaration',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: null,
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+        init: {
+          type: 'MemberExpression',
+          object: {
+            type: 'Identifier',
+            name: 'foo',
+            typeAnnotation: null,
+            data: {
+              startLineNumber: 1,
+              endLineNumber: 1,
+            },
+          },
+          property: {
+            type: 'Identifier',
+            name: 'bar',
+            typeAnnotation: null,
+            data: {
+              startLineNumber: 1,
+              endLineNumber: 1,
+            },
+          },
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+    ],
+    kind: 'const',
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
 // expectType<ParseAst<`hello.world`>>([
 //   {
 //     type: 'ExpressionStatement',

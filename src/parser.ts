@@ -355,13 +355,6 @@ type ParseVariableDeclaration<T extends Array<Token<any>>> =
       : SyntaxError<'Variable declaration list cannot be empty.', FL>
     : null;
 
-// type ParseCallExpression<T extends Array<Token<any>>> = T[0] extends ParenToken<
-//   '(',
-//   any
-// >
-//   ? T[1]
-//   : null;
-
 type ParseMemberExpression<
   O extends Node<any>,
   T extends Array<Token<any>>,
