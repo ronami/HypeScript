@@ -41,8 +41,8 @@ import type {
   Token,
   TokenData,
 } from './tokens';
-import type { Push, Reverse, Tail, TailBy, Unshift } from './utils/arrayUtils';
-import type { Cast, IsNever } from './utils/generalUtils';
+import type { Push, Tail, TailBy } from './utils/arrayUtils';
+import type { IsNever } from './utils/generalUtils';
 
 // type Wrap<T extends [any, Array<Token<any>>]> = T[1][0] extends DotToken
 //   ? T[1][1] extends SymbolToken<infer V>
