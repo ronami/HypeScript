@@ -857,11 +857,207 @@ expectType<ParseAst<`foo(1 2`>>({
   lineNumber: 1,
 });
 
-expectType<ParseAst<`foo(\n1 2`>>({
+expectType<ParseAst<`[\n1 2`>>({
   type: 'SyntaxError',
   message: "Parsing error: ',' expected.",
   lineNumber: 2,
 });
+expectType<ParseAst<`[`>>({
+  type: 'SyntaxError',
+  message: "Parsing error: ']' expected.",
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`[1 2`>>({
+  type: 'SyntaxError',
+  message: "Parsing error: ',' expected.",
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`[\n1 2`>>({
+  type: 'SyntaxError',
+  message: "Parsing error: ',' expected.",
+  lineNumber: 2,
+});
+
+expectType<ParseAst<`[]`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'ArrayExpression',
+      elements: [],
+      data: { startLineNumber: 1, endLineNumber: 1 },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`[1]`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'ArrayExpression',
+      elements: [
+        {
+          type: 'NumericLiteral',
+          value: '1',
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+      ],
+      data: { startLineNumber: 1, endLineNumber: 1 },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`[\n1]`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'ArrayExpression',
+      elements: [
+        {
+          type: 'NumericLiteral',
+          value: '1',
+          data: {
+            startLineNumber: 2,
+            endLineNumber: 2,
+          },
+        },
+      ],
+      data: { startLineNumber: 1, endLineNumber: 2 },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 2,
+    },
+  },
+]);
+
+expectType<ParseAst<`[1, "hello"]`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'ArrayExpression',
+      elements: [
+        {
+          type: 'NumericLiteral',
+          value: '1',
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+        {
+          type: 'StringLiteral',
+          value: 'hello',
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+      ],
+      data: { startLineNumber: 1, endLineNumber: 1 },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`[1, [2]]`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'ArrayExpression',
+      elements: [
+        {
+          type: 'NumericLiteral',
+          value: '1',
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+        {
+          type: 'ArrayExpression',
+          elements: [
+            {
+              type: 'NumericLiteral',
+              value: '2',
+              data: {
+                startLineNumber: 1,
+                endLineNumber: 1,
+              },
+            },
+          ],
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+      ],
+      data: { startLineNumber: 1, endLineNumber: 1 },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`const array = [1]`>>([
+  {
+    type: 'VariableDeclaration',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        id: {
+          type: 'Identifier',
+          name: 'array',
+          typeAnnotation: null,
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+        init: {
+          type: 'ArrayExpression',
+          elements: [
+            {
+              type: 'NumericLiteral',
+              value: '1',
+              data: {
+                startLineNumber: 1,
+                endLineNumber: 1,
+              },
+            },
+          ],
+          data: { startLineNumber: 1, endLineNumber: 1 },
+        },
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+    ],
+    kind: 'const',
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
 
 // expectType<ParseAst<`hello.world`>>([
 //   {
