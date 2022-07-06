@@ -244,58 +244,6 @@ import type { IsNever } from './utils/generalUtils';
 //       : never
 //     : never;
 
-// type ParseObject<
-//   T extends Array<Token<any>>,
-//   R extends Array<any> = [],
-//   N extends boolean = false,
-//   F extends Token<any> = T[0],
-// > = F extends CurlyToken<'}'>
-//   ? [ObjectExpression<Reverse<R>>, Tail<T>]
-//   : T extends []
-//   ? never
-//   : N extends true
-//   ? F extends CommaToken
-//     ? ParseObjectItem<Tail<T>, R>
-//     : never
-//   : ParseObjectItem<T, R>;
-
-// type ParseObjectItem<
-//   T extends Array<Token<any>>,
-//   R extends Array<any> = [],
-// > = T[0] extends SymbolToken<infer K>
-//   ? T[1] extends ColonToken
-//     ? ParseExpression<Tail<Tail<T>>> extends infer G
-//       ? ParseObject<
-//           Cast<G, Array<any>>[1],
-//           Unshift<R, ObjectProperty<Identifier<K>, Cast<G, Array<any>>[0]>>,
-//           true
-//         >
-//       : never
-//     : never
-//   : never;
-
-// type ParseArray<
-//   T extends Array<Token<any>>,
-//   R extends Array<any> = [],
-//   N extends boolean = false,
-//   F extends Token<any> = T[0],
-// > = F extends BracketToken<']'>
-//   ? [ArrayExpression<Reverse<R>>, Tail<T>]
-//   : T extends []
-//   ? never
-//   : N extends true
-//   ? F extends CommaToken
-//     ? ParseArrayItem<Tail<T>, R>
-//     : never
-//   : ParseArrayItem<T, R>;
-
-// type ParseArrayItem<
-//   T extends Array<Token<any>>,
-//   R extends Array<any> = [],
-// > = ParseExpression<T> extends infer G
-//   ? ParseArray<Cast<G, Array<any>>[1], Unshift<R, Cast<G, Array<any>>[0]>, true>
-//   : never;
-
 type ExtractTokenData<
   T extends Token<any>,
   R extends Token<any> = T,
@@ -466,14 +414,65 @@ type ParseExpressionHelper<
   : T[0] extends SymbolToken<infer V, any>
   ? [Identifier<V, null, H>, G]
   : T[0] extends BracketToken<'[', TokenData<any, infer E>>
-  ? ParseArrayExpression<T, E>
+  ? ParseArrayExpression<Tail<T>, E>
+  : T[0] extends CurlyToken<'{', TokenData<any, infer E>>
+  ? ParseObject<Tail<T>, E>
   : null;
+
+// [ObjectExpression<[], NodeData<1, 1>>, []]
+
+type ParseObject<
+  T extends Array<Token<any>>,
+  E extends number,
+  R extends Array<any> = [],
+  N extends boolean = false,
+> = T[0] extends CurlyToken<'}', TokenData<any, infer L>>
+  ? [ObjectExpression<R, NodeData<E, L>>, Tail<T>]
+  : T extends []
+  ? SyntaxError<"'}' expected.", E>
+  : N extends true
+  ? T[0] extends CommaToken<any>
+    ? ParseObjectItem<Tail<T>, E, R>
+    : T[0] extends Token<TokenData<any, infer L>>
+    ? SyntaxError<"',' expected.", L>
+    : never
+  : ParseObjectItem<T, E, R>;
+
+type ParseObjectItem<
+  T extends Array<Token<any>>,
+  E extends number,
+  R extends Array<any> = [],
+> = T[0] extends SymbolToken<infer K, TokenData<any, infer L>>
+  ? T[1] extends ColonToken<any>
+    ? ParseExpression<TailBy<T, 2>> extends infer G
+      ? G extends Array<any>
+        ? G[0] extends Node<NodeData<any, infer W>>
+          ? ParseObject<
+              G[1],
+              E,
+              Push<
+                R,
+                ObjectProperty<
+                  Identifier<K, null, NodeData<L, L>>,
+                  G[0],
+                  NodeData<L, W>
+                >
+              >,
+              true
+            >
+          : never
+        : G extends Error<any, any, any>
+        ? G
+        : SyntaxError<'Expression expected.', E>
+      : never
+    : SyntaxError<"Parsing error: '}' expected.", E>
+  : SyntaxError<"Parsing error: '}' expected.", E>;
 
 type ParseArrayExpression<
   T extends Array<Token<any>>,
   E extends number,
 > = ParseCallExpressionArguments<
-  Tail<T>,
+  T,
   E,
   ']',
   BracketToken<']', any>
