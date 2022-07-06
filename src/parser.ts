@@ -379,7 +379,11 @@ type ParseCallExpression<
 > = T[0] extends ParenToken<'(', TokenData<any, infer E>>
   ? ParseCallExpressionArguments<Tail<T>, E> extends infer G
     ? G extends Array<any>
-      ? [CallExpression<O, G[0], NodeData<1, 1>>, G[1]]
+      ? O extends Node<NodeData<infer S, any>>
+        ? G[2] extends Token<TokenData<any, infer L>>
+          ? [CallExpression<O, G[0], NodeData<S, L>>, G[1]]
+          : never
+        : never
       : G
     : never
   : null;
@@ -390,7 +394,7 @@ type ParseCallExpressionArguments<
   N extends boolean = false,
   R extends Array<Node<any>> = [],
 > = T[0] extends ParenToken<')', any>
-  ? [R, Tail<T>]
+  ? [R, Tail<T>, T[0]]
   : T extends []
   ? SyntaxError<"Parsing error: ')' expected.", E>
   : N extends true
