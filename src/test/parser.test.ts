@@ -338,6 +338,167 @@ expectType<ParseAst<`const hello \n = ;`>>({
   lineNumber: 2,
 });
 
+expectType<ParseAst<`hello.`>>({
+  type: 'SyntaxError',
+  message: 'Identifier expected.',
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`hello..world`>>({
+  type: 'SyntaxError',
+  message: 'Identifier expected.',
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`\nhello."world"`>>({
+  type: 'SyntaxError',
+  message: 'Identifier expected.',
+  lineNumber: 2,
+});
+
+expectType<ParseAst<`hello.world`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'MemberExpression',
+      object: {
+        type: 'Identifier',
+        name: 'hello',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      property: {
+        type: 'Identifier',
+        name: 'world',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`hello.world.foo`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'MemberExpression',
+      object: {
+        type: 'MemberExpression',
+        object: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: null,
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+        property: {
+          type: 'Identifier',
+          name: 'world',
+          typeAnnotation: null,
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      property: {
+        type: 'Identifier',
+        name: 'foo',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`hello.\nworld.\nfoo`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'MemberExpression',
+      object: {
+        type: 'MemberExpression',
+        object: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: null,
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+        property: {
+          type: 'Identifier',
+          name: 'world',
+          typeAnnotation: null,
+          data: {
+            startLineNumber: 2,
+            endLineNumber: 2,
+          },
+        },
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 2,
+        },
+      },
+      property: {
+        type: 'Identifier',
+        name: 'foo',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 3,
+          endLineNumber: 3,
+        },
+      },
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 3,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 3,
+    },
+  },
+]);
+
+expectType<ParseAst<`hello.\nworld..foo`>>({
+  type: 'SyntaxError',
+  message: 'Identifier expected.',
+  lineNumber: 2,
+});
+
 // expectType<ParseAst<`hello.world`>>([
 //   {
 //     type: 'ExpressionStatement',
