@@ -373,6 +373,44 @@ type ParseMemberExpression<
     : SyntaxError<'Identifier expected.', E>
   : null;
 
+type ParseCallExpression<
+  O extends Node<any>,
+  T extends Array<Token<any>>,
+> = T[0] extends ParenToken<'(', TokenData<any, infer E>>
+  ? ParseCallExpressionArguments<Tail<T>, E> extends infer G
+    ? G extends Array<any>
+      ? [CallExpression<O, G[0], NodeData<1, 1>>, G[1]]
+      : G
+    : never
+  : null;
+
+type ParseCallExpressionArguments<
+  T extends Array<Token<any>>,
+  E extends number,
+  N extends boolean = false,
+  R extends Array<Node<any>> = [],
+> = T[0] extends ParenToken<')', any>
+  ? [R, Tail<T>]
+  : T extends []
+  ? SyntaxError<"Parsing error: ')' expected.", E>
+  : N extends true
+  ? T[0] extends CommaToken<any>
+    ? ParseCallExpressionArgumentsHelper<Tail<T>, E, R>
+    : T[0] extends Token<TokenData<any, infer L>>
+    ? SyntaxError<"Parsing error: ',' expected.", L>
+    : never
+  : ParseCallExpressionArgumentsHelper<T, E, R>;
+
+type ParseCallExpressionArgumentsHelper<
+  T extends Array<Token<any>>,
+  E extends number,
+  R extends Array<any> = [],
+> = ParseExpression<T> extends infer G
+  ? G extends Array<any>
+    ? ParseCallExpressionArguments<G[1], E, true, Push<R, G[0]>>
+    : G
+  : never;
+
 // T[1][0] extends DotToken
 // ? T[1][1] extends SymbolToken<infer V>
 //   ? Wrap<[MemberExpression<T[0], Identifier<V>>, Tail<Tail<T[1]>>]>
@@ -397,7 +435,17 @@ type CheckExpression<
       : never
     : G extends Error<any, any, any>
     ? G
-    : [O, T]
+    : ParseCallExpression<O, T> extends infer G
+    ? G extends [infer O, infer T]
+      ? O extends Node<any>
+        ? T extends Array<Token<any>>
+          ? CheckExpression<O, T>
+          : never
+        : never
+      : G extends Error<any, any, any>
+      ? G
+      : [O, T]
+    : never
   : never;
 
 type ParseExpression<
