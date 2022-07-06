@@ -411,18 +411,6 @@ type ParseCallExpressionArgumentsHelper<
     : G
   : never;
 
-// T[1][0] extends DotToken
-// ? T[1][1] extends SymbolToken<infer V>
-//   ? Wrap<[MemberExpression<T[0], Identifier<V>>, Tail<Tail<T[1]>>]>
-//   : T
-// : T[1][0] extends ParenToken<'('>
-// ? ParseFunctionArguments<Tail<T[1]>> extends infer G
-//   ? Wrap<
-//       [CallExpression<T[0], Cast<G, Array<any>>[0]>, Cast<G, Array<any>>[1]]
-//     >
-//   : never
-// : T;
-
 type CheckExpression<
   O extends Node<any>,
   T extends Array<Token<any>>,
@@ -484,9 +472,7 @@ type ParseExpressionStatement<T extends Array<Token<any>>> =
       ? G[0] extends Node<infer D>
         ? [ExpressionStatement<G[0], D>, G[1]]
         : never
-      : G extends Error<any, any, any>
-      ? G
-      : null
+      : G
     : never;
 
 type ParseTopLevel<
