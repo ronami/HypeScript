@@ -44,18 +44,6 @@ import type {
 import type { Push, Tail, TailBy } from './utils/arrayUtils';
 import type { IsNever } from './utils/generalUtils';
 
-// type Wrap<T extends [any, Array<Token<any>>]> = T[1][0] extends DotToken
-//   ? T[1][1] extends SymbolToken<infer V>
-//     ? Wrap<[MemberExpression<T[0], Identifier<V>>, Tail<Tail<T[1]>>]>
-//     : T
-//   : T[1][0] extends ParenToken<'('>
-//   ? ParseFunctionArguments<Tail<T[1]>> extends infer G
-//     ? Wrap<
-//         [CallExpression<T[0], Cast<G, Array<any>>[0]>, Cast<G, Array<any>>[1]]
-//       >
-//     : never
-//   : T;
-
 // type DoParseExpression<
 //   T extends Array<Token<any>>,
 //   F = T[0],
