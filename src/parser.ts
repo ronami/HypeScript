@@ -365,7 +365,12 @@ type ParseCallExpression<
   O extends Node<any>,
   T extends Array<Token<any>>,
 > = T[0] extends ParenToken<'(', TokenData<any, infer E>>
-  ? ParseCallExpressionArguments<Tail<T>, E> extends infer G
+  ? ParseCallExpressionArguments<
+      Tail<T>,
+      E,
+      ')',
+      ParenToken<')', any>
+    > extends infer G
     ? G extends Array<any>
       ? O extends Node<NodeData<infer S, any>>
         ? G[2] extends Token<TokenData<any, infer L>>
@@ -379,27 +384,31 @@ type ParseCallExpression<
 type ParseCallExpressionArguments<
   T extends Array<Token<any>>,
   E extends number,
+  J extends string,
+  F extends Token<any>,
   N extends boolean = false,
   R extends Array<Node<any>> = [],
-> = T[0] extends ParenToken<')', any>
+> = T[0] extends F
   ? [R, Tail<T>, T[0]]
   : T extends []
-  ? SyntaxError<"Parsing error: ')' expected.", E>
+  ? SyntaxError<`Parsing error: '${J}' expected.`, E>
   : N extends true
   ? T[0] extends CommaToken<any>
-    ? ParseCallExpressionArgumentsHelper<Tail<T>, E, R>
+    ? ParseCallExpressionArgumentsHelper<Tail<T>, E, J, F, R>
     : T[0] extends Token<TokenData<any, infer L>>
     ? SyntaxError<"Parsing error: ',' expected.", L>
     : never
-  : ParseCallExpressionArgumentsHelper<T, E, R>;
+  : ParseCallExpressionArgumentsHelper<T, E, J, F, R>;
 
 type ParseCallExpressionArgumentsHelper<
   T extends Array<Token<any>>,
   E extends number,
+  J extends string,
+  F extends Token<any>,
   R extends Array<any> = [],
 > = ParseExpression<T> extends infer G
   ? G extends Array<any>
-    ? ParseCallExpressionArguments<G[1], E, true, Push<R, G[0]>>
+    ? ParseCallExpressionArguments<G[1], E, J, F, true, Push<R, G[0]>>
     : G
   : never;
 
@@ -432,13 +441,13 @@ type ParseExpression<
   T extends Array<Token<any>>,
   H extends NodeData<any, any> = ExtractTokenData<T[0]>,
   G extends Array<Token<any>> = Tail<T>,
-> = ParseExpressionHelper<T, H, G> extends [infer O, infer T]
-  ? O extends Node<any>
-    ? T extends Array<Token<any>>
-      ? CheckExpression<O, T>
-      : never
-    : never
-  : null;
+> = ParseExpressionHelper<T, H, G> extends infer P
+  ? P extends Array<any>
+    ? CheckExpression<P[0], P[1]>
+    : P extends Error<any, any, any>
+    ? P
+    : null
+  : never;
 
 type ParseExpressionHelper<
   T extends Array<Token<any>>,
@@ -456,7 +465,25 @@ type ParseExpressionHelper<
   ? [StringLiteral<V, H>, G]
   : T[0] extends SymbolToken<infer V, any>
   ? [Identifier<V, null, H>, G]
+  : T[0] extends BracketToken<'[', TokenData<any, infer E>>
+  ? ParseArrayExpression<T, E>
   : null;
+
+type ParseArrayExpression<
+  T extends Array<Token<any>>,
+  E extends number,
+> = ParseCallExpressionArguments<
+  Tail<T>,
+  E,
+  ']',
+  BracketToken<']', any>
+> extends infer A
+  ? A extends Array<any>
+    ? A[2] extends Token<TokenData<any, infer L>>
+      ? [ArrayExpression<A[0], NodeData<E, L>>, A[1]]
+      : never
+    : A
+  : never;
 
 type ParseExpressionStatement<T extends Array<Token<any>>> =
   ParseExpression<T> extends infer G
