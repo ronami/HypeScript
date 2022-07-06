@@ -847,36 +847,36 @@ expectType<ParseAst<`hello.world(foo(1))`>>([
 
 expectType<ParseAst<`foo(`>>({
   type: 'SyntaxError',
-  message: "Parsing error: ')' expected.",
+  message: "')' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`foo(1 2`>>({
   type: 'SyntaxError',
-  message: "Parsing error: ',' expected.",
+  message: "',' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`[\n1 2`>>({
   type: 'SyntaxError',
-  message: "Parsing error: ',' expected.",
+  message: "',' expected.",
   lineNumber: 2,
 });
 expectType<ParseAst<`[`>>({
   type: 'SyntaxError',
-  message: "Parsing error: ']' expected.",
+  message: "']' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`[1 2`>>({
   type: 'SyntaxError',
-  message: "Parsing error: ',' expected.",
+  message: "',' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`[\n1 2`>>({
   type: 'SyntaxError',
-  message: "Parsing error: ',' expected.",
+  message: "',' expected.",
   lineNumber: 2,
 });
 
@@ -1067,19 +1067,19 @@ expectType<ParseAst<`{`>>({
 
 expectType<ParseAst<`{ hello`>>({
   type: 'SyntaxError',
-  message: "Parsing error: '}' expected.",
+  message: "'}' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`{hello world`>>({
   type: 'SyntaxError',
-  message: "Parsing error: '}' expected.",
+  message: "'}' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`{\n1 2`>>({
   type: 'SyntaxError',
-  message: "Parsing error: '}' expected.",
+  message: "'}' expected.",
   lineNumber: 1,
 });
 
