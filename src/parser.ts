@@ -42,7 +42,6 @@ import type {
   TokenData,
 } from './tokens';
 import type { Push, Tail, TailBy } from './utils/arrayUtils';
-import type { IsNever } from './utils/generalUtils';
 
 // type DoParseExpression<
 //   T extends Array<Token<any>>,
@@ -418,8 +417,6 @@ type ParseExpressionHelper<
   : T[0] extends CurlyToken<'{', TokenData<any, infer E>>
   ? ParseObject<Tail<T>, E>
   : null;
-
-// [ObjectExpression<[], NodeData<1, 1>>, []]
 
 type ParseObject<
   T extends Array<Token<any>>,
