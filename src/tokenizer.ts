@@ -7,18 +7,12 @@ import type {
 } from './utils/stringUtils';
 import type { Numbers, Symbols } from './utils/generalUtils';
 import type {
-  CurlyToken,
-  ParenToken,
-  DotToken,
-  SemicolonToken,
-  ColonToken,
   Token,
   NumberToken,
   SymbolToken,
   StringToken,
-  BracketToken,
-  CommaToken,
   TokenData,
+  GenericToken,
 } from './tokens';
 import type { SyntaxError } from './errors';
 import type { Succ } from './utils/math';
@@ -31,25 +25,25 @@ type TokenizeInput<
   L extends number,
   D extends TokenData<any, any> = TokenData<G, L>,
 > = F extends ','
-  ? [CommaToken<D>, E]
+  ? [GenericToken<',', D>, E]
   : F extends '('
-  ? [ParenToken<'(', D>, E]
+  ? [GenericToken<'(', D>, E]
   : F extends ')'
-  ? [ParenToken<')', D>, E]
+  ? [GenericToken<')', D>, E]
   : F extends '['
-  ? [BracketToken<'[', D>, E]
+  ? [GenericToken<'[', D>, E]
   : F extends ']'
-  ? [BracketToken<']', D>, E]
+  ? [GenericToken<']', D>, E]
   : F extends '{'
-  ? [CurlyToken<'{', D>, E]
+  ? [GenericToken<'{', D>, E]
   : F extends '}'
-  ? [CurlyToken<'}', D>, E]
+  ? [GenericToken<'}', D>, E]
   : F extends '.'
-  ? [DotToken<D>, E]
+  ? [GenericToken<'.', D>, E]
   : F extends ';'
-  ? [SemicolonToken<D>, E]
+  ? [GenericToken<';', D>, E]
   : F extends ':'
-  ? [ColonToken<D>, E]
+  ? [GenericToken<':', D>, E]
   : F extends Numbers
   ? TokenizeNumber<I, '', D, F>
   : F extends '"'

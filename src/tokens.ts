@@ -3,36 +3,9 @@ export type TokenData<P extends boolean, L extends number> = {
   lineNumber: L;
 };
 
-export type ParenToken<V extends string, D extends TokenData<any, any>> = {
-  type: 'paren';
+export type GenericToken<V extends string, D extends TokenData<any, any>> = {
+  type: 'generic';
   value: V;
-  data: D;
-};
-
-export type BracketToken<V extends string, D extends TokenData<any, any>> = {
-  type: 'bracket';
-  value: V;
-  data: D;
-};
-
-export type CurlyToken<V extends string, D extends TokenData<any, any>> = {
-  type: 'curly';
-  value: V;
-  data: D;
-};
-
-export type DotToken<D extends TokenData<any, any>> = {
-  type: 'dot';
-  data: D;
-};
-
-export type SemicolonToken<D extends TokenData<any, any>> = {
-  type: 'semicolon';
-  data: D;
-};
-
-export type ColonToken<D extends TokenData<any, any>> = {
-  type: 'colon';
   data: D;
 };
 
@@ -54,19 +27,8 @@ export type SymbolToken<V extends string, D extends TokenData<any, any>> = {
   data: D;
 };
 
-export type CommaToken<D extends TokenData<any, any>> = {
-  type: 'comma';
-  data: D;
-};
-
 export type Token<D extends TokenData<any, any>, V extends string = string> =
+  | GenericToken<V, D>
   | NumberToken<V, D>
-  | BracketToken<V, D>
   | StringToken<V, D>
-  | SymbolToken<V, D>
-  | ParenToken<V, D>
-  | CurlyToken<V, D>
-  | DotToken<D>
-  | SemicolonToken<D>
-  | ColonToken<D>
-  | CommaToken<D>;
+  | SymbolToken<V, D>;
