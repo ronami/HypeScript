@@ -28,14 +28,8 @@ import type {
 } from './ast';
 import type { Error, SyntaxError } from './errors';
 import type {
-  BracketToken,
-  ColonToken,
-  CommaToken,
-  CurlyToken,
-  DotToken,
+  GenericToken,
   NumberToken,
-  ParenToken,
-  SemicolonToken,
   StringToken,
   SymbolToken,
   Token,
@@ -293,7 +287,7 @@ type ParseVariableDeclaration<T extends Array<Token<any>>> =
 type ParseMemberExpression<
   O extends Node<any>,
   T extends Array<Token<any>>,
-> = T[0] extends DotToken<TokenData<any, infer E>>
+> = T[0] extends GenericToken<'.', TokenData<any, infer E>>
   ? T[1] extends SymbolToken<infer N, TokenData<any, infer L>>
     ? O extends Node<NodeData<infer S, infer E>>
       ? [
@@ -311,13 +305,8 @@ type ParseMemberExpression<
 type ParseCallExpression<
   O extends Node<any>,
   T extends Array<Token<any>>,
-> = T[0] extends ParenToken<'(', TokenData<any, infer E>>
-  ? ParseCallExpressionArguments<
-      Tail<T>,
-      E,
-      ')',
-      ParenToken<')', any>
-    > extends infer G
+> = T[0] extends GenericToken<'(', TokenData<any, infer E>>
+  ? ParseCallExpressionArguments<Tail<T>, E, ')'> extends infer G
     ? G extends Array<any>
       ? O extends Node<NodeData<infer S, any>>
         ? G[2] extends Token<TokenData<any, infer L>>
@@ -332,30 +321,28 @@ type ParseCallExpressionArguments<
   T extends Array<Token<any>>,
   E extends number,
   J extends string,
-  F extends Token<any>,
   N extends boolean = false,
   R extends Array<Node<any>> = [],
-> = T[0] extends F
+> = T[0] extends GenericToken<J, any>
   ? [R, Tail<T>, T[0]]
   : T extends []
   ? SyntaxError<`'${J}' expected.`, E>
   : N extends true
-  ? T[0] extends CommaToken<any>
-    ? ParseCallExpressionArgumentsHelper<Tail<T>, E, J, F, R>
+  ? T[0] extends GenericToken<',', any>
+    ? ParseCallExpressionArgumentsHelper<Tail<T>, E, J, R>
     : T[0] extends Token<TokenData<any, infer L>>
     ? SyntaxError<"',' expected.", L>
     : never
-  : ParseCallExpressionArgumentsHelper<T, E, J, F, R>;
+  : ParseCallExpressionArgumentsHelper<T, E, J, R>;
 
 type ParseCallExpressionArgumentsHelper<
   T extends Array<Token<any>>,
   E extends number,
   J extends string,
-  F extends Token<any>,
   R extends Array<any> = [],
 > = ParseExpression<T> extends infer G
   ? G extends Array<any>
-    ? ParseCallExpressionArguments<G[1], E, J, F, true, Push<R, G[0]>>
+    ? ParseCallExpressionArguments<G[1], E, J, true, Push<R, G[0]>>
     : G
   : never;
 
@@ -412,9 +399,9 @@ type ParseExpressionHelper<
   ? [StringLiteral<V, H>, G]
   : T[0] extends SymbolToken<infer V, any>
   ? [Identifier<V, null, H>, G]
-  : T[0] extends BracketToken<'[', TokenData<any, infer E>>
+  : T[0] extends GenericToken<'[', TokenData<any, infer E>>
   ? ParseArrayExpression<Tail<T>, E>
-  : T[0] extends CurlyToken<'{', TokenData<any, infer E>>
+  : T[0] extends GenericToken<'{', TokenData<any, infer E>>
   ? ParseObject<Tail<T>, E>
   : null;
 
@@ -423,12 +410,12 @@ type ParseObject<
   E extends number,
   R extends Array<any> = [],
   N extends boolean = false,
-> = T[0] extends CurlyToken<'}', TokenData<any, infer L>>
+> = T[0] extends GenericToken<'}', TokenData<any, infer L>>
   ? [ObjectExpression<R, NodeData<E, L>>, Tail<T>]
   : T extends []
   ? SyntaxError<"'}' expected.", E>
   : N extends true
-  ? T[0] extends CommaToken<any>
+  ? T[0] extends GenericToken<',', any>
     ? ParseObjectItem<Tail<T>, E, R>
     : T[0] extends Token<TokenData<any, infer L>>
     ? SyntaxError<"',' expected.", L>
@@ -440,7 +427,7 @@ type ParseObjectItem<
   E extends number,
   R extends Array<any> = [],
 > = T[0] extends SymbolToken<infer K, TokenData<any, infer L>>
-  ? T[1] extends ColonToken<any>
+  ? T[1] extends GenericToken<':', any>
     ? ParseExpression<TailBy<T, 2>> extends infer G
       ? G extends Array<any>
         ? G[0] extends Node<NodeData<any, infer W>>
@@ -468,12 +455,7 @@ type ParseObjectItem<
 type ParseArrayExpression<
   T extends Array<Token<any>>,
   E extends number,
-> = ParseCallExpressionArguments<
-  T,
-  E,
-  ']',
-  BracketToken<']', any>
-> extends infer A
+> = ParseCallExpressionArguments<T, E, ']'> extends infer A
   ? A extends Array<any>
     ? A[2] extends Token<TokenData<any, infer L>>
       ? [ArrayExpression<A[0], NodeData<E, L>>, A[1]]
@@ -496,7 +478,7 @@ type ParseTopLevel<
   N extends boolean,
 > = T extends []
   ? R
-  : T[0] extends SemicolonToken<any>
+  : T[0] extends GenericToken<';', any>
   ? ParseTopLevel<Tail<T>, R, false>
   : N extends false
   ? ParseTopLevelHelper<T, R>

@@ -196,7 +196,7 @@ expectType<Tokenize<`123`>>([
 
 expectType<Tokenize<`[1, 2, 3]`>>([
   {
-    type: 'bracket',
+    type: 'generic',
     value: '[',
     data: {
       precedingLinebreak: false,
@@ -212,7 +212,8 @@ expectType<Tokenize<`[1, 2, 3]`>>([
     },
   },
   {
-    type: 'comma',
+    type: 'generic',
+    value: ',',
     data: {
       precedingLinebreak: false,
       lineNumber: 1,
@@ -227,7 +228,8 @@ expectType<Tokenize<`[1, 2, 3]`>>([
     },
   },
   {
-    type: 'comma',
+    type: 'generic',
+    value: ',',
     data: {
       precedingLinebreak: false,
       lineNumber: 1,
@@ -242,7 +244,7 @@ expectType<Tokenize<`[1, 2, 3]`>>([
     },
   },
   {
-    type: 'bracket',
+    type: 'generic',
     value: ']',
     data: {
       precedingLinebreak: false,
@@ -261,7 +263,7 @@ expectType<Tokenize<`foo()`>>([
     },
   },
   {
-    type: 'paren',
+    type: 'generic',
     value: '(',
     data: {
       precedingLinebreak: false,
@@ -269,7 +271,7 @@ expectType<Tokenize<`foo()`>>([
     },
   },
   {
-    type: 'paren',
+    type: 'generic',
     value: ')',
     data: {
       precedingLinebreak: false,
@@ -288,7 +290,7 @@ expectType<Tokenize<`"foo"()`>>([
     },
   },
   {
-    type: 'paren',
+    type: 'generic',
     value: '(',
     data: {
       precedingLinebreak: false,
@@ -296,7 +298,7 @@ expectType<Tokenize<`"foo"()`>>([
     },
   },
   {
-    type: 'paren',
+    type: 'generic',
     value: ')',
     data: {
       precedingLinebreak: false,
@@ -315,7 +317,7 @@ expectType<Tokenize<`"foo"\n()`>>([
     },
   },
   {
-    type: 'paren',
+    type: 'generic',
     value: '(',
     data: {
       precedingLinebreak: true,
@@ -323,7 +325,7 @@ expectType<Tokenize<`"foo"\n()`>>([
     },
   },
   {
-    type: 'paren',
+    type: 'generic',
     value: ')',
     data: {
       precedingLinebreak: false,
@@ -342,7 +344,7 @@ expectType<Tokenize<`"foo"(\n)`>>([
     },
   },
   {
-    type: 'paren',
+    type: 'generic',
     value: '(',
     data: {
       precedingLinebreak: false,
@@ -350,7 +352,7 @@ expectType<Tokenize<`"foo"(\n)`>>([
     },
   },
   {
-    type: 'paren',
+    type: 'generic',
     value: ')',
     data: {
       precedingLinebreak: true,
