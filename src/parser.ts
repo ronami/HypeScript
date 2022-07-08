@@ -412,8 +412,8 @@ type ParseExpressionStatement<T extends Array<Token<any>>> =
     : never;
 
 type ParseFunctionDeclaration<T extends Array<Token<any>>> =
-  T[0] extends SymbolToken<'function', any>
-    ? T[1] extends SymbolToken<infer N, any>
+  T[0] extends SymbolToken<'function', TokenData<any, infer L>>
+    ? T[1] extends SymbolToken<infer N, TokenData<any, infer O>>
       ? T[2] extends GenericToken<'(', any>
         ? ParseFunctionParams<TailBy<T, 3>> extends infer G
           ? G extends Array<any>
@@ -430,26 +430,26 @@ type ParseFunctionDeclaration<T extends Array<Token<any>>> =
                   ]
                 : never
               : never
-            : never
+            : G
           : never
-        : never
-      : never
+        : SyntaxError<"'(' expected.", O>
+      : SyntaxError<'Identifier expected.', L>
     : null;
 
 type ParseFunctionParams<
   T extends Array<Token<any>>,
   R extends Array<any> = [],
   N extends boolean = false,
-> = T[0] extends GenericToken<')', any>
+> = T[0] extends GenericToken<')', TokenData<any, infer L>>
   ? T[1] extends GenericToken<'{', any>
     ? [R, TailBy<T, 2>]
-    : never
+    : SyntaxError<"'{' expected.", L>
   : T extends []
-  ? never
+  ? SyntaxError<"')' expected.", 1>
   : N extends true
   ? T[0] extends GenericToken<',', any>
     ? ParseFunctionParamsHelper<Tail<T>, R>
-    : never
+    : SyntaxError<"',' expected.", 1>
   : ParseFunctionParamsHelper<T, R>;
 
 type ParseFunctionParamsHelper<
@@ -461,7 +461,7 @@ type ParseFunctionParamsHelper<
       Push<R, Identifier<V, null, NodeData<1, 1>>>,
       true
     >
-  : never;
+  : SyntaxError<'Identifier expected.', 1>;
 
 type ParseTopLevel<
   T extends Array<Token<any>>,
