@@ -1890,3 +1890,245 @@ expectType<ParseAst<`function foo(a, b) {}; foo()`>>([
     },
   },
 ]);
+
+expectType<ParseAst<`if (a) {}`>>([
+  {
+    type: 'IfStatement',
+    test: {
+      type: 'Identifier',
+      name: 'a',
+      typeAnnotation: null,
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    consequent: {
+      type: 'BlockStatement',
+      body: [],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`if (foo()) {}`>>([
+  {
+    type: 'IfStatement',
+    test: {
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'foo',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      arguments: [],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    consequent: {
+      type: 'BlockStatement',
+      body: [],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`if (foo()) { bar(); }`>>([
+  {
+    type: 'IfStatement',
+    test: {
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'foo',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      arguments: [],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    consequent: {
+      type: 'BlockStatement',
+      body: [
+        {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'CallExpression',
+            callee: {
+              type: 'Identifier',
+              name: 'bar',
+              typeAnnotation: null,
+              data: {
+                startLineNumber: 1,
+                endLineNumber: 1,
+              },
+            },
+            arguments: [],
+            data: {
+              startLineNumber: 1,
+              endLineNumber: 1,
+            },
+          },
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+      ],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`if (foo()) { bar(); } bazz()`>>([
+  {
+    type: 'IfStatement',
+    test: {
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'foo',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      arguments: [],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    consequent: {
+      type: 'BlockStatement',
+      body: [
+        {
+          type: 'ExpressionStatement',
+          expression: {
+            type: 'CallExpression',
+            callee: {
+              type: 'Identifier',
+              name: 'bar',
+              typeAnnotation: null,
+              data: {
+                startLineNumber: 1,
+                endLineNumber: 1,
+              },
+            },
+            arguments: [],
+            data: {
+              startLineNumber: 1,
+              endLineNumber: 1,
+            },
+          },
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+      ],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'bazz',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      arguments: [],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`if`>>({
+  type: 'SyntaxError',
+  message: "'(' expected.",
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`if (`>>({
+  type: 'SyntaxError',
+  message: 'Expression expected.',
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`if ("foo"`>>({
+  type: 'SyntaxError',
+  message: "')' expected.",
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`if (123)`>>({
+  type: 'SyntaxError',
+  message: "'{' expected.",
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`if (true) {`>>({
+  type: 'SyntaxError',
+  message: "'}' expected.",
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`if () {`>>({
+  type: 'SyntaxError',
+  message: 'Expression expected.',
+  lineNumber: 1,
+});
