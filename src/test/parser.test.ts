@@ -1742,3 +1742,9 @@ expectType<ParseAst<`function foo(a b) {}`>>({
   message: "',' expected.",
   lineNumber: 1,
 });
+
+expectType<ParseAst<`}`>>({
+  type: 'SyntaxError',
+  message: 'Declaration or statement expected.',
+  lineNumber: 1,
+});

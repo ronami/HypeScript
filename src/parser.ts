@@ -512,7 +512,11 @@ type ParseTopLevelHelper<T extends Array<Token<any>>> =
     ? P extends null
       ? ParseVariableDeclaration<T> extends infer P
         ? P extends null
-          ? ParseExpressionStatement<T>
+          ? ParseExpressionStatement<T> extends infer P
+            ? P extends null
+              ? SyntaxError<'Declaration or statement expected.', 1>
+              : P
+            : P
           : P
         : P
       : P
