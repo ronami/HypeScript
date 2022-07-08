@@ -511,23 +511,29 @@ type ParseTopLevelHelper<
   R extends Array<Node<any>>,
 > = ParseStatementHelper<T> extends infer G
   ? G extends Array<any>
-    ? ParseTopLevel<G[1], Push<R, G[0]>, true>
+    ? ParseTopLevel<G[1], Push<R, G[0]>, G[2]>
     : G
   : never;
 
 type ParseStatementHelper<T extends Array<Token<any>>> =
   ParseFunctionDeclaration<T> extends infer P
-    ? P extends null
-      ? ParseVariableDeclaration<T> extends infer P
-        ? P extends null
-          ? ParseExpressionStatement<T> extends infer P
-            ? P extends null
-              ? SyntaxError<'Declaration or statement expected.', 1>
-              : P
-            : P
-          : P
-        : P
-      : P
+    ? P extends Array<any>
+      ? [...P, false]
+      : P extends Error<any, any, any>
+      ? P
+      : ParseVariableDeclaration<T> extends infer P
+      ? P extends Array<any>
+        ? [...P, true]
+        : P extends Error<any, any, any>
+        ? P
+        : ParseExpressionStatement<T> extends infer P
+        ? P extends Array<any>
+          ? [...P, true]
+          : P extends Error<any, any, any>
+          ? P
+          : SyntaxError<'Declaration or statement expected.', 1>
+        : never
+      : never
     : never;
 
 export type Parse<T extends Array<Token<any>>> = ParseTopLevel<T>;
