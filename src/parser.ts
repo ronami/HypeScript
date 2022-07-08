@@ -128,52 +128,6 @@ import type { Push, Tail, TailBy } from './utils/arrayUtils';
 //     >
 //   : never;
 
-// type ParseFunctionDeclaration<T extends Array<Token<any>>> =
-//   T[0] extends SymbolToken<infer I>
-//     ? T[1] extends ParenToken<'('>
-//       ? ParseFunctionParams<Tail<Tail<T>>> extends infer G
-//         ? ParseBlockStatement<Cast<G, Array<any>>[1]> extends infer H
-//           ? [
-//               FunctionDeclaration<
-//                 Identifier<I>,
-//                 Cast<G, Array<any>>[0],
-//                 Cast<H, Array<any>>[0]
-//               >,
-//               Cast<H, Array<any>>[1],
-//             ]
-//           : never
-//         : never
-//       : never
-//     : never;
-
-// type ParseBlockStatement<
-//   T extends Array<Token<any>>,
-//   R extends Array<any> = [],
-// > = T[0] extends CurlyToken<'}'>
-//   ? [BlockStatement<Reverse<R>>, Tail<T>]
-//   : ParseFunctionStatement<T> extends infer F
-//   ? ParseBlockStatement<
-//       Cast<F, Array<any>>[1],
-//       Unshift<R, Cast<F, Array<any>>[0]>
-//     >
-//   : never;
-
-// type ParseFunctionParams<
-//   T extends Array<Token<any>>,
-//   R extends Array<any> = [],
-//   N extends boolean = false,
-// > = T[0] extends ParenToken<')'>
-//   ? T[1] extends CurlyToken<'{'>
-//     ? [Reverse<R>, Tail<Tail<T>>]
-//     : never
-//   : T extends []
-//   ? never
-//   : N extends true
-//   ? T[0] extends CommaToken
-//     ? ParseFunctionParamsItem<Tail<T>, R>
-//     : never
-//   : ParseFunctionParamsItem<T, R>;
-
 // type ParseTypeAnnotation<T extends Array<Token<any>>> =
 //   T[0] extends SymbolToken<'string'>
 //     ? [TypeAnnotation<StringTypeAnnotation>, Tail<T>]
@@ -188,21 +142,6 @@ import type { Push, Tail, TailBy } from './utils/arrayUtils';
 //     : T[0] extends SymbolToken<infer E>
 //     ? [TypeAnnotation<GenericTypeAnnotation<E>>, Tail<T>]
 //     : never;
-
-// type ParseFunctionParamsItem<
-//   T extends Array<Token<any>>,
-//   R extends Array<any> = [],
-// > = T[0] extends SymbolToken<infer V>
-//   ? T[1] extends ColonToken
-//     ? ParseTypeAnnotation<Tail<Tail<T>>> extends infer G
-//       ? ParseFunctionParams<
-//           Cast<G, Array<any>>[1],
-//           Unshift<R, Identifier<V, Cast<G, Array<any>>[0]>>,
-//           true
-//         >
-//       : never
-//     : ParseFunctionParams<Tail<T>, Unshift<R, Identifier<V>>, true>
-//   : never;
 
 // type ParseVariableDeclarationHelper<
 //   T extends Array<Token<any>>,
@@ -472,6 +411,58 @@ type ParseExpressionStatement<T extends Array<Token<any>>> =
       : G
     : never;
 
+type ParseFunctionDeclaration<T extends Array<Token<any>>> =
+  T[0] extends SymbolToken<'function', any>
+    ? T[1] extends SymbolToken<infer N, any>
+      ? T[2] extends GenericToken<'(', any>
+        ? ParseFunctionParams<TailBy<T, 3>> extends infer G
+          ? G extends Array<any>
+            ? [[], []] extends infer H
+              ? H extends Array<any>
+                ? [
+                    FunctionDeclaration<
+                      Identifier<N, null, NodeData<1, 1>>,
+                      G[0],
+                      H[0],
+                      NodeData<1, 1>
+                    >,
+                    H[1],
+                  ]
+                : never
+              : never
+            : never
+          : never
+        : never
+      : never
+    : null;
+
+type ParseFunctionParams<
+  T extends Array<Token<any>>,
+  R extends Array<any> = [],
+  N extends boolean = false,
+> = T[0] extends GenericToken<')', any>
+  ? T[1] extends GenericToken<'{', any>
+    ? [R, TailBy<T, 2>]
+    : never
+  : T extends []
+  ? never
+  : N extends true
+  ? T[0] extends GenericToken<',', any>
+    ? ParseFunctionParamsHelper<Tail<T>, R>
+    : never
+  : ParseFunctionParamsHelper<T, R>;
+
+type ParseFunctionParamsHelper<
+  T extends Array<Token<any>>,
+  R extends Array<any> = [],
+> = T[0] extends SymbolToken<infer V, any>
+  ? ParseFunctionParams<
+      Tail<T>,
+      Push<R, Identifier<V, null, NodeData<1, 1>>>,
+      true
+    >
+  : never;
+
 type ParseTopLevel<
   T extends Array<Token<any>>,
   R extends Array<Node<any>>,
@@ -491,16 +482,22 @@ type ParseTopLevel<
 type ParseTopLevelHelper<
   T extends Array<Token<any>>,
   R extends Array<Node<any>>,
-> = ParseVariableDeclaration<T> extends infer P
+> = ParseFunctionDeclaration<T> extends infer P
   ? P extends Array<any>
-    ? ParseTopLevel<P[1], Push<R, P[0]>, true>
+    ? ParseTopLevel<P[1], Push<R, P[0]>, false>
     : P extends Error<any, any, any>
     ? P
-    : ParseExpressionStatement<T> extends infer P
+    : ParseVariableDeclaration<T> extends infer P
     ? P extends Array<any>
       ? ParseTopLevel<P[1], Push<R, P[0]>, true>
       : P extends Error<any, any, any>
       ? P
+      : ParseExpressionStatement<T> extends infer P
+      ? P extends Array<any>
+        ? ParseTopLevel<P[1], Push<R, P[0]>, true>
+        : P extends Error<any, any, any>
+        ? P
+        : never
       : never
     : never
   : never;
