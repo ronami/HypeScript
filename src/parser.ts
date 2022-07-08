@@ -474,10 +474,10 @@ type ParseBlockStatement<
   : T[0] extends GenericToken<';', any>
   ? ParseBlockStatement<Tail<T>, R, false>
   : N extends false
-  ? ParseBlockStatementHelper<ParseStatementHelper<T>, R>
+  ? ParseBlockStatementHelper<T, R>
   : T[0] extends Token<TokenData<infer P, infer L>>
   ? P extends true
-    ? ParseBlockStatementHelper<ParseStatementHelper<T>, R>
+    ? ParseBlockStatementHelper<T, R>
     : SyntaxError<"';' expected.", L>
   : never;
 
@@ -490,21 +490,30 @@ type ParseTopLevel<
   : T[0] extends GenericToken<';', any>
   ? ParseTopLevel<Tail<T>, R, false>
   : N extends false
-  ? ParseTopLevelHelper<ParseStatementHelper<T>, R>
+  ? ParseTopLevelHelper<T, R>
   : T[0] extends Token<TokenData<infer P, infer L>>
   ? P extends true
-    ? ParseTopLevelHelper<ParseStatementHelper<T>, R>
+    ? ParseTopLevelHelper<T, R>
     : SyntaxError<"';' expected.", L>
   : never;
 
 type ParseBlockStatementHelper<
-  T,
+  T extends Array<Token<any>>,
   R extends Array<Node<any>>,
-> = T extends Array<any> ? ParseBlockStatement<T[1], Push<R, T[0]>, true> : T;
+> = ParseStatementHelper<T> extends infer G
+  ? G extends Array<any>
+    ? ParseBlockStatement<G[1], Push<R, G[0]>, true>
+    : G
+  : never;
 
-type ParseTopLevelHelper<T, R extends Array<Node<any>>> = T extends Array<any>
-  ? ParseTopLevel<T[1], Push<R, T[0]>, true>
-  : T;
+type ParseTopLevelHelper<
+  T extends Array<Token<any>>,
+  R extends Array<Node<any>>,
+> = ParseStatementHelper<T> extends infer G
+  ? G extends Array<any>
+    ? ParseTopLevel<G[1], Push<R, G[0]>, true>
+    : G
+  : never;
 
 type ParseStatementHelper<T extends Array<Token<any>>> =
   ParseFunctionDeclaration<T> extends infer P
