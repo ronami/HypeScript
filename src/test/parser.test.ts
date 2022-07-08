@@ -1748,3 +1748,145 @@ expectType<ParseAst<`}`>>({
   message: 'Declaration or statement expected.',
   lineNumber: 1,
 });
+
+expectType<ParseAst<`function foo(a, b) { } foo()`>>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+      typeAnnotation: null,
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    params: [
+      {
+        type: 'Identifier',
+        name: 'a',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      {
+        type: 'Identifier',
+        name: 'b',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+    ],
+    body: {
+      type: 'BlockStatement',
+      body: [],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'foo',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      arguments: [],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`function foo(a, b) {}; foo()`>>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+      typeAnnotation: null,
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    params: [
+      {
+        type: 'Identifier',
+        name: 'a',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      {
+        type: 'Identifier',
+        name: 'b',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+    ],
+    body: {
+      type: 'BlockStatement',
+      body: [],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'CallExpression',
+      callee: {
+        type: 'Identifier',
+        name: 'foo',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      arguments: [],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
