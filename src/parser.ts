@@ -46,42 +46,58 @@ type ExtractTokenData<
     : never
   : never;
 
-type ParseVariableDeclarationHelper<
-  L extends Node<any>,
-  N extends string,
-  NL extends number,
-  FL extends number,
+type ParseIdentifier<
   T extends Array<Token<any>>,
-> = L extends Node<NodeData<any, infer E>>
-  ? [
-      VariableDeclaration<
-        [
-          VariableDeclarator<
-            Identifier<N, null, NodeData<NL, NL>>,
-            L,
-            NodeData<NL, E>
+  O extends boolean,
+> = T[0] extends SymbolToken<infer N, TokenData<any, infer L>>
+  ? O extends true
+    ? T[1] extends GenericToken<':', TokenData<any, infer G>>
+      ? T[2] extends SymbolToken<infer K, any>
+        ? [
+            Identifier<N, TypeAnnotation<K, NodeData<1, 1>>, NodeData<L, L>>,
+            TailBy<T, 3>,
+          ]
+        : SyntaxError<'Type expected.', G>
+      : [Identifier<N, null, NodeData<L, L>>, Tail<T>]
+    : [Identifier<N, null, NodeData<L, L>>, Tail<T>]
+  : null;
+
+type ParseVariableDeclarationHelper<
+  R extends Array<Token<any>>,
+  N extends Node<any>,
+  L extends number,
+  S extends number,
+  K extends number,
+> = ParseExpression<Tail<R>> extends infer G
+  ? G extends Array<any>
+    ? G[0] extends Node<NodeData<infer E, any>>
+      ? [
+          VariableDeclaration<
+            [VariableDeclarator<N, G[0], NodeData<S, E>>],
+            'const',
+            NodeData<L, E>
           >,
-        ],
-        'const',
-        NodeData<FL, E>
-      >,
-      T,
-    ]
+          G[1],
+        ]
+      : never
+    : G extends null
+    ? SyntaxError<'Expression expected.', K>
+    : G
   : never;
 
 type ParseVariableDeclaration<T extends Array<Token<any>>> =
-  T[0] extends SymbolToken<'const', TokenData<any, infer FL>>
-    ? T[1] extends SymbolToken<infer N, TokenData<any, infer NL>>
-      ? T[2] extends SymbolToken<'=', TokenData<any, infer KL>>
-        ? ParseExpression<TailBy<T, 3>> extends [infer L, infer T]
-          ? L extends Node<any>
-            ? T extends Array<Token<any>>
-              ? ParseVariableDeclarationHelper<L, N, NL, FL, T>
-              : never
-            : never
-          : SyntaxError<'Expression expected.', KL>
-        : SyntaxError<"'const' declarations must be initialized.", NL>
-      : SyntaxError<'Variable declaration list cannot be empty.', FL>
+  T[0] extends SymbolToken<'const', TokenData<any, infer L>>
+    ? ParseIdentifier<Tail<T>, true> extends infer N
+      ? N extends [Node<NodeData<infer S, any>>, infer R]
+        ? R extends Array<any>
+          ? R[0] extends SymbolToken<'=', TokenData<any, infer K>>
+            ? ParseVariableDeclarationHelper<R, N[0], L, S, K>
+            : SyntaxError<"'const' declarations must be initialized.", S>
+          : never
+        : N extends null
+        ? SyntaxError<'Variable declaration list cannot be empty.', L>
+        : N
+      : never
     : null;
 
 type ParseMemberExpression<
