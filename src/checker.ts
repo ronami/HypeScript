@@ -40,9 +40,73 @@
 // import type { Concat, Reverse, Tail, Unshift } from './utils/arrayUtils';
 // import type { Cast, MergeWithOverride } from './utils/generalUtils';
 
-import type { Node } from './ast';
+import type {
+  BooleanLiteral,
+  Node,
+  NullLiteral,
+  NumericLiteral,
+  StringLiteral,
+} from './ast';
+import type {
+  BooleanLiteralType,
+  NullType,
+  NumberLiteralType,
+  StringLiteralType,
+  UnknownType,
+} from './types';
 
-export type Check<T extends Array<Node<any>>> = T;
+export type Check<T extends Array<Node<any>>> = InferExpression<T[0], {}>;
+
+type InferExpression<
+  T extends Node<any>,
+  S extends {},
+> = T extends StringLiteral<infer S, any>
+  ? StringLiteralType<S>
+  : T extends NumericLiteral<infer S, any>
+  ? NumberLiteralType<S>
+  : T extends NullLiteral<any>
+  ? NullType
+  : T extends BooleanLiteral<infer S, any>
+  ? BooleanLiteralType<S>
+  : UnknownType;
+//   T extends Identifier<infer N>
+//   ? N extends keyof S
+//     ? S[N]
+//     : never
+//   : T extends ArrayExpression<infer T>
+//   ? ArrayType<InferArrayElements<Cast<T, Array<any>>, S>>
+//   : T extends ObjectExpression<infer T>
+//   ? ObjectType<InferObjectValues<Cast<T, Array<any>>, S>>
+//   : T extends CallExpression<infer K, infer A>
+//   ? InferCallArguments<Cast<A, Array<any>>, S> extends infer O
+//     ? InferExpression<K, S> extends infer I
+//       ? I extends FunctionType<infer P, infer R>
+//         ? AssignableArgumentTypes<
+//             Cast<P, Array<any>>,
+//             Cast<O, Array<any>>
+//           > extends true
+//           ? R
+//           : never
+//         : never
+//       : never
+//     : never
+//   : T extends MemberExpression<infer O, Identifier<infer P>>
+//   ? InferExpression<O, S> extends infer D
+//     ? D extends ObjectType<infer Y>
+//       ? P extends keyof Y
+//         ? Y[P]
+//         : never
+//       : D extends StringType
+//       ? P extends 'length'
+//         ? NumberType
+//         : never
+//       : D extends NumberType
+//       ? P extends 'toString'
+//         ? FunctionType<[], StringType>
+//         : never
+//       : never
+//     : never
+//   : UnknownType;
 
 // type InferArrayElements<
 //   T extends Array<any>,

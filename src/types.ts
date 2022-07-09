@@ -2,16 +2,31 @@ export type StringType = {
   type: 'StringType';
 };
 
+export type StringLiteralType<V extends string> = {
+  type: 'StringLiteralType';
+  value: V;
+};
+
 export type NumberType = {
   type: 'NumberType';
 };
 
-export type NullType = {
-  type: 'NullType';
+export type NumberLiteralType<V extends string> = {
+  type: 'NumberLiteralType';
+  value: V;
 };
 
 export type BooleanType = {
   type: 'BooleanType';
+};
+
+export type BooleanLiteralType<V extends boolean> = {
+  type: 'BooleanLiteralType';
+  value: V;
+};
+
+export type NullType = {
+  type: 'NullType';
 };
 
 export type UnknownType = {

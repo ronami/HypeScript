@@ -8,19 +8,19 @@ export type NullLiteral<D extends NodeData<any, any>> = {
   data: D;
 };
 
-export type NumericLiteral<T, D extends NodeData<any, any>> = {
+export type NumericLiteral<T extends string, D extends NodeData<any, any>> = {
   type: 'NumericLiteral';
   value: T;
   data: D;
 };
 
-export type BooleanLiteral<T, D extends NodeData<any, any>> = {
+export type BooleanLiteral<T extends boolean, D extends NodeData<any, any>> = {
   type: 'BooleanLiteral';
   value: T;
   data: D;
 };
 
-export type StringLiteral<T, D extends NodeData<any, any>> = {
+export type StringLiteral<T extends string, D extends NodeData<any, any>> = {
   type: 'StringLiteral';
   value: T;
   data: D;
