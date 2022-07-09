@@ -1,5 +1,3 @@
-export {};
-
 // import type {
 //   AnyTypeAnnotation,
 //   ArrayExpression,
@@ -42,7 +40,9 @@ export {};
 // import type { Concat, Reverse, Tail, Unshift } from './utils/arrayUtils';
 // import type { Cast, MergeWithOverride } from './utils/generalUtils';
 
-// export type Check<T extends Array<any>> = CheckBlock<T>;
+import type { Node } from './ast';
+
+export type Check<T extends Array<Node<any>>> = T;
 
 // type InferArrayElements<
 //   T extends Array<any>,
