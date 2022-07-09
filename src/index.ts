@@ -1,7 +1,7 @@
 import type { Tokenize } from './tokenizer';
 import type { Parse } from './parser';
-// import type { Check } from './checker';
+import type { Check } from './checker';
 
 type T = Tokenize<`function foo(a) {}`>;
 type R = Parse<T>;
-// type C = Check<[R]>;
+type C = Check<R>;

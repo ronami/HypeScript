@@ -195,7 +195,7 @@ type ParseCallExpressionArgumentsHelper<
   T extends Array<Token<any>>,
   E extends number,
   J extends string,
-  R extends Array<any> = [],
+  R extends Array<Node<any>> = [],
 > = ParseExpression<T> extends infer G
   ? G extends Array<any>
     ? ParseCallExpressionArguments<G[1], E, J, true, Push<R, G[0]>>
@@ -264,7 +264,7 @@ type ParseExpressionHelper<
 type ParseObject<
   T extends Array<Token<any>>,
   E extends number,
-  R extends Array<any> = [],
+  R extends Array<Node<any>> = [],
   N extends boolean = false,
 > = T[0] extends GenericToken<'}', TokenData<any, infer L>>
   ? [ObjectExpression<R, NodeData<E, L>>, Tail<T>]
@@ -281,7 +281,7 @@ type ParseObject<
 type ParseObjectItem<
   T extends Array<Token<any>>,
   E extends number,
-  R extends Array<any> = [],
+  R extends Array<Node<any>> = [],
 > = T[0] extends SymbolToken<infer K, TokenData<any, infer L>>
   ? T[1] extends GenericToken<':', any>
     ? ParseExpression<TailBy<T, 2>> extends infer G
@@ -358,7 +358,7 @@ type ParseFunctionDeclaration<T extends Array<Token<any>>> =
 type ParseFunctionParams<
   T extends Array<Token<any>>,
   I extends number,
-  R extends Array<any> = [],
+  R extends Array<Node<any>> = [],
   N extends boolean = false,
 > = T[0] extends GenericToken<')', TokenData<any, infer L>>
   ? T[1] extends GenericToken<'{', TokenData<any, infer K>>
@@ -377,7 +377,7 @@ type ParseFunctionParams<
 type ParseFunctionParamsHelper<
   T extends Array<Token<any>>,
   I extends number,
-  R extends Array<any> = [],
+  R extends Array<Node<any>> = [],
 > = ParseIdentifier<T, true> extends infer G
   ? G extends Array<any>
     ? ParseFunctionParams<G[1], I, Push<R, G[0]>, true>
