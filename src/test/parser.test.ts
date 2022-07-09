@@ -2132,3 +2132,21 @@ expectType<ParseAst<`if () {`>>({
   message: 'Expression expected.',
   lineNumber: 1,
 });
+
+expectType<ParseAst<`return 123`>>({
+  type: 'SyntaxError',
+  message: "A 'return' statement can only be used within a function body.",
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`if (a) { return 123 }`>>({
+  type: 'SyntaxError',
+  message: "A 'return' statement can only be used within a function body.",
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`return;`>>({
+  type: 'SyntaxError',
+  message: "A 'return' statement can only be used within a function body.",
+  lineNumber: 1,
+});
