@@ -35,7 +35,7 @@ import type {
   Token,
   TokenData,
 } from './tokens';
-import type { Push, Tail, TailBy } from './utils/arrayUtils';
+import type { Head, Push, Tail, TailBy } from './utils/arrayUtils';
 
 type ExtractTokenData<
   T extends Token<any>,
@@ -331,8 +331,8 @@ type ParseExpressionStatement<T extends Array<Token<any>>> =
 type ParseFunctionDeclaration<T extends Array<Token<any>>> =
   T[0] extends SymbolToken<'function', TokenData<any, infer L>>
     ? T[1] extends SymbolToken<infer N, TokenData<any, infer O>>
-      ? T[2] extends GenericToken<'(', any>
-        ? ParseFunctionParams<TailBy<T, 3>> extends infer G
+      ? T[2] extends GenericToken<'(', TokenData<any, infer I>>
+        ? ParseFunctionParams<TailBy<T, 3>, I> extends infer G
           ? G extends Array<any>
             ? ParseBlockStatement<G[1], G[2], true> extends infer H
               ? H extends Array<any>
@@ -357,6 +357,7 @@ type ParseFunctionDeclaration<T extends Array<Token<any>>> =
 
 type ParseFunctionParams<
   T extends Array<Token<any>>,
+  I extends number,
   R extends Array<any> = [],
   N extends boolean = false,
 > = T[0] extends GenericToken<')', TokenData<any, infer L>>
@@ -364,22 +365,25 @@ type ParseFunctionParams<
     ? [R, TailBy<T, 2>, K]
     : SyntaxError<"'{' expected.", L>
   : T extends []
-  ? SyntaxError<"')' expected.", 1>
+  ? SyntaxError<"')' expected.", I>
   : N extends true
   ? T[0] extends GenericToken<',', any>
-    ? ParseFunctionParamsHelper<Tail<T>, R>
-    : SyntaxError<"',' expected.", 1>
-  : ParseFunctionParamsHelper<T, R>;
+    ? ParseFunctionParamsHelper<Tail<T>, I, R>
+    : Head<R> extends Node<NodeData<any, infer I>>
+    ? SyntaxError<"',' expected.", I>
+    : never
+  : ParseFunctionParamsHelper<T, I, R>;
 
 type ParseFunctionParamsHelper<
   T extends Array<Token<any>>,
+  I extends number,
   R extends Array<any> = [],
 > = ParseIdentifier<T, true> extends infer G
   ? G extends Array<any>
-    ? ParseFunctionParams<G[1], Push<R, G[0]>, true>
+    ? ParseFunctionParams<G[1], I, Push<R, G[0]>, true>
     : G extends Error<any, any, any>
     ? G
-    : SyntaxError<'Identifier expected.', 1>
+    : SyntaxError<'Identifier expected.', I>
   : never;
 
 type ParseBlockStatement<
@@ -389,7 +393,9 @@ type ParseBlockStatement<
   R extends Array<Node<any>> = [],
   N extends boolean = false,
 > = T extends []
-  ? SyntaxError<"'}' expected.", 1>
+  ? Head<R> extends Node<NodeData<any, infer S>>
+    ? SyntaxError<"'}' expected.", S>
+    : SyntaxError<"'}' expected.", L>
   : T[0] extends GenericToken<'}', TokenData<any, infer E>>
   ? [BlockStatement<R, NodeData<L, E>>, Tail<T>]
   : T[0] extends GenericToken<';', any>
@@ -442,15 +448,17 @@ type ParseIfStatement<
   T extends Array<Token<any>>,
   F extends boolean,
 > = T[0] extends SymbolToken<'if', TokenData<any, infer L>>
-  ? T[1] extends GenericToken<'(', any>
+  ? T[1] extends GenericToken<'(', TokenData<any, infer H>>
     ? ParseExpression<TailBy<T, 2>> extends infer G
       ? G extends Array<any>
-        ? ParseIfStatementHelper<G, L, F>
-        : G extends Error<any, any, any>
-        ? G
-        : SyntaxError<'Expression expected.', 1>
+        ? G[0] extends Node<NodeData<any, infer E>>
+          ? ParseIfStatementHelper<G, L, F, E>
+          : G extends Error<any, any, any>
+          ? G
+          : never
+        : SyntaxError<'Expression expected.', H>
       : never
-    : SyntaxError<"'(' expected.", 1>
+    : SyntaxError<"'(' expected.", L>
   : null;
 
 type ParseReturnStatementHelper<
@@ -486,8 +494,9 @@ type ParseIfStatementHelper<
   G extends Array<any>,
   L extends number,
   F extends boolean,
+  E extends number,
 > = G[1] extends Array<any>
-  ? G[1][0] extends GenericToken<')', any>
+  ? G[1][0] extends GenericToken<')', TokenData<any, infer I>>
     ? G[1][1] extends GenericToken<'{', TokenData<any, infer H>>
       ? ParseBlockStatement<TailBy<G[1], 2>, H, F> extends infer B
         ? B extends Array<any>
@@ -496,8 +505,8 @@ type ParseIfStatementHelper<
             : never
           : B
         : never
-      : SyntaxError<"'{' expected.", 1>
-    : SyntaxError<"')' expected.", 1>
+      : SyntaxError<"'{' expected.", I>
+    : SyntaxError<"')' expected.", E>
   : never;
 
 type ParseStatementHelper<
