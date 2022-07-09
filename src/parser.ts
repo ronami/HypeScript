@@ -374,13 +374,13 @@ type ParseFunctionParams<
 type ParseFunctionParamsHelper<
   T extends Array<Token<any>>,
   R extends Array<any> = [],
-> = T[0] extends SymbolToken<infer V, TokenData<any, infer L>>
-  ? ParseFunctionParams<
-      Tail<T>,
-      Push<R, Identifier<V, null, NodeData<L, L>>>,
-      true
-    >
-  : SyntaxError<'Identifier expected.', 1>;
+> = ParseIdentifier<T, true> extends infer G
+  ? G extends Array<any>
+    ? ParseFunctionParams<G[1], Push<R, G[0]>, true>
+    : G extends Error<any, any, any>
+    ? G
+    : SyntaxError<'Identifier expected.', 1>
+  : never;
 
 type ParseBlockStatement<
   T extends Array<Token<any>>,

@@ -2542,3 +2542,178 @@ expectType<ParseAst<`const \nhello: \nFoo = \n"world"`>>([
     },
   },
 ]);
+
+expectType<ParseAst<`function foo(a: string) {}`>>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+      typeAnnotation: null,
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    params: [
+      {
+        type: 'Identifier',
+        name: 'a',
+        typeAnnotation: {
+          type: 'TypeAnnotation',
+          typeAnnotation: {
+            type: 'StringTypeAnnotation',
+            data: {
+              startLineNumber: 1,
+              endLineNumber: 1,
+            },
+          },
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+    ],
+    body: {
+      type: 'BlockStatement',
+      body: [],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`function\n foo\n(\na: number)\n {\n}`>>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+      typeAnnotation: null,
+      data: {
+        startLineNumber: 2,
+        endLineNumber: 2,
+      },
+    },
+    params: [
+      {
+        type: 'Identifier',
+        name: 'a',
+        typeAnnotation: {
+          type: 'TypeAnnotation',
+          typeAnnotation: {
+            type: 'NumberTypeAnnotation',
+            data: {
+              startLineNumber: 4,
+              endLineNumber: 4,
+            },
+          },
+          data: {
+            startLineNumber: 4,
+            endLineNumber: 4,
+          },
+        },
+        data: {
+          startLineNumber: 4,
+          endLineNumber: 4,
+        },
+      },
+    ],
+    body: {
+      type: 'BlockStatement',
+      body: [],
+      data: {
+        startLineNumber: 5,
+        endLineNumber: 6,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 6,
+    },
+  },
+]);
+
+expectType<ParseAst<`function\n foo\n(\na: null, \nb: boolean)\n {\n}`>>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+      typeAnnotation: null,
+      data: {
+        startLineNumber: 2,
+        endLineNumber: 2,
+      },
+    },
+    params: [
+      {
+        type: 'Identifier',
+        name: 'a',
+        typeAnnotation: {
+          type: 'TypeAnnotation',
+          typeAnnotation: {
+            type: 'NullLiteralTypeAnnotation',
+            data: {
+              startLineNumber: 4,
+              endLineNumber: 4,
+            },
+          },
+          data: {
+            startLineNumber: 4,
+            endLineNumber: 4,
+          },
+        },
+        data: {
+          startLineNumber: 4,
+          endLineNumber: 4,
+        },
+      },
+      {
+        type: 'Identifier',
+        name: 'b',
+        typeAnnotation: {
+          type: 'TypeAnnotation',
+          typeAnnotation: {
+            type: 'BooleanTypeAnnotation',
+            data: {
+              startLineNumber: 5,
+              endLineNumber: 5,
+            },
+          },
+          data: {
+            startLineNumber: 5,
+            endLineNumber: 5,
+          },
+        },
+        data: {
+          startLineNumber: 5,
+          endLineNumber: 5,
+        },
+      },
+    ],
+    body: {
+      type: 'BlockStatement',
+      body: [],
+      data: {
+        startLineNumber: 6,
+        endLineNumber: 7,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 7,
+    },
+  },
+]);
