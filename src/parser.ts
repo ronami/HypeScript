@@ -52,12 +52,13 @@ type ParseIdentifier<
 > = T[0] extends SymbolToken<infer N, TokenData<any, infer L>>
   ? O extends true
     ? T[1] extends GenericToken<':', TokenData<any, infer G>>
-      ? T[2] extends SymbolToken<infer K, any>
-        ? [
-            Identifier<N, TypeAnnotation<K, NodeData<1, 1>>, NodeData<L, L>>,
-            TailBy<T, 3>,
-          ]
-        : SyntaxError<'Type expected.', G>
+      ? ParseTypeAnnotation<TailBy<T, 2>> extends infer J
+        ? J extends Array<any>
+          ? [Identifier<N, J[0], NodeData<L, L>>, J[1]]
+          : J extends Error<any, any, any>
+          ? J
+          : SyntaxError<'Type expected.', G>
+        : never
       : [Identifier<N, null, NodeData<L, L>>, Tail<T>]
     : [Identifier<N, null, NodeData<L, L>>, Tail<T>]
   : null;
@@ -84,6 +85,45 @@ type ParseVariableDeclarationHelper<
     ? SyntaxError<'Expression expected.', K>
     : G
   : never;
+
+type ParseTypeAnnotation<T extends Array<Token<any>>> =
+  T[0] extends SymbolToken<'string', TokenData<any, infer L>>
+    ? [
+        TypeAnnotation<StringTypeAnnotation<NodeData<L, L>>, NodeData<L, L>>,
+        Tail<T>,
+      ]
+    : T[0] extends SymbolToken<'boolean', TokenData<any, infer L>>
+    ? [
+        TypeAnnotation<BooleanTypeAnnotation<NodeData<L, L>>, NodeData<L, L>>,
+        Tail<T>,
+      ]
+    : T[0] extends SymbolToken<'null', TokenData<any, infer L>>
+    ? [
+        TypeAnnotation<
+          NullLiteralTypeAnnotation<NodeData<L, L>>,
+          NodeData<L, L>
+        >,
+        Tail<T>,
+      ]
+    : T[0] extends SymbolToken<'number', TokenData<any, infer L>>
+    ? [
+        TypeAnnotation<NumberTypeAnnotation<NodeData<L, L>>, NodeData<L, L>>,
+        Tail<T>,
+      ]
+    : T[0] extends SymbolToken<'any', TokenData<any, infer L>>
+    ? [
+        TypeAnnotation<AnyTypeAnnotation<NodeData<L, L>>, NodeData<L, L>>,
+        Tail<T>,
+      ]
+    : T[0] extends SymbolToken<infer E, TokenData<any, infer L>>
+    ? [
+        TypeAnnotation<
+          GenericTypeAnnotation<E, NodeData<L, L>>,
+          NodeData<L, L>
+        >,
+        Tail<T>,
+      ]
+    : never;
 
 type ParseVariableDeclaration<T extends Array<Token<any>>> =
   T[0] extends SymbolToken<'const', TokenData<any, infer L>>
