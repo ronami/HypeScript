@@ -391,6 +391,24 @@ type ParseIfStatement<T extends Array<Token<any>>> = T[0] extends SymbolToken<
     : SyntaxError<"'(' expected.", 1>
   : null;
 
+type ParseReturnStatementHelper<T extends Array<Token<any>>> =
+  T[0] extends GenericToken<';', any>
+    ? [ReturnStatement<null, NodeData<1, 1>>, Tail<T>]
+    : ParseExpression<T> extends infer G
+    ? G extends Array<any>
+      ? [ReturnStatement<G[0], NodeData<1, 1>>, G[1]]
+      : G
+    : never;
+
+type ParseReturnStatement<T extends Array<Token<any>>> =
+  T[0] extends SymbolToken<'return', any>
+    ? T[1] extends Token<TokenData<infer P, any>, any>
+      ? P extends false
+        ? ParseReturnStatementHelper<Tail<T>>
+        : [ReturnStatement<null, NodeData<1, 1>>, Tail<T>]
+      : [ReturnStatement<null, NodeData<1, 1>>, []]
+    : null;
+
 type ParseIfStatementHelper<G extends Array<any>> = G[1] extends Array<any>
   ? G[1][0] extends GenericToken<')', any>
     ? G[1][1] extends GenericToken<'{', any>
@@ -419,12 +437,18 @@ type ParseStatementHelper<T extends Array<Token<any>>> =
           ? [...P, false]
           : P extends Error<any, any, any>
           ? P
-          : ParseExpressionStatement<T> extends infer P
+          : ParseReturnStatement<T> extends infer P
           ? P extends Array<any>
             ? [...P, true]
             : P extends Error<any, any, any>
             ? P
-            : SyntaxError<'Declaration or statement expected.', 1>
+            : ParseExpressionStatement<T> extends infer P
+            ? P extends Array<any>
+              ? [...P, true]
+              : P extends Error<any, any, any>
+              ? P
+              : SyntaxError<'Declaration or statement expected.', 1>
+            : never
           : never
         : never
       : never
