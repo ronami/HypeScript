@@ -258,6 +258,7 @@ expectType<ParseAst<`hello  ; "world"`>>([
     },
   },
 ]);
+
 expectType<ParseAst<`const hello = "world"`>>([
   {
     type: 'VariableDeclaration',
@@ -2309,6 +2310,235 @@ expectType<ParseAst<`function foo() { \nreturn\n }`>>([
     data: {
       startLineNumber: 1,
       endLineNumber: 3,
+    },
+  },
+]);
+
+expectType<ParseAst<`const hello: string = "world"`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'const',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        init: {
+          type: 'StringLiteral',
+          value: 'world',
+          data: { startLineNumber: 1, endLineNumber: 1 },
+        },
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: {
+            type: 'TypeAnnotation',
+            typeAnnotation: {
+              type: 'StringTypeAnnotation',
+              data: { startLineNumber: 1, endLineNumber: 1 },
+            },
+            data: { startLineNumber: 1, endLineNumber: 1 },
+          },
+          data: { startLineNumber: 1, endLineNumber: 1 },
+        },
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+    ],
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`const \nhello: \nnumber = \n"world"`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'const',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        init: {
+          type: 'StringLiteral',
+          value: 'world',
+          data: { startLineNumber: 4, endLineNumber: 4 },
+        },
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: {
+            type: 'TypeAnnotation',
+            typeAnnotation: {
+              type: 'NumberTypeAnnotation',
+              data: { startLineNumber: 3, endLineNumber: 3 },
+            },
+            data: { startLineNumber: 3, endLineNumber: 3 },
+          },
+          data: { startLineNumber: 2, endLineNumber: 2 },
+        },
+        data: {
+          startLineNumber: 2,
+          endLineNumber: 4,
+        },
+      },
+    ],
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 4,
+    },
+  },
+]);
+
+expectType<ParseAst<`const \nhello: \nnull = \n"world"`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'const',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        init: {
+          type: 'StringLiteral',
+          value: 'world',
+          data: { startLineNumber: 4, endLineNumber: 4 },
+        },
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: {
+            type: 'TypeAnnotation',
+            typeAnnotation: {
+              type: 'NullLiteralTypeAnnotation',
+              data: { startLineNumber: 3, endLineNumber: 3 },
+            },
+            data: { startLineNumber: 3, endLineNumber: 3 },
+          },
+          data: { startLineNumber: 2, endLineNumber: 2 },
+        },
+        data: {
+          startLineNumber: 2,
+          endLineNumber: 4,
+        },
+      },
+    ],
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 4,
+    },
+  },
+]);
+
+expectType<ParseAst<`const \nhello: \nboolean = \n"world"`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'const',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        init: {
+          type: 'StringLiteral',
+          value: 'world',
+          data: { startLineNumber: 4, endLineNumber: 4 },
+        },
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: {
+            type: 'TypeAnnotation',
+            typeAnnotation: {
+              type: 'BooleanTypeAnnotation',
+              data: { startLineNumber: 3, endLineNumber: 3 },
+            },
+            data: { startLineNumber: 3, endLineNumber: 3 },
+          },
+          data: { startLineNumber: 2, endLineNumber: 2 },
+        },
+        data: {
+          startLineNumber: 2,
+          endLineNumber: 4,
+        },
+      },
+    ],
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 4,
+    },
+  },
+]);
+
+expectType<ParseAst<`const \nhello: \nany = \n"world"`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'const',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        init: {
+          type: 'StringLiteral',
+          value: 'world',
+          data: { startLineNumber: 4, endLineNumber: 4 },
+        },
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: {
+            type: 'TypeAnnotation',
+            typeAnnotation: {
+              type: 'AnyTypeAnnotation',
+              data: { startLineNumber: 3, endLineNumber: 3 },
+            },
+            data: { startLineNumber: 3, endLineNumber: 3 },
+          },
+          data: { startLineNumber: 2, endLineNumber: 2 },
+        },
+        data: {
+          startLineNumber: 2,
+          endLineNumber: 4,
+        },
+      },
+    ],
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 4,
+    },
+  },
+]);
+
+expectType<ParseAst<`const \nhello: \nFoo = \n"world"`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'const',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        init: {
+          type: 'StringLiteral',
+          value: 'world',
+          data: { startLineNumber: 4, endLineNumber: 4 },
+        },
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: {
+            type: 'TypeAnnotation',
+            typeAnnotation: {
+              type: 'GenericTypeAnnotation',
+              id: 'Foo',
+              data: { startLineNumber: 3, endLineNumber: 3 },
+            },
+            data: { startLineNumber: 3, endLineNumber: 3 },
+          },
+          data: { startLineNumber: 2, endLineNumber: 2 },
+        },
+        data: {
+          startLineNumber: 2,
+          endLineNumber: 4,
+        },
+      },
+    ],
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 4,
     },
   },
 ]);
