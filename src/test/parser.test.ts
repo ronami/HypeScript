@@ -2150,3 +2150,165 @@ expectType<ParseAst<`return;`>>({
   message: "A 'return' statement can only be used within a function body.",
   lineNumber: 1,
 });
+
+expectType<ParseAst<`function foo() { return 1 }`>>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+      typeAnnotation: null,
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    params: [],
+    body: {
+      type: 'BlockStatement',
+      body: [
+        {
+          type: 'ReturnStatement',
+          argument: {
+            type: 'NumericLiteral',
+            value: '1',
+            data: {
+              startLineNumber: 1,
+              endLineNumber: 1,
+            },
+          },
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+      ],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`function foo() { return 1; }`>>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+      typeAnnotation: null,
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    params: [],
+    body: {
+      type: 'BlockStatement',
+      body: [
+        {
+          type: 'ReturnStatement',
+          argument: {
+            type: 'NumericLiteral',
+            value: '1',
+            data: {
+              startLineNumber: 1,
+              endLineNumber: 1,
+            },
+          },
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+      ],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`function foo() { return; }`>>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+      typeAnnotation: null,
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    params: [],
+    body: {
+      type: 'BlockStatement',
+      body: [
+        {
+          type: 'ReturnStatement',
+          argument: null,
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+      ],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`function foo() { \nreturn\n }`>>([
+  {
+    type: 'FunctionDeclaration',
+    id: {
+      type: 'Identifier',
+      name: 'foo',
+      typeAnnotation: null,
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    params: [],
+    body: {
+      type: 'BlockStatement',
+      body: [
+        {
+          type: 'ReturnStatement',
+          argument: null,
+          data: {
+            startLineNumber: 2,
+            endLineNumber: 2,
+          },
+        },
+      ],
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 3,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 3,
+    },
+  },
+]);
