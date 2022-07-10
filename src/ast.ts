@@ -53,7 +53,7 @@ export type ObjectProperty<
 };
 
 export type VariableDeclaration<
-  H,
+  H extends Array<VariableDeclarator<any, any, any>>,
   K extends 'const' | 'let',
   D extends NodeData<any, any>,
 > = {
@@ -63,7 +63,11 @@ export type VariableDeclaration<
   data: D;
 };
 
-export type VariableDeclarator<N, I, D extends NodeData<any, any>> = {
+export type VariableDeclarator<
+  N,
+  I extends Node<any>,
+  D extends NodeData<any, any>,
+> = {
   type: 'VariableDeclarator';
   id: N;
   init: I;

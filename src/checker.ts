@@ -51,6 +51,8 @@ import type {
   ObjectExpression,
   ObjectProperty,
   StringLiteral,
+  VariableDeclaration,
+  VariableDeclarator,
 } from './ast';
 import type { Error, SyntaxError } from './errors';
 import type {
@@ -62,6 +64,7 @@ import type {
   UnknownType,
 } from './types';
 import type { Push, Tail } from './utils/arrayUtils';
+import type { MergeWithOverride } from './utils/generalUtils';
 
 export type Check<
   T extends Array<Node<any>>,
@@ -71,9 +74,30 @@ export type Check<
   ? R
   : T[0] extends ExpressionStatement<any, any>
   ? InferExpressionStatement<T[0], S> extends infer G
+    ? G extends Array<any>
+      ? Check<Tail<T>, G[1], R>
+      : Check<Tail<T>, S, Push<R, G>>
+    : never
+  : T[0] extends VariableDeclaration<any, any, any>
+  ? InferVariableDeclaration<T[0], S> extends infer G
+    ? G extends Array<any>
+      ? Check<Tail<T>, G[1], R>
+      : Check<Tail<T>, S, Push<R, G>>
+    : never
+  : never;
+
+type InferVariableDeclaration<
+  O extends VariableDeclaration<any, any, any>,
+  S extends {},
+> = O extends VariableDeclaration<
+  [VariableDeclarator<Identifier<infer N, any, any>, infer I, any>],
+  any,
+  any
+>
+  ? InferExpression<I, S> extends infer G
     ? G extends Error<any, any, any>
-      ? Check<Tail<T>, S, Push<R, G>>
-      : Check<Tail<T>, S, R>
+      ? G
+      : [null, MergeWithOverride<S, { [a in N]: G }>]
     : never
   : never;
 
@@ -84,25 +108,25 @@ type InferExpressionStatement<
   ? InferExpression<E, S> extends infer G
     ? G extends Error<any, any, any>
       ? G
-      : null
+      : [null, S]
     : never
   : never;
 
 type InferExpression<
   T extends Node<any>,
   S extends {},
-> = T extends StringLiteral<infer S, any>
-  ? StringLiteralType<S>
-  : T extends NumericLiteral<infer S, any>
-  ? NumberLiteralType<S>
+> = T extends StringLiteral<infer I, any>
+  ? StringLiteralType<I>
+  : T extends NumericLiteral<infer I, any>
+  ? NumberLiteralType<I>
   : T extends NullLiteral<any>
   ? NullType
-  : T extends BooleanLiteral<infer S, any>
-  ? BooleanLiteralType<S>
-  : T extends Identifier<infer N, any, NodeData<infer S, any>>
+  : T extends BooleanLiteral<infer I, any>
+  ? BooleanLiteralType<I>
+  : T extends Identifier<infer N, any, NodeData<infer I, any>>
   ? N extends keyof S
     ? S[N]
-    : SyntaxError<`Cannot find name '${N}'.`, S>
+    : SyntaxError<`Cannot find name '${N}'.`, I>
   : T extends ObjectExpression<infer O, any>
   ? InferObjectProperties<O, S>
   : UnknownType;
