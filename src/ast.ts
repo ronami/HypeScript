@@ -149,7 +149,10 @@ export type BlockStatement<B, D extends NodeData<any, any>> = {
   data: D;
 };
 
-export type TypeAnnotation<T, D extends NodeData<any, any>> = {
+export type TypeAnnotation<
+  T extends Node<any>,
+  D extends NodeData<any, any>,
+> = {
   type: 'TypeAnnotation';
   typeAnnotation: T;
   data: D;
