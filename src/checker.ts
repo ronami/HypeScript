@@ -44,6 +44,7 @@ import type {
   BooleanLiteral,
   ExpressionStatement,
   Identifier,
+  MemberExpression,
   Node,
   NodeData,
   NullLiteral,
@@ -129,6 +130,8 @@ type InferExpression<
     : SyntaxError<`Cannot find name '${N}'.`, I>
   : T extends ObjectExpression<infer O, any>
   ? InferObjectProperties<O, S>
+  : T extends MemberExpression<infer O, infer P, any>
+  ? 1
   : UnknownType;
 
 type InferObjectProperties<
