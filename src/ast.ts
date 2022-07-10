@@ -116,12 +116,14 @@ export type CallExpression<C, A, D extends NodeData<any, any>> = {
 
 export type MemberExpression<
   O extends Node<any>,
-  P extends Identifier<any, any, any>,
+  P extends Node<any>,
+  C extends boolean,
   D extends NodeData<any, any>,
 > = {
   type: 'MemberExpression';
   object: O;
   property: P;
+  computed: C;
   data: D;
 };
 
@@ -203,7 +205,7 @@ export type Node<D extends NodeData<any, any>> =
   | NullLiteral<D>
   | ExpressionStatement<any, D>
   | CallExpression<any, any, D>
-  | MemberExpression<any, any, D>
+  | MemberExpression<any, any, any, D>
   | IfStatement<any, any, D>
   | ReturnStatement<any, D>
   | BlockStatement<any, D>
