@@ -42,18 +42,24 @@
 
 import type {
   BooleanLiteral,
+  Identifier,
   Node,
   NullLiteral,
   NumericLiteral,
+  ObjectExpression,
+  ObjectProperty,
   StringLiteral,
 } from './ast';
+import type { Error, SyntaxError } from './errors';
 import type {
   BooleanLiteralType,
   NullType,
   NumberLiteralType,
+  ObjectType,
   StringLiteralType,
   UnknownType,
 } from './types';
+import type { Push, Tail } from './utils/arrayUtils';
 
 export type Check<T extends Array<Node<any>>> = InferExpression<T[0], {}>;
 
@@ -68,11 +74,28 @@ type InferExpression<
   ? NullType
   : T extends BooleanLiteral<infer S, any>
   ? BooleanLiteralType<S>
+  : T extends Identifier<infer N, any, any>
+  ? N extends keyof S
+    ? S[N]
+    : SyntaxError<`Cannot find name '${N}'.`, 1>
+  : T extends ObjectExpression<infer O, any>
+  ? InferObjectProperties<O, S>
   : UnknownType;
-//   T extends Identifier<infer N>
-//   ? N extends keyof S
-//     ? S[N]
-//     : never
+
+type InferObjectProperties<
+  T extends Array<ObjectProperty<any, any, any>>,
+  S extends {},
+  R extends {} = {},
+> = T extends []
+  ? ObjectType<R>
+  : T[0] extends ObjectProperty<Identifier<infer K, any, any>, infer V, any>
+  ? InferExpression<V, S> extends infer J
+    ? J extends Error<any, any, any>
+      ? J
+      : InferObjectProperties<Tail<T>, S, R & { [a in K]: J }>
+    : never
+  : never;
+
 //   : T extends ArrayExpression<infer T>
 //   ? ArrayType<InferArrayElements<Cast<T, Array<any>>, S>>
 //   : T extends ObjectExpression<infer T>

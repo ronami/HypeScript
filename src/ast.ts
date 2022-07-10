@@ -32,13 +32,20 @@ export type ArrayExpression<T, D extends NodeData<any, any>> = {
   data: D;
 };
 
-export type ObjectExpression<T, D extends NodeData<any, any>> = {
+export type ObjectExpression<
+  T extends Array<ObjectProperty<any, any, any>>,
+  D extends NodeData<any, any>,
+> = {
   type: 'ObjectExpression';
   properties: T;
   data: D;
 };
 
-export type ObjectProperty<K, T, D extends NodeData<any, any>> = {
+export type ObjectProperty<
+  K,
+  T extends Node<any>,
+  D extends NodeData<any, any>,
+> = {
   type: 'ObjectProperty';
   key: K;
   value: T;
@@ -71,7 +78,7 @@ export type FunctionDeclaration<I, P, B, D extends NodeData<any, any>> = {
   data: D;
 };
 
-export type Identifier<N, T, D extends NodeData<any, any>> = {
+export type Identifier<N extends string, T, D extends NodeData<any, any>> = {
   type: 'Identifier';
   name: N;
   typeAnnotation: T;

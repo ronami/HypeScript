@@ -47,10 +47,10 @@ export type FunctionType<P, R> = {
   return: R;
 };
 
-// export type ObjectType<O> = {
-//   type: 'ObjectType';
-//   keys: O;
-// };
+export type ObjectType<O> = {
+  type: 'ObjectType';
+  object: O;
+};
 
 // export type ArrayType<V> = {
 //   type: 'ArrayType';
@@ -77,8 +77,8 @@ export type StaticType =
   | UnknownType
   | VoidType
   | AnyType
-  | FunctionType<any, any>;
-// | ObjectType<any>
+  | FunctionType<any, any>
+  | ObjectType<any>;
 // | ArrayType<any>
 // | UnionType<any>
 // | GenericType<any>;
