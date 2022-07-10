@@ -4,9 +4,8 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 
-const a = 123;
-
-const foo: string = a;
+const a = { b: true }
+const b: boolean = a.b
 
 `>;
 type R = Parse<T>;
