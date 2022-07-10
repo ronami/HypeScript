@@ -8,6 +8,8 @@ const foo = {
   hello: "world"
 };
 
+foo.hello;
+
 `>;
 type R = Parse<T>;
 type C = Check<R>;
