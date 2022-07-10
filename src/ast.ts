@@ -85,7 +85,10 @@ export type Identifier<N extends string, T, D extends NodeData<any, any>> = {
   data: D;
 };
 
-export type ExpressionStatement<E, D extends NodeData<any, any>> = {
+export type ExpressionStatement<
+  E extends Node<any>,
+  D extends NodeData<any, any>,
+> = {
   type: 'ExpressionStatement';
   expression: E;
   data: D;
