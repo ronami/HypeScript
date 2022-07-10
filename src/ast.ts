@@ -42,7 +42,7 @@ export type ObjectExpression<
 };
 
 export type ObjectProperty<
-  K,
+  K extends Identifier<any, any, any>,
   T extends Node<any>,
   D extends NodeData<any, any>,
 > = {
@@ -64,7 +64,7 @@ export type VariableDeclaration<
 };
 
 export type VariableDeclarator<
-  N,
+  N extends Identifier<any, any, any>,
   I extends Node<any>,
   D extends NodeData<any, any>,
 > = {
@@ -74,7 +74,12 @@ export type VariableDeclarator<
   data: D;
 };
 
-export type FunctionDeclaration<I, P, B, D extends NodeData<any, any>> = {
+export type FunctionDeclaration<
+  I extends Identifier<any, any, any>,
+  P extends Array<Node<any>>,
+  B extends BlockStatement<any, any>,
+  D extends NodeData<any, any>,
+> = {
   type: 'FunctionDeclaration';
   id: I;
   params: P;
@@ -82,7 +87,11 @@ export type FunctionDeclaration<I, P, B, D extends NodeData<any, any>> = {
   data: D;
 };
 
-export type Identifier<N extends string, T, D extends NodeData<any, any>> = {
+export type Identifier<
+  N extends string,
+  T extends TypeAnnotation<any, any> | null,
+  D extends NodeData<any, any>,
+> = {
   type: 'Identifier';
   name: N;
   typeAnnotation: T;
@@ -105,14 +114,22 @@ export type CallExpression<C, A, D extends NodeData<any, any>> = {
   data: D;
 };
 
-export type MemberExpression<O, P, D extends NodeData<any, any>> = {
+export type MemberExpression<
+  O extends Node<any>,
+  P extends Node<any>,
+  D extends NodeData<any, any>,
+> = {
   type: 'MemberExpression';
   object: O;
   property: P;
   data: D;
 };
 
-export type IfStatement<T, C, D extends NodeData<any, any>> = {
+export type IfStatement<
+  T extends Node<any>,
+  C extends Node<any>,
+  D extends NodeData<any, any>,
+> = {
   type: 'IfStatement';
   test: T;
   consequent: C;

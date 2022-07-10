@@ -65,7 +65,7 @@ type ParseIdentifier<
 
 type ParseVariableDeclarationHelper<
   R extends Array<Token<any>>,
-  N extends Node<any>,
+  N extends Identifier<any, any, any>,
   L extends number,
   S extends number,
   K extends number,
@@ -128,7 +128,7 @@ type ParseTypeAnnotation<T extends Array<Token<any>>> =
 type ParseVariableDeclaration<T extends Array<Token<any>>> =
   T[0] extends SymbolToken<'const', TokenData<any, infer L>>
     ? ParseIdentifier<Tail<T>, true> extends infer N
-      ? N extends [Node<NodeData<infer S, any>>, infer R]
+      ? N extends [Identifier<any, any, NodeData<infer S, any>>, infer R]
         ? R extends Array<any>
           ? R[0] extends SymbolToken<'=', TokenData<any, infer K>>
             ? ParseVariableDeclarationHelper<R, N[0], L, S, K>
