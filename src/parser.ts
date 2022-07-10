@@ -123,7 +123,7 @@ type ParseTypeAnnotation<T extends Array<Token<any>>> =
         >,
         Tail<T>,
       ]
-    : never;
+    : null;
 
 type ParseVariableDeclaration<T extends Array<Token<any>>> =
   T[0] extends SymbolToken<'const', TokenData<any, infer L>>
