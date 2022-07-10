@@ -386,6 +386,7 @@ expectType<ParseAst<`hello.world`>>([
           endLineNumber: 1,
         },
       },
+      computed: false,
       data: {
         startLineNumber: 1,
         endLineNumber: 1,
@@ -423,6 +424,7 @@ expectType<ParseAst<`hello.world.foo`>>([
             endLineNumber: 1,
           },
         },
+        computed: false,
         data: {
           startLineNumber: 1,
           endLineNumber: 1,
@@ -437,6 +439,7 @@ expectType<ParseAst<`hello.world.foo`>>([
           endLineNumber: 1,
         },
       },
+      computed: false,
       data: {
         startLineNumber: 1,
         endLineNumber: 1,
@@ -474,6 +477,7 @@ expectType<ParseAst<`hello.\nworld.\nfoo`>>([
             endLineNumber: 2,
           },
         },
+        computed: false,
         data: {
           startLineNumber: 1,
           endLineNumber: 2,
@@ -488,6 +492,7 @@ expectType<ParseAst<`hello.\nworld.\nfoo`>>([
           endLineNumber: 3,
         },
       },
+      computed: false,
       data: {
         startLineNumber: 1,
         endLineNumber: 3,
@@ -547,6 +552,7 @@ expectType<ParseAst<`const hello = foo.bar;`>>([
               endLineNumber: 1,
             },
           },
+          computed: false,
           data: {
             startLineNumber: 1,
             endLineNumber: 1,
@@ -761,6 +767,7 @@ expectType<ParseAst<`hello.world(1)`>>([
             endLineNumber: 1,
           },
         },
+        computed: false,
         data: {
           startLineNumber: 1,
           endLineNumber: 1,
@@ -810,6 +817,7 @@ expectType<ParseAst<`hello.world(foo(1))`>>([
             endLineNumber: 1,
           },
         },
+        computed: false,
         data: {
           startLineNumber: 1,
           endLineNumber: 1,
@@ -2720,6 +2728,102 @@ expectType<ParseAst<`function\n foo\n(\na: null, \nb: boolean)\n {\n}`>>([
     data: {
       startLineNumber: 1,
       endLineNumber: 7,
+    },
+  },
+]);
+
+expectType<ParseAst<`hello[world]`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'MemberExpression',
+      object: {
+        type: 'Identifier',
+        name: 'hello',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      property: {
+        type: 'Identifier',
+        name: 'world',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      computed: true,
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`hello[world()]["foo"]`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'MemberExpression',
+      object: {
+        type: 'MemberExpression',
+        object: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: null,
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+        property: {
+          type: 'CallExpression',
+          callee: {
+            type: 'Identifier',
+            name: 'world',
+            typeAnnotation: null,
+            data: {
+              startLineNumber: 1,
+              endLineNumber: 1,
+            },
+          },
+          arguments: [],
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+        computed: true,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      property: {
+        type: 'StringLiteral',
+        value: 'foo',
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      computed: true,
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
     },
   },
 ]);

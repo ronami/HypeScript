@@ -143,20 +143,35 @@ type ParseVariableDeclaration<T extends Array<Token<any>>> =
 type ParseMemberExpression<
   O extends Node<any>,
   T extends Array<Token<any>>,
-> = T[0] extends GenericToken<'.', TokenData<any, infer E>>
-  ? T[1] extends SymbolToken<infer N, TokenData<any, infer L>>
-    ? O extends Node<NodeData<infer S, infer E>>
+> = O extends Node<NodeData<infer S, infer E>>
+  ? T[0] extends GenericToken<'.', TokenData<any, infer E>>
+    ? T[1] extends SymbolToken<infer N, TokenData<any, infer L>>
       ? [
           MemberExpression<
             O,
             Identifier<N, null, NodeData<L, L>>,
+            false,
             NodeData<S, L>
           >,
           TailBy<T, 2>,
         ]
+      : SyntaxError<'Identifier expected.', E>
+    : T[0] extends GenericToken<'[', TokenData<any, infer E>>
+    ? ParseExpression<Tail<T>> extends infer G
+      ? G extends [infer Q, infer W]
+        ? Q extends Node<NodeData<infer S, any>>
+          ? W extends Array<Token<any>>
+            ? W[0] extends GenericToken<']', TokenData<any, infer E>>
+              ? [MemberExpression<O, Q, true, NodeData<1, 1>>, Tail<W>]
+              : SyntaxError<"']' expected.", S>
+            : never
+          : never
+        : G extends null
+        ? SyntaxError<'Expression expected.', E>
+        : G
       : never
-    : SyntaxError<'Identifier expected.', E>
-  : null;
+    : null
+  : never;
 
 type ParseCallExpression<
   O extends Node<any>,
