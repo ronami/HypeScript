@@ -96,9 +96,9 @@ type InferVariableDeclaration<
   any
 >
   ? InferExpression<I, S> extends infer G
-    ? G extends Error<any, any, any>
-      ? G
-      : [null, MergeWithOverride<S, { [a in N]: G }>]
+    ? G extends Array<any>
+      ? [null, MergeWithOverride<S, { [a in N]: G[0] }>]
+      : G
     : never
   : never;
 
@@ -107,9 +107,9 @@ type InferExpressionStatement<
   S extends {},
 > = O extends ExpressionStatement<infer E, any>
   ? InferExpression<E, S> extends infer G
-    ? G extends Error<any, any, any>
-      ? G
-      : [null, S]
+    ? G extends Array<any>
+      ? [null, S]
+      : G
     : never
   : never;
 
@@ -117,16 +117,16 @@ type InferExpression<
   T extends Node<any>,
   S extends {},
 > = T extends StringLiteral<infer I, any>
-  ? StringLiteralType<I>
+  ? [StringLiteralType<I>, S]
   : T extends NumericLiteral<infer I, any>
-  ? NumberLiteralType<I>
+  ? [NumberLiteralType<I>, S]
   : T extends NullLiteral<any>
-  ? NullType
+  ? [NullType, S]
   : T extends BooleanLiteral<infer I, any>
-  ? BooleanLiteralType<I>
+  ? [BooleanLiteralType<I>, S]
   : T extends Identifier<infer N, any, NodeData<infer I, any>>
   ? N extends keyof S
-    ? S[N]
+    ? [S[N], S]
     : SyntaxError<`Cannot find name '${N}'.`, I>
   : T extends ObjectExpression<infer O, any>
   ? InferObjectProperties<O, S>
@@ -139,15 +139,15 @@ type InferMemberExpression<
   P extends Identifier<any, any, any>,
   S extends {},
 > = InferExpression<O, S> extends infer J
-  ? J extends Error<any, any, any>
-    ? J
-    : P extends Identifier<infer N, any, NodeData<infer S, any>>
-    ? J extends ObjectType<infer Y>
-      ? N extends keyof Y
-        ? Y[N]
-        : SyntaxError<`Property '${N}' does not exist on type '{}'.`, S>
+  ? J extends Array<any>
+    ? P extends Identifier<infer N, any, NodeData<infer S, any>>
+      ? J[0] extends ObjectType<infer Y>
+        ? N extends keyof Y
+          ? [Y[N], S]
+          : SyntaxError<`Property '${N}' does not exist on type '{}'.`, S>
+        : SyntaxError<`Property '${N}' does not exist on type '...'.`, S>
       : never
-    : never
+    : J
   : never;
 
 type InferObjectProperties<
@@ -155,12 +155,12 @@ type InferObjectProperties<
   S extends {},
   R extends {} = {},
 > = T extends []
-  ? ObjectType<R>
+  ? [ObjectType<R>, S]
   : T[0] extends ObjectProperty<Identifier<infer K, any, any>, infer V, any>
   ? InferExpression<V, S> extends infer J
-    ? J extends Error<any, any, any>
-      ? J
-      : InferObjectProperties<Tail<T>, S, R & { [a in K]: J }>
+    ? J extends Array<any>
+      ? InferObjectProperties<Tail<T>, S, R & { [a in K]: J[0] }>
+      : J
     : never
   : never;
 

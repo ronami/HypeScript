@@ -5,10 +5,12 @@ import type { Check } from './checker';
 type T = Tokenize<`
 
 const foo = {
-  hello: "world"
+  hello: { foo: "bar" }
 };
 
-foo.hello;
+const a = foo.hello;
+
+a.foo
 
 `>;
 type R = Parse<T>;
