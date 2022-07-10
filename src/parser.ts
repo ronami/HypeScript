@@ -264,7 +264,7 @@ type ParseExpressionHelper<
 type ParseObject<
   T extends Array<Token<any>>,
   E extends number,
-  R extends Array<Node<any>> = [],
+  R extends Array<ObjectProperty<any, any, any>> = [],
   N extends boolean = false,
 > = T[0] extends GenericToken<'}', TokenData<any, infer L>>
   ? [ObjectExpression<R, NodeData<E, L>>, Tail<T>]
@@ -281,7 +281,7 @@ type ParseObject<
 type ParseObjectItem<
   T extends Array<Token<any>>,
   E extends number,
-  R extends Array<Node<any>> = [],
+  R extends Array<ObjectProperty<any, any, any>> = [],
 > = T[0] extends SymbolToken<infer K, TokenData<any, infer L>>
   ? T[1] extends GenericToken<':', any>
     ? ParseExpression<TailBy<T, 2>> extends infer G
