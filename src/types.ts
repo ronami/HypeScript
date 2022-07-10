@@ -47,22 +47,38 @@ export type FunctionType<P, R> = {
   return: R;
 };
 
-export type ObjectType<O> = {
-  type: 'ObjectType';
-  keys: O;
-};
+// export type ObjectType<O> = {
+//   type: 'ObjectType';
+//   keys: O;
+// };
 
-export type ArrayType<V> = {
-  type: 'ArrayType';
-  value: V;
-};
+// export type ArrayType<V> = {
+//   type: 'ArrayType';
+//   value: V;
+// };
 
-export type UnionType<V> = {
-  type: 'UnionType';
-  values: V;
-};
+// export type UnionType<V> = {
+//   type: 'UnionType';
+//   values: V;
+// };
 
-export type GenericType<T> = {
-  type: 'GenericType';
-  id: T;
-};
+// export type GenericType<T> = {
+//   type: 'GenericType';
+//   id: T;
+// };
+
+export type StaticType =
+  | StringType
+  | StringLiteralType<any>
+  | NumberType
+  | NumberLiteralType<any>
+  | BooleanType
+  | BooleanLiteralType<any>
+  | UnknownType
+  | VoidType
+  | AnyType
+  | FunctionType<any, any>;
+// | ObjectType<any>
+// | ArrayType<any>
+// | UnionType<any>
+// | GenericType<any>;
