@@ -116,7 +116,7 @@ export type CallExpression<C, A, D extends NodeData<any, any>> = {
 
 export type MemberExpression<
   O extends Node<any>,
-  P extends Node<any>,
+  P extends Identifier<any, any, any>,
   D extends NodeData<any, any>,
 > = {
   type: 'MemberExpression';

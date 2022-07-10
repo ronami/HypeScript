@@ -131,8 +131,24 @@ type InferExpression<
   : T extends ObjectExpression<infer O, any>
   ? InferObjectProperties<O, S>
   : T extends MemberExpression<infer O, infer P, any>
-  ? 1
+  ? InferMemberExpression<O, P, S>
   : UnknownType;
+
+type InferMemberExpression<
+  O extends Node<any>,
+  P extends Identifier<any, any, any>,
+  S extends {},
+> = InferExpression<O, S> extends infer J
+  ? J extends Error<any, any, any>
+    ? J
+    : P extends Identifier<infer N, any, NodeData<infer S, any>>
+    ? J extends ObjectType<infer Y>
+      ? N extends keyof Y
+        ? Y[N]
+        : SyntaxError<`Property '${N}' does not exist on type '{}'.`, S>
+      : never
+    : never
+  : never;
 
 type InferObjectProperties<
   T extends Array<ObjectProperty<any, any, any>>,
