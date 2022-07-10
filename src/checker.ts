@@ -41,27 +41,39 @@
 // import type { Cast, MergeWithOverride } from './utils/generalUtils';
 
 import type {
+  AnyTypeAnnotation,
   BooleanLiteral,
+  BooleanTypeAnnotation,
   ExpressionStatement,
+  GenericTypeAnnotation,
   Identifier,
   MemberExpression,
   Node,
   NodeData,
   NullLiteral,
+  NullLiteralTypeAnnotation,
+  NumberTypeAnnotation,
   NumericLiteral,
   ObjectExpression,
   ObjectProperty,
   StringLiteral,
+  StringTypeAnnotation,
+  TypeAnnotation,
   VariableDeclaration,
   VariableDeclarator,
 } from './ast';
 import type { Error, SyntaxError } from './errors';
 import type {
+  AnyType,
   BooleanLiteralType,
+  BooleanType,
   NullType,
   NumberLiteralType,
+  NumberType,
   ObjectType,
+  StaticType,
   StringLiteralType,
+  StringType,
   UnknownType,
 } from './types';
 import type { Push, Tail } from './utils/arrayUtils';
@@ -87,17 +99,64 @@ export type Check<
     : never
   : never;
 
+type MatchType<A extends StaticType, B extends StaticType> = A extends AnyType
+  ? true
+  : A extends B
+  ? B extends A
+    ? true
+    : false
+  : A extends StringType
+  ? B extends StringLiteralType<any>
+    ? true
+    : false
+  : A extends BooleanType
+  ? B extends BooleanLiteralType<any>
+    ? true
+    : false
+  : A extends NumberType
+  ? B extends NumberLiteralType<any>
+    ? true
+    : false
+  : false;
+
+type MapAnnotationToType<A extends Node<any>> =
+  A extends StringTypeAnnotation<any>
+    ? StringType
+    : A extends NumberTypeAnnotation<any>
+    ? NumberType
+    : A extends BooleanTypeAnnotation<any>
+    ? BooleanType
+    : A extends NullLiteralTypeAnnotation<any>
+    ? NullType
+    : A extends AnyTypeAnnotation<any>
+    ? AnyType
+    : never;
+
 type InferVariableDeclaration<
   O extends VariableDeclaration<any, any, any>,
   S extends {},
 > = O extends VariableDeclaration<
-  [VariableDeclarator<Identifier<infer N, any, any>, infer I, any>],
+  [
+    VariableDeclarator<
+      Identifier<infer N, infer T, NodeData<infer L, any>>,
+      infer I,
+      any
+    >,
+  ],
   any,
   any
 >
   ? InferExpression<I, S> extends infer G
     ? G extends Array<any>
-      ? [null, MergeWithOverride<S, { [a in N]: G[0] }>]
+      ? T extends TypeAnnotation<infer T, any>
+        ? MapAnnotationToType<T> extends infer P
+          ? P extends StaticType
+            ? MatchType<P, G[0]> extends true
+              ? [null, MergeWithOverride<S, { [a in N]: P }>]
+              : SyntaxError<`Type '...' is not assignable to type '...'.`, L>
+            : never
+          : never
+        : [null, MergeWithOverride<S, { [a in N]: G[0] }>]
       : G
     : never
   : never;

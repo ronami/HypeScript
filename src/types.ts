@@ -77,6 +77,7 @@ export type StaticType =
   | UnknownType
   | VoidType
   | AnyType
+  | NullType
   | FunctionType<any, any>
   | ObjectType<any>;
 // | ArrayType<any>
