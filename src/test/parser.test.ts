@@ -339,6 +339,12 @@ expectType<ParseAst<`const hello \n = ;`>>({
   lineNumber: 2,
 });
 
+expectType<ParseAst<`const hello: `>>({
+  type: 'SyntaxError',
+  message: 'Type expected.',
+  lineNumber: 1,
+});
+
 expectType<ParseAst<`hello.`>>({
   type: 'SyntaxError',
   message: 'Identifier expected.',
