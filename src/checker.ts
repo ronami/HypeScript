@@ -189,25 +189,42 @@ type InferExpression<
     : SyntaxError<`Cannot find name '${N}'.`, I>
   : T extends ObjectExpression<infer O, any>
   ? InferObjectProperties<O, S>
-  : T extends MemberExpression<infer O, infer P, any>
-  ? InferMemberExpression<O, P, S>
+  : T extends MemberExpression<infer O, infer P, infer C, any>
+  ? InferMemberExpression<O, P, C, S>
   : UnknownType;
 
 type InferMemberExpression<
   O extends Node<any>,
-  P extends Identifier<any, any, any>,
+  P extends Node<any>,
+  C extends boolean,
   S extends {},
 > = InferExpression<O, S> extends infer J
   ? J extends Array<any>
-    ? P extends Identifier<infer N, any, NodeData<infer S, any>>
-      ? J[0] extends ObjectType<infer Y>
-        ? N extends keyof Y
-          ? [Y[N], S]
-          : SyntaxError<`Property '${N}' does not exist on type '{}'.`, S>
-        : SyntaxError<`Property '${N}' does not exist on type '...'.`, S>
+    ? C extends false
+      ? P extends Identifier<infer N, any, NodeData<infer S, any>>
+        ? InferMemberExpressionHelper<J[0], N, S>
+        : never
+      : InferExpression<P, S> extends infer G
+      ? G extends Array<any>
+        ? G[0] extends StringLiteralType<infer N>
+          ? InferMemberExpressionHelper<J[0], N, S>
+          : SyntaxError<`Property '...' does not exist on type '{}'.`, 1>
+        : G extends null
+        ? never
+        : G
       : never
     : J
   : never;
+
+type InferMemberExpressionHelper<
+  O extends ObjectType<any>,
+  N extends string,
+  S extends {},
+> = O extends ObjectType<infer Y>
+  ? N extends keyof Y
+    ? [Y[N], S]
+    : SyntaxError<`Property '${N}' does not exist on type '{}'.`, 1>
+  : SyntaxError<`Property '${N}' does not exist on type '...'.`, 1>;
 
 type InferObjectProperties<
   T extends Array<ObjectProperty<any, any, any>>,
