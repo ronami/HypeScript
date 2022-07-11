@@ -430,7 +430,7 @@ type InferMemberExpression<
   : never;
 
 type InferMemberExpressionHelper<
-  O extends ObjectType<any>,
+  O extends StaticType,
   N extends string,
   S extends {},
   L extends number,
@@ -440,7 +440,23 @@ type InferMemberExpressionHelper<
     : SyntaxError<`Property '${N}' does not exist on type '{}'.`, L>
   : O extends ArrayType<infer V>
   ? [V, S]
+  : O extends UnionType<infer U>
+  ? InferMemberExpressionUnionHelper<U, N, S, L>
   : SyntaxError<`Property '${N}' does not exist on type '...'.`, L>;
+
+type InferMemberExpressionUnionHelper<
+  U extends Array<StaticType>,
+  N extends string,
+  S extends {},
+  L extends number,
+  R extends Array<any> = [],
+> = U extends []
+  ? [UnionType<R>, S]
+  : InferMemberExpressionHelper<U[0], N, S, L> extends infer H
+  ? H extends Array<any>
+    ? InferMemberExpressionUnionHelper<Tail<U>, N, H[1], L, Push<R, H[0]>>
+    : H
+  : never;
 
 type InferObjectProperties<
   T extends Array<ObjectProperty<any, any, any>>,
