@@ -52,15 +52,15 @@ export type ObjectType<O> = {
   object: O;
 };
 
-// export type ArrayType<V> = {
-//   type: 'ArrayType';
-//   value: V;
-// };
+export type ArrayType<V extends StaticType> = {
+  type: 'ArrayType';
+  elements: V;
+};
 
-// export type UnionType<V> = {
-//   type: 'UnionType';
-//   values: V;
-// };
+export type UnionType<V extends Array<StaticType>> = {
+  type: 'UnionType';
+  types: V;
+};
 
 // export type GenericType<T> = {
 //   type: 'GenericType';
@@ -79,7 +79,7 @@ export type StaticType =
   | AnyType
   | NullType
   | FunctionType<any, any>
-  | ObjectType<any>;
-// | ArrayType<any>
-// | UnionType<any>
+  | ObjectType<any>
+  | ArrayType<any>
+  | UnionType<any>;
 // | GenericType<any>;

@@ -42,6 +42,7 @@
 
 import type {
   AnyTypeAnnotation,
+  ArrayExpression,
   BooleanLiteral,
   BooleanTypeAnnotation,
   ExpressionStatement,
@@ -65,6 +66,7 @@ import type {
 import type { Error, SyntaxError } from './errors';
 import type {
   AnyType,
+  ArrayType,
   BooleanLiteralType,
   BooleanType,
   NullType,
@@ -191,7 +193,23 @@ type InferExpression<
   ? InferObjectProperties<O, S>
   : T extends MemberExpression<infer O, infer P, infer C, any>
   ? InferMemberExpression<O, P, C, S>
+  : T extends ArrayExpression<infer T, any>
+  ? InferArrayElements<T, S>
   : UnknownType;
+
+type InferArrayElements<
+  T extends Array<Node<any>>,
+  S extends {},
+  R extends StaticType = AnyType,
+> = T extends []
+  ? [ArrayType<R>, S]
+  : T[0] extends Node<any>
+  ? InferExpression<T[0], S> extends infer J
+    ? J extends Array<any>
+      ? InferArrayElements<Tail<T>, S, J[0]>
+      : J
+    : never
+  : never;
 
 type InferMemberExpression<
   O extends Node<any>,

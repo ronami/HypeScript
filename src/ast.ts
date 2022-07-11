@@ -26,7 +26,10 @@ export type StringLiteral<T extends string, D extends NodeData<any, any>> = {
   data: D;
 };
 
-export type ArrayExpression<T, D extends NodeData<any, any>> = {
+export type ArrayExpression<
+  T extends Array<Node<any>>,
+  D extends NodeData<any, any>,
+> = {
   type: 'ArrayExpression';
   elements: T;
   data: D;
