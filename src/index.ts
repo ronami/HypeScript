@@ -4,13 +4,7 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 
-const a = {
-    hello: 1
-}
-
-const foo = "world"
-
-a[1]
+[1, 2, 3]
 
 `>;
 type R = Parse<T>;
