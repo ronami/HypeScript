@@ -84,7 +84,7 @@ import type {
   UnknownType,
   VoidType,
 } from './types';
-import type { Includes, Push, Tail } from './utils/arrayUtils';
+import type { Includes, Push, Tail, Uniq } from './utils/arrayUtils';
 import type { MergeWithOverride } from './utils/generalUtils';
 
 export type Check<
@@ -362,7 +362,11 @@ type InferArrayElements<
     ? J extends Array<any>
       ? MapLiteralToType<J[0]> extends infer E
         ? E extends StaticType
-          ? InferArrayElements<Tail<T>, J[1], InferArrayElementsHelper<R, E>>
+          ? InferArrayElementsHelper<R, E> extends infer U
+            ? U extends StaticType
+              ? InferArrayElements<Tail<T>, J[1], U>
+              : never
+            : never
           : never
         : never
       : J
@@ -377,9 +381,13 @@ type InferArrayElementsHelper<
   : R extends E
   ? E
   : R extends UnionType<infer U>
-  ? Includes<U, E> extends true
+  ? E extends UnionType<infer I>
+    ? UnionType<Uniq<[...U, ...I]>>
+    : Includes<U, E> extends true
     ? R
     : UnionType<Push<U, E>>
+  : E extends UnionType<infer U>
+  ? UnionType<Push<U, R>>
   : UnionType<[R, E]>;
 
 type MapLiteralToType<T extends StaticType> = T extends NumberLiteralType<any>

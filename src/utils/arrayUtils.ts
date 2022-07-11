@@ -39,3 +39,9 @@ export type Includes<T extends Array<any>, E> = T extends []
   : T[0] extends E
   ? true
   : Includes<Tail<T>, E>;
+
+export type Uniq<T extends Array<any>, R extends Array<any> = []> = T extends []
+  ? R
+  : Includes<R, T[0]> extends true
+  ? Uniq<Tail<T>, R>
+  : Uniq<Tail<T>, Push<R, T[0]>>;

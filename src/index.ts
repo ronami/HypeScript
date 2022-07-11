@@ -4,10 +4,12 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 
-const a = [1, "2", 3];
+const a = [1, "2"];
 const b = a[0];
+const c = [true, "3", b];
+const d = c[0]
 
-const c: number = b;
+d()
 
 `>;
 type R = Parse<T>;
