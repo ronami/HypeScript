@@ -4,7 +4,9 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 
-[1, 2, 3]
+function foo(a: string) {
+  return a;
+}
 
 `>;
 type R = Parse<T>;

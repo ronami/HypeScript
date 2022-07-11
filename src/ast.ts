@@ -142,13 +142,19 @@ export type IfStatement<
   // alternate: A;
 };
 
-export type ReturnStatement<T, D extends NodeData<any, any>> = {
+export type ReturnStatement<
+  T extends Node<any> | null,
+  D extends NodeData<any, any>,
+> = {
   type: 'ReturnStatement';
   argument: T;
   data: D;
 };
 
-export type BlockStatement<B, D extends NodeData<any, any>> = {
+export type BlockStatement<
+  B extends Array<Node<any>>,
+  D extends NodeData<any, any>,
+> = {
   type: 'BlockStatement';
   body: B;
   data: D;
