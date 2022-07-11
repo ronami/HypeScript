@@ -80,10 +80,11 @@ import type {
   StaticType,
   StringLiteralType,
   StringType,
+  UnionType,
   UnknownType,
   VoidType,
 } from './types';
-import type { Push, Tail } from './utils/arrayUtils';
+import type { Includes, Push, Tail } from './utils/arrayUtils';
 import type { MergeWithOverride } from './utils/generalUtils';
 
 export type Check<
@@ -359,10 +360,35 @@ type InferArrayElements<
   : T[0] extends Node<any>
   ? InferExpression<T[0], S> extends infer J
     ? J extends Array<any>
-      ? InferArrayElements<Tail<T>, S, J[0]>
+      ? MapLiteralToType<J[0]> extends infer E
+        ? E extends StaticType
+          ? InferArrayElements<Tail<T>, J[1], InferArrayElementsHelper<R, E>>
+          : never
+        : never
       : J
     : never
   : never;
+
+type InferArrayElementsHelper<
+  R extends StaticType,
+  E extends StaticType,
+> = R extends AnyType
+  ? E
+  : R extends E
+  ? E
+  : R extends UnionType<infer U>
+  ? Includes<U, E> extends true
+    ? R
+    : UnionType<Push<U, E>>
+  : UnionType<[R, E]>;
+
+type MapLiteralToType<T extends StaticType> = T extends NumberLiteralType<any>
+  ? NumberType
+  : T extends StringLiteralType<any>
+  ? StringType
+  : T extends BooleanLiteralType<any>
+  ? BooleanType
+  : T;
 
 type InferMemberExpression<
   O extends Node<any>,
