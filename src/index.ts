@@ -4,7 +4,7 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 
-function foo(a: string) {
+function foo(a: string, ab: number) {
   return a;
 }
 

@@ -112,6 +112,35 @@ export type Check<
     : never
   : never;
 
+type MapAnnotationToType<A extends Node<any>> =
+  A extends StringTypeAnnotation<any>
+    ? StringType
+    : A extends NumberTypeAnnotation<any>
+    ? NumberType
+    : A extends BooleanTypeAnnotation<any>
+    ? BooleanType
+    : A extends NullLiteralTypeAnnotation<any>
+    ? NullType
+    : A extends AnyTypeAnnotation<any>
+    ? AnyType
+    : never;
+
+type InferFunctionParams<
+  T extends Array<Node<any>>,
+  S extends {},
+  R extends Array<StaticType> = [],
+  H extends Record<string, StaticType> = {},
+> = T extends []
+  ? [R, H, S]
+  : T[0] extends Identifier<infer N, TypeAnnotation<infer V, any>, any>
+  ? InferFunctionParams<
+      Tail<T>,
+      S,
+      Push<R, MapAnnotationToType<V>>,
+      MergeWithOverride<H, { [a in N]: MapAnnotationToType<V> }>
+    >
+  : never;
+
 type InferFunctionDeclaration<
   O extends FunctionDeclaration<any, any, any, any>,
   S extends {},
@@ -121,10 +150,14 @@ type InferFunctionDeclaration<
   BlockStatement<infer B, any>,
   any
 >
-  ? InferBlockStatement<B, S> extends infer G
-    ? G extends Array<any>
-      ? [null, MergeWithOverride<S, { [a in N]: FunctionType<[], G[0]> }>]
-      : G
+  ? InferFunctionParams<P, S> extends infer H
+    ? H extends Array<any>
+      ? InferBlockStatement<B, MergeWithOverride<S, H[1]>> extends infer G
+        ? G extends Array<any>
+          ? [null, MergeWithOverride<S, { [a in N]: FunctionType<[], G[0]> }>]
+          : G
+        : never
+      : H
     : never
   : never;
 
@@ -175,19 +208,6 @@ type MatchType<A extends StaticType, B extends StaticType> = A extends AnyType
     ? true
     : false
   : false;
-
-type MapAnnotationToType<A extends Node<any>> =
-  A extends StringTypeAnnotation<any>
-    ? StringType
-    : A extends NumberTypeAnnotation<any>
-    ? NumberType
-    : A extends BooleanTypeAnnotation<any>
-    ? BooleanType
-    : A extends NullLiteralTypeAnnotation<any>
-    ? NullType
-    : A extends AnyTypeAnnotation<any>
-    ? AnyType
-    : never;
 
 type InferVariableDeclaration<
   O extends VariableDeclaration<any, any, any>,
