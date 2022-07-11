@@ -396,6 +396,10 @@ type MapLiteralToType<T extends StaticType> = T extends NumberLiteralType<any>
   ? StringType
   : T extends BooleanLiteralType<any>
   ? BooleanType
+  : T extends ObjectType<infer O>
+  ? ObjectType<{
+      [P in keyof O]: O[P] extends StaticType ? MapLiteralToType<O[P]> : never;
+    }>
   : T;
 
 type InferMemberExpression<
