@@ -201,17 +201,19 @@ type InferMemberExpression<
 > = InferExpression<O, S> extends infer J
   ? J extends Array<any>
     ? C extends false
-      ? P extends Identifier<infer N, any, NodeData<infer S, any>>
-        ? InferMemberExpressionHelper<J[0], N, S>
+      ? P extends Identifier<infer N, any, NodeData<infer L, any>>
+        ? InferMemberExpressionHelper<J[0], N, S, L>
         : never
       : InferExpression<P, S> extends infer G
-      ? G extends Array<any>
-        ? G[0] extends StringLiteralType<infer N>
-          ? InferMemberExpressionHelper<J[0], N, S>
-          : SyntaxError<`Property '...' does not exist on type '{}'.`, 1>
-        : G extends null
-        ? never
-        : G
+      ? P extends Node<NodeData<infer L, any>>
+        ? G extends Array<any>
+          ? G[0] extends StringLiteralType<infer N>
+            ? InferMemberExpressionHelper<J[0], N, S, L>
+            : SyntaxError<`Type '{}' cannot be used as an index type.`, L>
+          : G extends null
+          ? never
+          : G
+        : never
       : never
     : J
   : never;
@@ -220,11 +222,12 @@ type InferMemberExpressionHelper<
   O extends ObjectType<any>,
   N extends string,
   S extends {},
+  L extends number,
 > = O extends ObjectType<infer Y>
   ? N extends keyof Y
     ? [Y[N], S]
-    : SyntaxError<`Property '${N}' does not exist on type '{}'.`, 1>
-  : SyntaxError<`Property '${N}' does not exist on type '...'.`, 1>;
+    : SyntaxError<`Property '${N}' does not exist on type '{}'.`, L>
+  : SyntaxError<`Property '${N}' does not exist on type '...'.`, L>;
 
 type InferObjectProperties<
   T extends Array<ObjectProperty<any, any, any>>,
