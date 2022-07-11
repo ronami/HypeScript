@@ -43,9 +43,11 @@
 import type {
   AnyTypeAnnotation,
   ArrayExpression,
+  BlockStatement,
   BooleanLiteral,
   BooleanTypeAnnotation,
   ExpressionStatement,
+  FunctionDeclaration,
   GenericTypeAnnotation,
   Identifier,
   MemberExpression,
@@ -57,6 +59,7 @@ import type {
   NumericLiteral,
   ObjectExpression,
   ObjectProperty,
+  ReturnStatement,
   StringLiteral,
   StringTypeAnnotation,
   TypeAnnotation,
@@ -69,6 +72,7 @@ import type {
   ArrayType,
   BooleanLiteralType,
   BooleanType,
+  FunctionType,
   NullType,
   NumberLiteralType,
   NumberType,
@@ -77,6 +81,7 @@ import type {
   StringLiteralType,
   StringType,
   UnknownType,
+  VoidType,
 } from './types';
 import type { Push, Tail } from './utils/arrayUtils';
 import type { MergeWithOverride } from './utils/generalUtils';
@@ -99,6 +104,56 @@ export type Check<
       ? Check<Tail<T>, G[1], R>
       : Check<Tail<T>, S, Push<R, G>>
     : never
+  : T[0] extends FunctionDeclaration<any, any, any, any>
+  ? InferFunctionDeclaration<T[0], S> extends infer G
+    ? G extends Array<any>
+      ? Check<Tail<T>, G[1], R>
+      : Check<Tail<T>, S, Push<R, G>>
+    : never
+  : never;
+
+type InferFunctionDeclaration<
+  O extends FunctionDeclaration<any, any, any, any>,
+  S extends {},
+> = O extends FunctionDeclaration<
+  Identifier<infer N, any, NodeData<infer L, any>>,
+  infer P,
+  BlockStatement<infer B, any>,
+  any
+>
+  ? InferBlockStatement<B, S> extends infer G
+    ? G extends Array<any>
+      ? [null, MergeWithOverride<S, { [a in N]: FunctionType<[], G[0]> }>]
+      : G
+    : never
+  : never;
+
+type InferBlockStatement<
+  T extends Array<Node<any>>,
+  S extends {} = {},
+  R extends StaticType = VoidType,
+> = T extends []
+  ? [R, S]
+  : T[0] extends ExpressionStatement<any, any>
+  ? InferExpressionStatement<T[0], S> extends infer G
+    ? G extends Array<any>
+      ? InferBlockStatement<Tail<T>, G[1], R>
+      : G
+    : never
+  : T[0] extends VariableDeclaration<any, any, any>
+  ? InferVariableDeclaration<T[0], S> extends infer G
+    ? G extends Array<any>
+      ? InferBlockStatement<Tail<T>, G[1], R>
+      : G
+    : never
+  : T[0] extends ReturnStatement<infer F, any>
+  ? F extends Node<any>
+    ? InferExpression<F, S> extends infer G
+      ? G extends Array<any>
+        ? InferBlockStatement<[], G[1], G[0]>
+        : G
+      : never
+    : InferBlockStatement<Tail<T>, S, VoidType>
   : never;
 
 type MatchType<A extends StaticType, B extends StaticType> = A extends AnyType

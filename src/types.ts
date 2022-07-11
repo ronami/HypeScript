@@ -41,7 +41,10 @@ export type AnyType = {
   type: 'AnyType';
 };
 
-export type FunctionType<P, R> = {
+export type FunctionType<
+  P extends Array<StaticType>,
+  R extends Array<StaticType>,
+> = {
   type: 'FunctionType';
   params: P;
   return: R;
