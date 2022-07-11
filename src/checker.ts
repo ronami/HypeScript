@@ -46,9 +46,9 @@ import type {
   BlockStatement,
   BooleanLiteral,
   BooleanTypeAnnotation,
+  CallExpression,
   ExpressionStatement,
   FunctionDeclaration,
-  GenericTypeAnnotation,
   Identifier,
   MemberExpression,
   Node,
@@ -154,7 +154,7 @@ type InferFunctionDeclaration<
     ? H extends Array<any>
       ? InferBlockStatement<B, MergeWithOverride<S, H[1]>> extends infer G
         ? G extends Array<any>
-          ? [null, MergeWithOverride<S, { [a in N]: FunctionType<[], G[0]> }>]
+          ? [null, MergeWithOverride<S, { [a in N]: FunctionType<H[0], G[0]> }>]
           : G
         : never
       : H
@@ -208,6 +208,19 @@ type MatchType<A extends StaticType, B extends StaticType> = A extends AnyType
     ? true
     : false
   : false;
+
+type MatchTypeArrays<
+  T extends Array<StaticType>,
+  H extends Array<StaticType>,
+  L extends number,
+> = T extends []
+  ? true
+  : MatchType<T[0], H[0]> extends true
+  ? MatchTypeArrays<Tail<T>, Tail<H>, L>
+  : SyntaxError<
+      `Argument of type '...' is not assignable to parameter of type '...'.`,
+      L
+    >;
 
 type InferVariableDeclaration<
   O extends VariableDeclaration<any, any, any>,
@@ -270,7 +283,59 @@ type InferExpression<
   ? InferMemberExpression<O, P, C, S>
   : T extends ArrayExpression<infer T, any>
   ? InferArrayElements<T, S>
+  : T extends CallExpression<infer C, infer A, any>
+  ? InferCallExpression<C, A, S>
   : UnknownType;
+
+type InferCallExpression<
+  C extends Node<any>,
+  A extends Array<Node<any>>,
+  S extends {},
+> = C extends Node<NodeData<infer L, any>>
+  ? InferExpression<C, S> extends infer G
+    ? G extends Array<any>
+      ? G[0] extends FunctionType<infer P, infer R>
+        ? InferExpressionsArray<A, S> extends infer H
+          ? H extends Array<any>
+            ? InferCallExpressionHelper<P, H[0], R, S, L>
+            : H
+          : never
+        : SyntaxError<
+            `This expression is not callable. Type '...' has no call signatures.`,
+            L
+          >
+      : G
+    : never
+  : never;
+
+type InferCallExpressionHelper<
+  P extends Array<StaticType>,
+  H extends Array<StaticType>,
+  R extends StaticType,
+  S extends {},
+  L extends number,
+> = P['length'] extends H['length']
+  ? MatchTypeArrays<P, H, L> extends infer W
+    ? W extends true
+      ? [R, S]
+      : W
+    : never
+  : SyntaxError<
+      `Expected ${P['length']} arguments, but got ${H['length']}.`,
+      L
+    >;
+
+type InferExpressionsArray<
+  T extends Array<Node<any>>,
+  S extends {},
+  R extends Array<StaticType> = [],
+> = T extends []
+  ? [R, S]
+  : InferExpression<T[0], S> extends infer H
+  ? H extends Array<any>
+    ? InferExpressionsArray<Tail<T>, MergeWithOverride<S, H[1]>, Push<R, H[0]>>
+    : H
+  : never;
 
 type InferArrayElements<
   T extends Array<Node<any>>,
