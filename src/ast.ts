@@ -110,7 +110,11 @@ export type ExpressionStatement<
   data: D;
 };
 
-export type CallExpression<C, A, D extends NodeData<any, any>> = {
+export type CallExpression<
+  C extends Node<any>,
+  A extends Array<Node<any>>,
+  D extends NodeData<any, any>,
+> = {
   type: 'CallExpression';
   callee: C;
   arguments: A;
