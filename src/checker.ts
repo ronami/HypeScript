@@ -406,6 +406,8 @@ type InferMemberExpression<
         ? G extends Array<any>
           ? G[0] extends StringLiteralType<infer N>
             ? InferMemberExpressionHelper<J[0], N, S, L>
+            : G[0] extends NumberLiteralType<infer N>
+            ? InferMemberExpressionHelper<J[0], N, S, L>
             : SyntaxError<`Type '{}' cannot be used as an index type.`, L>
           : G extends null
           ? never
@@ -420,10 +422,12 @@ type InferMemberExpressionHelper<
   N extends string,
   S extends {},
   L extends number,
-> = O extends ObjectType<infer Y>
-  ? N extends keyof Y
-    ? [Y[N], S]
+> = O extends ObjectType<infer V>
+  ? N extends keyof V
+    ? [V[N], S]
     : SyntaxError<`Property '${N}' does not exist on type '{}'.`, L>
+  : O extends ArrayType<infer V>
+  ? [V, S]
   : SyntaxError<`Property '${N}' does not exist on type '...'.`, L>;
 
 type InferObjectProperties<
