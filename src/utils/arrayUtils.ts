@@ -33,3 +33,9 @@ export type TailBy<
   B extends number,
   A extends Array<any> = [],
 > = B extends A['length'] ? T : TailBy<Tail<T>, B, Push<A, 0>>;
+
+export type Includes<T extends Array<any>, E> = T extends []
+  ? false
+  : T[0] extends E
+  ? true
+  : Includes<Tail<T>, E>;
