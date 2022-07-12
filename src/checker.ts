@@ -400,14 +400,14 @@ type InferMemberExpression<
     : J
   : never;
 
-type InferObjectMemberExpressionHelper<
+type InferMemberExpressionObjectHelper<
   V extends Array<[string, StaticType]>,
   N extends string,
 > = V extends []
   ? null
   : V[0][0] extends N
   ? V[0][1]
-  : InferObjectMemberExpressionHelper<Tail<V>, N>;
+  : InferMemberExpressionObjectHelper<Tail<V>, N>;
 
 type InferMemberExpressionHelper<
   O extends StaticType,
@@ -415,7 +415,7 @@ type InferMemberExpressionHelper<
   S extends {},
   L extends number,
 > = O extends ObjectType<infer V>
-  ? InferObjectMemberExpressionHelper<V, N> extends infer I
+  ? InferMemberExpressionObjectHelper<V, N> extends infer I
     ? I extends null
       ? SyntaxError<`Property '${N}' does not exist on type '{}'.`, L>
       : [I, S]
