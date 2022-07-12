@@ -400,15 +400,26 @@ type InferMemberExpression<
     : J
   : never;
 
+type InferObjectMemberExpressionHelper<
+  V extends Array<[string, StaticType]>,
+  N extends string,
+> = V extends []
+  ? null
+  : V[0][0] extends N
+  ? V[0][1]
+  : InferObjectMemberExpressionHelper<Tail<V>, N>;
+
 type InferMemberExpressionHelper<
   O extends StaticType,
   N extends string,
   S extends {},
   L extends number,
 > = O extends ObjectType<infer V>
-  ? N extends keyof V
-    ? [V[N], S]
-    : SyntaxError<`Property '${N}' does not exist on type '{}'.`, L>
+  ? InferObjectMemberExpressionHelper<V, N> extends infer I
+    ? I extends null
+      ? SyntaxError<`Property '${N}' does not exist on type '{}'.`, L>
+      : [I, S]
+    : never
   : O extends ArrayType<infer V>
   ? [V, S]
   : O extends UnionType<infer U>
@@ -432,13 +443,13 @@ type InferMemberExpressionUnionHelper<
 type InferObjectProperties<
   T extends Array<ObjectProperty<any, any, any>>,
   S extends {},
-  R extends {} = {},
+  R extends Array<any> = [],
 > = T extends []
   ? [ObjectType<R>, S]
   : T[0] extends ObjectProperty<Identifier<infer K, any, any>, infer V, any>
   ? InferExpression<V, S> extends infer J
     ? J extends Array<any>
-      ? InferObjectProperties<Tail<T>, S, R & { [a in K]: J[0] }>
+      ? InferObjectProperties<Tail<T>, S, Push<R, [K, J[0]]>>
       : J
     : never
   : never;
