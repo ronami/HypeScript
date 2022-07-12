@@ -1,10 +1,13 @@
 import type {
   ArrayType,
+  BooleanLiteralType,
   BooleanType,
   NullType,
+  NumberLiteralType,
   NumberType,
   ObjectType,
   StaticType,
+  StringLiteralType,
   StringType,
   UnionType,
 } from './types';
@@ -13,21 +16,35 @@ import type { Tail } from './utils/arrayUtils';
 export type Serialize<
   T extends StaticType,
   N extends boolean = false,
-> = T extends StringType
-  ? 'string'
-  : T extends BooleanType
-  ? 'boolean'
-  : T extends NumberType
-  ? 'number'
-  : T extends NullType
-  ? 'null'
-  : T extends ArrayType<infer I>
-  ? SerializeArray<I>
-  : T extends UnionType<infer U>
-  ? SerializeUnion<U, N>
-  : T extends ObjectType<infer O>
-  ? { [P in keyof O]: O[P] extends StaticType ? Serialize<O[P]> : never }
+> = MapLiteralToType<T> extends infer H
+  ? H extends StringType
+    ? 'string'
+    : H extends BooleanType
+    ? 'boolean'
+    : H extends NumberType
+    ? 'number'
+    : H extends NullType
+    ? 'null'
+    : H extends ArrayType<infer I>
+    ? SerializeArray<I>
+    : H extends UnionType<infer U>
+    ? SerializeUnion<U, N>
+    : H extends ObjectType<infer O>
+    ? { [P in keyof O]: O[P] extends StaticType ? Serialize<O[P]> : never }
+    : never
   : never;
+
+type MapLiteralToType<T extends StaticType> = T extends NumberLiteralType<any>
+  ? NumberType
+  : T extends StringLiteralType<any>
+  ? StringType
+  : T extends BooleanLiteralType<any>
+  ? BooleanType
+  : T extends ObjectType<infer O>
+  ? ObjectType<{
+      [P in keyof O]: O[P] extends StaticType ? MapLiteralToType<O[P]> : never;
+    }>
+  : T;
 
 type SerializeArray<I extends StaticType> = Serialize<I, true> extends infer H
   ? H extends string
@@ -58,7 +75,11 @@ type SerializeUnion<
 type R = Serialize<
   ArrayType<
     UnionType<
-      [StringType, NumberType, ArrayType<UnionType<[StringType, NumberType]>>]
+      [
+        StringLiteralType<'hello'>,
+        NumberLiteralType<'2'>,
+        ArrayType<UnionType<[StringType, NumberType]>>,
+      ]
     >
   >
 >;
