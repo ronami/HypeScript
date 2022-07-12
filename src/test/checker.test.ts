@@ -421,3 +421,67 @@ o[true];
     lineNumber: 7,
   },
 ]);
+
+expectType<
+  TypeCheck<`
+
+const a = [1,2,3];
+
+const b: string = a;
+
+`>
+>([
+  {
+    type: 'SyntaxError',
+    message: "Type 'number[]' is not assignable to type 'string'.",
+    lineNumber: 5,
+  },
+]);
+
+expectType<
+  TypeCheck<`
+
+const a = [1,2,'3'];
+
+const b: string = a;
+
+`>
+>([
+  {
+    type: 'SyntaxError',
+    message: "Type '(number | string)[]' is not assignable to type 'string'.",
+    lineNumber: 5,
+  },
+]);
+
+expectType<
+  TypeCheck<`
+
+const a = [1,2,'3'][0];
+
+const b: string = a;
+
+`>
+>([
+  {
+    type: 'SyntaxError',
+    message: "Type 'number | string' is not assignable to type 'string'.",
+    lineNumber: 5,
+  },
+]);
+
+expectType<
+  TypeCheck<`
+
+const a = [[1, 2]];
+
+const b: string = a;
+
+`>
+>([
+  {
+    type: 'SyntaxError',
+    message: "Type 'number[][]' is not assignable to type 'string'.",
+    lineNumber: 5,
+  },
+]);

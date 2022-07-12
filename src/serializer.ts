@@ -42,7 +42,7 @@ type MapLiteralToType<T extends StaticType> = T extends NumberLiteralType<any>
   ? BooleanType
   : T;
 
-type SerializeArray<I extends StaticType> = Serialize<I> extends infer H
+type SerializeArray<I extends StaticType> = Serialize<I, true> extends infer H
   ? H extends string
     ? `${H}[]`
     : never
