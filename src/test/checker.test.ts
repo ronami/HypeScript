@@ -203,7 +203,7 @@ const hello: number = "hello";
 >([
   {
     type: 'SyntaxError',
-    message: "Type '...' is not assignable to type '...'.",
+    message: "Type 'string' is not assignable to type 'number'.",
     lineNumber: 3,
   },
 ]);
@@ -217,7 +217,7 @@ const hello: string = 123;
 >([
   {
     type: 'SyntaxError',
-    message: "Type '...' is not assignable to type '...'.",
+    message: "Type 'number' is not assignable to type 'string'.",
     lineNumber: 3,
   },
 ]);
@@ -232,7 +232,7 @@ const foo: number = hello;
 >([
   {
     type: 'SyntaxError',
-    message: "Type '...' is not assignable to type '...'.",
+    message: "Type 'string' is not assignable to type 'number'.",
     lineNumber: 4,
   },
 ]);
@@ -274,7 +274,7 @@ const foo: number = hello.hey;
 >([
   {
     type: 'SyntaxError',
-    message: "Type '...' is not assignable to type '...'.",
+    message: "Type 'string' is not assignable to type 'number'.",
     lineNumber: 5,
   },
 ]);
@@ -417,7 +417,7 @@ o[true];
 >([
   {
     type: 'SyntaxError',
-    message: "Type '{}' cannot be used as an index type.",
+    message: "Type 'boolean' cannot be used as an index type.",
     lineNumber: 7,
   },
 ]);

@@ -25,6 +25,7 @@ import type {
   VariableDeclarator,
 } from './ast';
 import type { SyntaxError } from './errors';
+import type { Serialize } from './serializer';
 import type {
   AnyType,
   ArrayType,
@@ -190,7 +191,9 @@ type MatchTypeArrays<
   : MatchType<T[0], H[0]> extends true
   ? MatchTypeArrays<Tail<T>, Tail<H>, L>
   : SyntaxError<
-      `Argument of type '...' is not assignable to parameter of type '...'.`,
+      `Argument of type '${Serialize<
+        H[0]
+      >}' is not assignable to parameter of type '${Serialize<T[0]>}'.`,
       L
     >;
 
@@ -215,7 +218,12 @@ type InferVariableDeclaration<
           ? P extends StaticType
             ? MatchType<P, G[0]> extends true
               ? [null, MergeWithOverride<S, { [a in N]: P }>]
-              : SyntaxError<`Type '...' is not assignable to type '...'.`, L>
+              : SyntaxError<
+                  `Type '${Serialize<
+                    G[0]
+                  >}' is not assignable to type '${Serialize<P>}'.`,
+                  L
+                >
             : never
           : never
         : [null, MergeWithOverride<S, { [a in N]: G[0] }>]
@@ -273,7 +281,9 @@ type InferCallExpression<
             : H
           : never
         : SyntaxError<
-            `This expression is not callable. Type '...' has no call signatures.`,
+            `This expression is not callable. Type '${Serialize<
+              G[0]
+            >}' has no call signatures.`,
             L
           >
       : G
@@ -378,7 +388,10 @@ type InferMemberExpression<
             ? InferMemberExpressionHelper<J[0], N, S, L>
             : G[0] extends NumberLiteralType<infer N>
             ? InferMemberExpressionHelper<J[0], N, S, L>
-            : SyntaxError<`Type '{}' cannot be used as an index type.`, L>
+            : SyntaxError<
+                `Type '${Serialize<G[0]>}' cannot be used as an index type.`,
+                L
+              >
           : G extends null
           ? never
           : G
