@@ -47,7 +47,7 @@ export type FunctionType<P extends Array<StaticType>, R extends StaticType> = {
   return: R;
 };
 
-export type ObjectType<O> = {
+export type ObjectType<O extends Array<[string, StaticType]>> = {
   type: 'ObjectType';
   object: O;
 };
