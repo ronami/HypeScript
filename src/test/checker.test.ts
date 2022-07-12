@@ -258,7 +258,7 @@ const foo: number = hello;
 >([
   {
     type: 'SyntaxError',
-    message: "Type '...' is not assignable to type '...'.",
+    message: "Type '{ hey: string; }' is not assignable to type 'number'.",
     lineNumber: 5,
   },
 ]);
