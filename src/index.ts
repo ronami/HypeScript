@@ -4,7 +4,7 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 
-function foo(hey: number, ho: string) {}
+function foo(hey: number, ho: any) {}
 
 foo([foo], 'a')
 
