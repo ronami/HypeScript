@@ -1,4 +1,5 @@
 import type {
+  AnyType,
   ArrayType,
   BooleanLiteralType,
   BooleanType,
@@ -11,6 +12,7 @@ import type {
   StringLiteralType,
   StringType,
   UnionType,
+  UnknownType,
   VoidType,
 } from './types';
 import type { Tail } from './utils/arrayUtils';
@@ -27,6 +29,10 @@ export type Serialize<T extends StaticType> =
       ? 'null'
       : H extends VoidType
       ? 'void'
+      : H extends AnyType
+      ? 'any'
+      : H extends UnknownType
+      ? 'unknown'
       : H extends ArrayType<infer I>
       ? SerializeArray<I>
       : H extends UnionType<infer U>
