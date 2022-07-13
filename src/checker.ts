@@ -88,7 +88,7 @@ type MapAnnotationToType<A extends Node<any>> =
 type InferFunctionParams<
   T extends Array<Node<any>>,
   S extends {},
-  R extends Array<StaticType> = [],
+  R extends Array<[string, StaticType]> = [],
   H extends Record<string, StaticType> = {},
 > = T extends []
   ? [R, H, S]
@@ -101,14 +101,14 @@ type InferFunctionParams<
 type InferFunctionParamsHelper<
   T extends Array<Node<any>>,
   S extends {},
-  R extends Array<StaticType>,
+  R extends Array<[string, StaticType]>,
   H extends Record<string, StaticType>,
   V extends StaticType,
   N extends string,
 > = InferFunctionParams<
   Tail<T>,
   S,
-  Push<R, V>,
+  Push<R, [N, V]>,
   MergeWithOverride<H, { [a in N]: V }>
 >;
 
@@ -183,17 +183,17 @@ type MatchType<A extends StaticType, B extends StaticType> = A extends AnyType
   : false;
 
 type MatchTypeArrays<
-  T extends Array<StaticType>,
+  T extends Array<[string, StaticType]>,
   H extends Array<StaticType>,
   L extends number,
 > = T extends []
   ? true
-  : MatchType<T[0], H[0]> extends true
+  : MatchType<T[0][1], H[0]> extends true
   ? MatchTypeArrays<Tail<T>, Tail<H>, L>
   : SyntaxError<
       `Argument of type '${Serialize<
         H[0]
-      >}' is not assignable to parameter of type '${Serialize<T[0]>}'.`,
+      >}' is not assignable to parameter of type '${Serialize<T[0][1]>}'.`,
       L
     >;
 
@@ -291,7 +291,7 @@ type InferCallExpression<
   : never;
 
 type InferCallExpressionHelper<
-  P extends Array<StaticType>,
+  P extends Array<[string, StaticType]>,
   H extends Array<StaticType>,
   R extends StaticType,
   S extends {},
