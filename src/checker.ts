@@ -417,14 +417,17 @@ type InferMemberExpressionHelper<
 > = O extends ObjectType<infer V>
   ? InferMemberExpressionObjectHelper<V, N> extends infer I
     ? I extends null
-      ? SyntaxError<`Property '${N}' does not exist on type '{}'.`, L>
+      ? SyntaxError<
+          `Property '${N}' does not exist on type '${Serialize<O>}'.`,
+          L
+        >
       : [I, S]
     : never
   : O extends ArrayType<infer V>
   ? [V, S]
   : O extends UnionType<infer U>
   ? InferMemberExpressionUnionHelper<U, N, S, L>
-  : SyntaxError<`Property '${N}' does not exist on type '...'.`, L>;
+  : SyntaxError<`Property '${N}' does not exist on type '${Serialize<O>}'.`, L>;
 
 type InferMemberExpressionUnionHelper<
   U extends Array<StaticType>,

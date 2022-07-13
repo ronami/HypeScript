@@ -92,7 +92,7 @@ hello.world
 >([
   {
     type: 'SyntaxError',
-    message: "Property 'world' does not exist on type '{}'.",
+    message: "Property 'world' does not exist on type '{ foo: string; }'.",
     lineNumber: 4,
   },
 ]);
@@ -137,7 +137,7 @@ hello
 >([
   {
     type: 'SyntaxError',
-    message: "Property 'hey' does not exist on type '{}'.",
+    message: "Property 'hey' does not exist on type '{ bar: string; }'.",
     lineNumber: 11,
   },
 ]);
@@ -153,7 +153,7 @@ hello.foo
 >([
   {
     type: 'SyntaxError',
-    message: "Property 'foo' does not exist on type '...'.",
+    message: "Property 'foo' does not exist on type 'string'.",
     lineNumber: 5,
   },
 ]);
@@ -377,7 +377,7 @@ o[k]["hi"];
 >([
   {
     type: 'SyntaxError',
-    message: "Property 'hi' does not exist on type '{}'.",
+    message: "Property 'hi' does not exist on type '{ ho: string; }'.",
     lineNumber: 11,
   },
 ]);
