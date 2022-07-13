@@ -2,6 +2,7 @@ import type {
   ArrayType,
   BooleanLiteralType,
   BooleanType,
+  FunctionType,
   NullType,
   NumberLiteralType,
   NumberType,
@@ -10,27 +11,61 @@ import type {
   StringLiteralType,
   StringType,
   UnionType,
+  VoidType,
 } from './types';
 import type { Tail } from './utils/arrayUtils';
 
-export type Serialize<
-  T extends StaticType,
-  N extends boolean = false,
-> = MapLiteralToType<T> extends infer H
-  ? H extends StringType
-    ? 'string'
-    : H extends BooleanType
-    ? 'boolean'
-    : H extends NumberType
-    ? 'number'
-    : H extends NullType
-    ? 'null'
-    : H extends ArrayType<infer I>
-    ? SerializeArray<I>
-    : H extends UnionType<infer U>
-    ? SerializeUnion<U, N>
-    : H extends ObjectType<infer O>
-    ? SerializeObject<O>
+export type Serialize<T extends StaticType> =
+  MapLiteralToType<T> extends infer H
+    ? H extends StringType
+      ? 'string'
+      : H extends BooleanType
+      ? 'boolean'
+      : H extends NumberType
+      ? 'number'
+      : H extends NullType
+      ? 'null'
+      : H extends VoidType
+      ? 'void'
+      : H extends ArrayType<infer I>
+      ? SerializeArray<I>
+      : H extends UnionType<infer U>
+      ? SerializeUnion<U>
+      : H extends ObjectType<infer O>
+      ? SerializeObject<O>
+      : H extends FunctionType<infer P, infer R>
+      ? SerializeFunction<P, R>
+      : never
+    : never;
+
+type SerializeFunction<
+  P extends Array<[string, StaticType]>,
+  R extends StaticType,
+> = SerializeFunctionParams<P> extends infer H
+  ? H extends string
+    ? `(${H}) => ${Serialize<R>}`
+    : never
+  : never;
+
+type SerializeFunctionParams<
+  P extends Array<[string, StaticType]>,
+  R extends string = '',
+> = P extends []
+  ? R
+  : P[0] extends [infer K, infer V]
+  ? V extends StaticType
+    ? K extends string
+      ? SerializeFunctionParams<
+          Tail<P>,
+          `${R}${K}: ${Serialize<V>}` extends infer U
+            ? U extends string
+              ? P['length'] extends 1
+                ? `${U}`
+                : `${U}, `
+              : never
+            : never
+        >
+      : never
     : never
   : never;
 
@@ -42,26 +77,30 @@ type MapLiteralToType<T extends StaticType> = T extends NumberLiteralType<any>
   ? BooleanType
   : T;
 
-type SerializeArray<I extends StaticType> = Serialize<I, true> extends infer H
+type ShouldUseParens<I extends StaticType> = I extends UnionType<any>
+  ? true
+  : I extends FunctionType<any, any>
+  ? true
+  : false;
+
+type SerializeArray<I extends StaticType> = Serialize<I> extends infer H
   ? H extends string
-    ? `${H}[]`
+    ? ShouldUseParens<I> extends true
+      ? `(${H})[]`
+      : `${H}[]`
     : never
   : never;
 
 type SerializeUnion<
   U extends Array<StaticType>,
-  N extends boolean,
   R extends string = '',
 > = U extends []
-  ? N extends true
-    ? `(${R})`
-    : R
+  ? R
   : U[0] extends StaticType
-  ? Serialize<U[0], true> extends infer H
+  ? Serialize<U[0]> extends infer H
     ? H extends string
       ? SerializeUnion<
           Tail<U>,
-          N,
           U['length'] extends 1 ? `${R}${H}` : `${R}${H} | `
         >
       : never
