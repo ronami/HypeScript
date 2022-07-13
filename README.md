@@ -8,34 +8,34 @@ This project includes a (very) simplified implementation of [TypeScript](https:/
 
 The implementation uses types only — with no runtime code whatsoever, and to see it in action you'll need to hover your mouse over the resulting type.
 
-You enter TypeScript code as string and get possible type errors back:
+You enter TypeScript code as string and get possible type errors back (**[See the live demo]()**):
 
 ```typescript
 import type { TypeCheck } from 'hypescript';
 
 type Errors = TypeCheck<`
 
-function foo(name: string) {
+function foo(name: number) {
   return name
 }
 
-const result = foo()
+foo('not a number')
 
 `>;
 
 // Errors is now equal to the following type:
-type Expected = ["Expected 1 arguments, but got 0."];
+type Expected = ["Line 7: Argument of type 'string' is not assignable to parameter of type 'number'."];
 ```
 
-The project contains a tokenizer, parser and type-checker and includes comments explaining how everything works.
+The implementation includes a tokenizer, parser, and a type-checker and includes comments explaining how everything works.
 
 *☝ Please note that this project is meant to be used for fun and learning purposes and not for practical use.*
 
 ### Try running the code
 
-See it live on your browser on the [TypeScript Playground]().
+See a live demo in your browser on the [TypeScript Playground]().
 
-Alternatively, install `hypescript` in your own project with `yarn` or `npm` ([TypeScript](https://github.com/microsoft/TypeScript) 4.1 or later is required):
+Alternatively, install `hypescript` in your own project with `yarn` or `npm` ([TypeScript](https://github.com/microsoft/TypeScript) 4.7 or later is required):
 
 ```
 yarn add hypescript
@@ -43,25 +43,14 @@ yarn add hypescript
 
 ### Supported features and syntax
 
-Some syntax or type checking features aren't supported (yet), here are some example for what currently works (see demo link for each).
+Some TypeScript syntax and features haven't been implemented and won't work. Here's a list of examples (with demo links) for some of the capabilites:
 
-#### Calling a function with missing arguments
-
-The following would result in the `Errors` type showing the following error: `Expected 1 arguments, but got 0.`
-
-```typescript
-import type { TypeCheck } from 'hypescript';
-
-type Errors = TypeCheck<`
-
-function foo(name: string) {
-  return name
-}
-
-const result = foo()
-
-`>;
-```
+- [Calling a function with insufficient arguments]()
+- [Calling a function with wrong argument types]()
+- [Trying to access a variable that haven't been defined]()
+- [Accessing a property that doesn't exist on an object]()
+- [Trying to assign a value to a variable that doesn't match its type annotation]()
+- [Trying to access a variable that haven't been defined]()
 
 ### Additional links
 
