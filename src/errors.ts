@@ -9,3 +9,9 @@ export type SyntaxError<M extends string, L extends number> = Error<
   M,
   L
 >;
+
+export type TypeError<M extends string, L extends number> = Error<
+  'TypeError',
+  M,
+  L
+>;

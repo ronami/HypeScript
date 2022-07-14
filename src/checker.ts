@@ -24,7 +24,7 @@ import type {
   VariableDeclaration,
   VariableDeclarator,
 } from './ast';
-import type { SyntaxError } from './errors';
+import type { TypeError } from './errors';
 import type { Serialize } from './serializer';
 import type {
   AnyType,
@@ -45,6 +45,7 @@ import type {
 } from './types';
 import type { Includes, Push, Tail, Uniq } from './utils/arrayUtils';
 import type { MergeWithOverride } from './utils/generalUtils';
+import type { TypeResult } from './utils/utilityTypes';
 
 export type Check<
   T extends Array<Node<any>>,
@@ -243,17 +244,17 @@ type InferExpression<
   T extends Node<any>,
   S extends Record<string, StaticType>,
 > = T extends StringLiteral<infer I, any>
-  ? [StringLiteralType<I>, S]
+  ? TypeResult<StringLiteralType<I>, S>
   : T extends NumericLiteral<infer I, any>
-  ? [NumberLiteralType<I>, S]
+  ? TypeResult<NumberLiteralType<I>, S>
   : T extends NullLiteral<any>
-  ? [NullType, S]
+  ? TypeResult<NullType, S>
   : T extends BooleanLiteral<infer I, any>
-  ? [BooleanLiteralType<I>, S]
+  ? TypeResult<BooleanLiteralType<I>, S>
   : T extends Identifier<infer N, any, NodeData<infer I, any>>
   ? N extends keyof S
-    ? [S[N], S]
-    : SyntaxError<`Cannot find name '${N}'.`, I>
+    ? TypeResult<S[N], S>
+    : TypeResult<AnyType, S, [TypeError<`Cannot find name '${N}'.`, I>]>
   : T extends ObjectExpression<infer O, any>
   ? InferObjectProperties<O, S>
   : T extends MemberExpression<infer O, infer P, infer C, any>
