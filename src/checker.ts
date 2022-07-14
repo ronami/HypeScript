@@ -87,27 +87,24 @@ type MapAnnotationToType<A extends Node<any>> =
 
 type InferFunctionParams<
   T extends Array<Node<any>>,
-  S extends Record<string, StaticType>,
   R extends Array<[string, StaticType]> = [],
   H extends Record<string, StaticType> = {},
 > = T extends []
-  ? [R, H, S]
+  ? [R, H]
   : T[0] extends Identifier<infer N, infer K, any>
   ? K extends TypeAnnotation<infer V, any>
-    ? InferFunctionParamsHelper<T, S, R, H, MapAnnotationToType<V>, N>
-    : InferFunctionParamsHelper<T, S, R, H, AnyType, N>
+    ? InferFunctionParamsHelper<T, R, H, MapAnnotationToType<V>, N>
+    : InferFunctionParamsHelper<T, R, H, AnyType, N>
   : never;
 
 type InferFunctionParamsHelper<
   T extends Array<Node<any>>,
-  S extends Record<string, StaticType>,
   R extends Array<[string, StaticType]>,
   H extends Record<string, StaticType>,
   V extends StaticType,
   N extends string,
 > = InferFunctionParams<
   Tail<T>,
-  S,
   Push<R, [N, V]>,
   MergeWithOverride<H, { [a in N]: V }>
 >;
@@ -121,7 +118,7 @@ type InferFunctionDeclaration<
   BlockStatement<infer B, any>,
   any
 >
-  ? InferFunctionParams<P, S> extends infer H
+  ? InferFunctionParams<P> extends infer H
     ? H extends Array<any>
       ? InferBlockStatement<B, MergeWithOverride<S, H[1]>> extends infer G
         ? G extends Array<any>
