@@ -4,11 +4,9 @@
 
 ### Introduction
 
-This project includes a (very) simplified implementation of [TypeScript](https://github.com/microsoft/TypeScript)'s type-system that's written in [TypeScript](https://github.com/microsoft/TypeScript)'s own type-system.
+This is a simplified implementation of [TypeScript](https://github.com/microsoft/TypeScript)'s type-system that's written in [TypeScript](https://github.com/microsoft/TypeScript)'s type annotations. This means that it uses types only — with no runtime code whatsoever.
 
-The implementation uses types only — with no runtime code whatsoever, and to see it in action you'll need to hover your mouse over the resulting type.
-
-You enter TypeScript code as string and get possible type errors back (**[See the live demo]()**):
+You pass [TypeScript](https://github.com/microsoft/TypeScript) code as string to the `TypeCheck` generic and get possible type errors back (**[See the live demo]()**):
 
 ```typescript
 import type { TypeCheck } from 'hypescript';
@@ -16,18 +14,18 @@ import type { TypeCheck } from 'hypescript';
 type Errors = TypeCheck<`
 
 function foo(name: number) {
-  return name
+  return name;
 }
 
-foo('not a number')
+foo('not a number');
 
 `>;
 
 // Errors is now equal to the following type:
-type Expected = ["Line 7: Argument of type 'string' is not assignable to parameter of type 'number'."];
+type Expected = [
+  "Line 7: Argument of type 'string' is not assignable to parameter of type 'number'."
+];
 ```
-
-The implementation includes a tokenizer, parser, and a type-checker and includes comments explaining how everything works.
 
 *☝ Please note that this project is meant to be used for fun and learning purposes and not for practical use.*
 
@@ -43,7 +41,7 @@ yarn add hypescript
 
 ### Supported features and syntax
 
-Some TypeScript syntax and features haven't been implemented and won't work. Here's a list of examples (with demo links) for some of the capabilites:
+Some [TypeScript](https://github.com/microsoft/TypeScript) syntax and features haven't been implemented and won't work. Here's a list of examples (with browser demo links) for some of the capabilites:
 
 - [Calling a function with insufficient arguments]()
 - [Calling a function with wrong argument types]()
