@@ -43,7 +43,7 @@ import type {
   UnknownType,
   VoidType,
 } from './types';
-import type { Includes, Push, Tail, Uniq } from './utils/arrayUtils';
+import type { Concat, Includes, Push, Tail, Uniq } from './utils/arrayUtils';
 import type { MergeWithOverride } from './utils/generalUtils';
 import type { TypeResult } from './utils/utilityTypes';
 
@@ -451,15 +451,27 @@ type InferMemberExpressionUnionHelper<
   : never;
 
 type InferObjectProperties<
-  T extends Array<ObjectProperty<any, any, any>>,
-  S extends Record<string, StaticType>,
-  R extends Array<any> = [],
-> = T extends []
-  ? [ObjectType<R>, S]
-  : T[0] extends ObjectProperty<Identifier<infer K, any, any>, infer V, any>
-  ? InferExpression<V, S> extends infer J
-    ? J extends Array<any>
-      ? InferObjectProperties<Tail<T>, S, Push<R, [K, J[0]]>>
-      : J
+  Properties extends Array<ObjectProperty<any, any, any>>,
+  State extends Record<string, StaticType>,
+  Result extends Array<any> = [],
+  Errors extends Array<TypeError<any, any>> = [],
+> = Properties extends []
+  ? TypeResult<ObjectType<Result>, State, Errors>
+  : Properties[0] extends ObjectProperty<
+      Identifier<infer Name, any, any>,
+      infer Value,
+      any
+    >
+  ? InferExpression<Value, State> extends TypeResult<
+      infer ExpressionValue,
+      infer ExpressionState,
+      infer ExpressionErrors
+    >
+    ? InferObjectProperties<
+        Tail<Properties>,
+        ExpressionState,
+        Push<Result, [Name, ExpressionValue]>,
+        Concat<Errors, ExpressionErrors>
+      >
     : never
   : never;
