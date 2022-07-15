@@ -31,6 +31,7 @@ import type {
   ArrayType,
   BooleanLiteralType,
   BooleanType,
+  CallArgumentsType,
   FunctionType,
   NullType,
   NumberLiteralType,
@@ -43,7 +44,14 @@ import type {
   UnknownType,
   VoidType,
 } from './types';
-import type { Concat, Includes, Push, Tail, Uniq } from './utils/arrayUtils';
+import type {
+  Concat,
+  Includes,
+  Push,
+  Tail,
+  Uniq,
+  Unshift,
+} from './utils/arrayUtils';
 import type { MergeWithOverride } from './utils/generalUtils';
 import type { StateType, TypeResult } from './utils/utilityTypes';
 
@@ -245,18 +253,20 @@ type MatchType<A extends StaticType, B extends StaticType> = A extends AnyType
   : false;
 
 type MatchTypeArrays<
-  T extends Array<[string, StaticType]>,
-  H extends Array<StaticType>,
-  L extends number,
-> = T extends []
+  ParamsType extends Array<[string, StaticType]>,
+  ArgumentsType extends Array<StaticType>,
+  StartLine extends number,
+> = ParamsType extends []
   ? true
-  : MatchType<T[0][1], H[0]> extends true
-  ? MatchTypeArrays<Tail<T>, Tail<H>, L>
-  : SyntaxError<
+  : MatchType<ParamsType[0][1], ArgumentsType[0]> extends true
+  ? MatchTypeArrays<Tail<ParamsType>, Tail<ArgumentsType>, StartLine>
+  : TypeError<
       `Argument of type '${Serialize<
-        H[0]
-      >}' is not assignable to parameter of type '${Serialize<T[0][1]>}'.`,
-      L
+        ArgumentsType[0]
+      >}' is not assignable to parameter of type '${Serialize<
+        ParamsType[0][1]
+      >}'.`,
+      StartLine
     >;
 
 type InferVariableDeclaration<
@@ -353,51 +363,78 @@ type InferCallExpression<
   infer CalleeState,
   infer CalleeErrors
 >
-  ? InferExpressionsArray<Arguments, State> extends infer H
-    ? CalleeValue extends FunctionType<infer P, infer R>
-      ? H extends Array<any>
-        ? InferCallExpressionHelper<P, H[0], R, State, StartLine>
-        : H
+  ? InferExpressionsArray<Arguments, CalleeState> extends TypeResult<
+      CallArgumentsType<infer ArgumentsType>,
+      infer ArgumentsState,
+      infer ArgumentsErrors
+    >
+    ? CalleeValue extends FunctionType<infer ParamsType, infer ReturnType>
+      ? InferCallExpressionHelper<
+          ParamsType,
+          ArgumentsType,
+          ReturnType,
+          ArgumentsState,
+          Concat<CalleeErrors, ArgumentsErrors>,
+          StartLine
+        >
       : TypeResult<
           AnyType,
-          State,
-          [
+          ArgumentsState,
+          Unshift<
+            ArgumentsErrors,
             TypeError<
               `This expression is not callable. Type '${Serialize<CalleeValue>}' has no call signatures.`,
               StartLine
-            >,
-          ]
+            >
+          >
         >
     : never
   : never;
 
 type InferCallExpressionHelper<
-  P extends Array<[string, StaticType]>,
-  H extends Array<StaticType>,
-  R extends StaticType,
+  ParamsType extends Array<[string, StaticType]>,
+  ArgumentsType extends Array<StaticType>,
+  ReturnType extends StaticType,
   State extends StateType,
+  Errors extends Array<TypeError<any, any>>,
   StartLine extends number,
-> = P['length'] extends H['length']
-  ? MatchTypeArrays<P, H, StartLine> extends infer W
-    ? W extends true
-      ? [R, State]
-      : W
-    : never
-  : TypeError<
-      `Expected ${P['length']} arguments, but got ${H['length']}.`,
-      StartLine
+> = ParamsType['length'] extends ArgumentsType['length']
+  ? MatchTypeArrays<ParamsType, ArgumentsType, StartLine> extends TypeError<
+      infer Message,
+      infer StartLine
+    >
+    ? TypeResult<ReturnType, State, Push<Errors, TypeError<Message, StartLine>>>
+    : TypeResult<ReturnType, State, Errors>
+  : TypeResult<
+      AnyType,
+      State,
+      Push<
+        Errors,
+        TypeError<
+          `Expected ${ParamsType['length']} arguments, but got ${ArgumentsType['length']}.`,
+          StartLine
+        >
+      >
     >;
 
 type InferExpressionsArray<
-  T extends Array<BaseNode<any>>,
-  S extends StateType,
-  R extends Array<StaticType> = [],
-> = T extends []
-  ? [R, S]
-  : InferExpression<T[0], S> extends infer H
-  ? H extends Array<any>
-    ? InferExpressionsArray<Tail<T>, MergeWithOverride<S, H[1]>, Push<R, H[0]>>
-    : H
+  NodeList extends Array<BaseNode<any>>,
+  State extends StateType,
+  Result extends Array<StaticType> = [],
+  Errors extends Array<TypeError<any, any>> = [],
+> = NodeList extends []
+  ? TypeResult<CallArgumentsType<Result>, State, Errors>
+  : InferExpression<NodeList[0], State> extends TypeResult<
+      infer ExpressionValue,
+      infer ExpressionState,
+      infer ExpressionErrors
+    >
+  ? InferExpressionsArray<
+      Tail<NodeList>,
+      MergeWithOverride<State, ExpressionState>,
+      Push<Result, ExpressionValue>,
+      Concat<Errors, ExpressionErrors>
+    >
   : never;
 
 type InferArrayElements<
