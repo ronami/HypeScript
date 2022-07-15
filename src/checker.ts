@@ -327,24 +327,32 @@ type InferExpressionsArray<
   : never;
 
 type InferArrayElements<
-  T extends Array<BaseNode<any>>,
-  S extends Record<string, StaticType>,
-  R extends StaticType = AnyType,
-> = T extends []
-  ? [ArrayType<R>, S]
-  : T[0] extends BaseNode<any>
-  ? InferExpression<T[0], S> extends infer J
-    ? J extends Array<any>
-      ? MapLiteralToType<J[0]> extends infer E
-        ? E extends StaticType
-          ? InferArrayElementsHelper<R, E> extends infer U
-            ? U extends StaticType
-              ? InferArrayElements<Tail<T>, J[1], U>
-              : never
+  Elements extends Array<BaseNode<any>>,
+  State extends Record<string, StaticType>,
+  Result extends StaticType = AnyType,
+  Errors extends Array<TypeError<any, any>> = [],
+> = Elements extends []
+  ? TypeResult<ArrayType<Result>, State, Errors>
+  : Elements[0] extends BaseNode<any>
+  ? InferExpression<Elements[0], State> extends TypeResult<
+      infer ExpressionValue,
+      infer ExpressionState,
+      infer ExpressionErrors
+    >
+    ? MapLiteralToType<ExpressionValue> extends infer E
+      ? E extends StaticType
+        ? InferArrayElementsHelper<Result, E> extends infer U
+          ? U extends StaticType
+            ? InferArrayElements<
+                Tail<Elements>,
+                ExpressionState,
+                U,
+                Concat<Errors, ExpressionErrors>
+              >
             : never
           : never
         : never
-      : J
+      : never
     : never
   : never;
 
