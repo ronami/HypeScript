@@ -400,7 +400,7 @@ type InferCallExpression<
           AnyType,
           ArgumentsState,
           Unshift<
-            ArgumentsErrors,
+            Concat<CalleeErrors, ArgumentsErrors>,
             TypeError<
               `This expression is not callable. Type '${Serialize<CalleeValue>}' has no call signatures.`,
               StartLine
