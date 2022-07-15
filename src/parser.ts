@@ -571,19 +571,19 @@ type ParseIfStatement<
 
 type ParseReturnStatementHelper<
   TokenList extends Array<Token<any>>,
-  LineNumber extends number,
+  StartLineNumber extends number,
 > = TokenList[0] extends GenericToken<
   ';',
   TokenData<any, infer SemicolonLineNumber>
 >
   ? [
-      ReturnStatement<null, NodeData<LineNumber, SemicolonLineNumber>>,
+      ReturnStatement<null, NodeData<StartLineNumber, SemicolonLineNumber>>,
       Tail<TokenList>,
     ]
   : ParseExpression<TokenList> extends infer G
   ? G extends Array<any>
-    ? G[0] extends BaseNode<NodeData<any, infer K>>
-      ? [ReturnStatement<G[0], NodeData<LineNumber, K>>, G[1]]
+    ? G[0] extends BaseNode<NodeData<any, infer EndLineNumber>>
+      ? [ReturnStatement<G[0], NodeData<StartLineNumber, EndLineNumber>>, G[1]]
       : G
     : never
   : never;
@@ -609,7 +609,7 @@ type ParseReturnStatement<
 
 type ParseIfStatementHelper<
   G extends Array<any>,
-  L extends number,
+  StartLineNumber extends number,
   InFunctionScope extends boolean,
   E extends number,
 > = G[1] extends Array<any>
@@ -624,8 +624,15 @@ type ParseIfStatementHelper<
           InFunctionScope
         > extends infer B
         ? B extends Array<any>
-          ? B[0] extends BaseNode<NodeData<any, infer E>>
-            ? [IfStatement<G[0], B[0], NodeData<L, E>>, B[1]]
+          ? B[0] extends BaseNode<NodeData<any, infer EndLineNumber>>
+            ? [
+                IfStatement<
+                  G[0],
+                  B[0],
+                  NodeData<StartLineNumber, EndLineNumber>
+                >,
+                B[1],
+              ]
             : never
           : B
         : never
