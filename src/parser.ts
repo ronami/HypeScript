@@ -558,13 +558,19 @@ type ParseTopLevel<
   : never;
 
 type ParseBlockStatementHelper<
-  T extends Array<Token<any>>,
-  L extends number,
-  F extends boolean,
-  R extends Array<BaseNode<any>>,
-> = ParseStatementHelper<T, F> extends infer G
+  TokenList extends Array<Token<any>>,
+  LineNumber extends number,
+  InFunctionScope extends boolean,
+  Result extends Array<BaseNode<any>>,
+> = ParseStatementHelper<TokenList, InFunctionScope> extends infer G
   ? G extends Array<any>
-    ? ParseBlockStatement<G[1], L, F, Push<R, G[0]>, true>
+    ? ParseBlockStatement<
+        G[1],
+        LineNumber,
+        InFunctionScope,
+        Push<Result, G[0]>,
+        true
+      >
     : G
   : never;
 
