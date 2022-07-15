@@ -213,14 +213,14 @@ type ParseMemberExpression<
   : never;
 
 type ParseCallExpression<
-  O extends BaseNode<any>,
-  T extends Array<Token<any>>,
-> = T[0] extends GenericToken<'(', TokenData<any, infer E>>
-  ? ParseCallExpressionArguments<Tail<T>, E, ')'> extends infer G
+  Node extends BaseNode<any>,
+  TokenList extends Array<Token<any>>,
+> = TokenList[0] extends GenericToken<'(', TokenData<any, infer E>>
+  ? ParseCallExpressionArguments<Tail<TokenList>, E, ')'> extends infer G
     ? G extends Array<any>
-      ? O extends BaseNode<NodeData<infer S, any>>
+      ? Node extends BaseNode<NodeData<infer NodeStartLine, any>>
         ? G[2] extends Token<TokenData<any, infer L>>
-          ? [CallExpression<O, G[0], NodeData<S, L>>, G[1]]
+          ? [CallExpression<Node, G[0], NodeData<NodeStartLine, L>>, G[1]]
           : never
         : never
       : G
@@ -257,9 +257,9 @@ type ParseCallExpressionArgumentsHelper<
   : never;
 
 type CheckExpression<
-  O extends BaseNode<any>,
-  T extends Array<Token<any>>,
-> = ParseMemberExpression<O, T> extends infer G
+  Node extends BaseNode<any>,
+  TokenList extends Array<Token<any>>,
+> = ParseMemberExpression<Node, TokenList> extends infer G
   ? G extends [infer O, infer T]
     ? O extends BaseNode<any>
       ? T extends Array<Token<any>>
@@ -268,7 +268,7 @@ type CheckExpression<
       : never
     : G extends Error<any, any, any>
     ? G
-    : ParseCallExpression<O, T> extends infer G
+    : ParseCallExpression<Node, TokenList> extends infer G
     ? G extends [infer O, infer T]
       ? O extends BaseNode<any>
         ? T extends Array<Token<any>>
@@ -277,7 +277,7 @@ type CheckExpression<
         : never
       : G extends Error<any, any, any>
       ? G
-      : [O, T]
+      : [Node, TokenList]
     : never
   : never;
 
