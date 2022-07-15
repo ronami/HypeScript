@@ -9,7 +9,7 @@ import type {
   FunctionDeclaration,
   Identifier,
   MemberExpression,
-  Node,
+  BaseNode,
   NodeData,
   NullLiteral,
   NullLiteralTypeAnnotation,
@@ -48,7 +48,7 @@ import type { MergeWithOverride } from './utils/generalUtils';
 import type { TypeResult } from './utils/utilityTypes';
 
 export type Check<
-  T extends Array<Node<any>>,
+  T extends Array<BaseNode<any>>,
   S extends Record<string, StaticType> = {},
   R extends Array<any> = [],
 > = T extends []
@@ -73,7 +73,7 @@ export type Check<
     : never
   : never;
 
-type MapAnnotationToType<A extends Node<any>> =
+type MapAnnotationToType<A extends BaseNode<any>> =
   A extends StringTypeAnnotation<any>
     ? StringType
     : A extends NumberTypeAnnotation<any>
@@ -87,7 +87,7 @@ type MapAnnotationToType<A extends Node<any>> =
     : never;
 
 type InferFunctionParams<
-  T extends Array<Node<any>>,
+  T extends Array<BaseNode<any>>,
   R extends Array<[string, StaticType]> = [],
   H extends Record<string, StaticType> = {},
 > = T extends []
@@ -99,7 +99,7 @@ type InferFunctionParams<
   : never;
 
 type InferFunctionParamsHelper<
-  T extends Array<Node<any>>,
+  T extends Array<BaseNode<any>>,
   R extends Array<[string, StaticType]>,
   H extends Record<string, StaticType>,
   V extends StaticType,
@@ -131,7 +131,7 @@ type InferFunctionDeclaration<
   : never;
 
 type InferBlockStatement<
-  T extends Array<Node<any>>,
+  T extends Array<BaseNode<any>>,
   S extends Record<string, StaticType> = {},
   R extends StaticType = VoidType,
 > = T extends []
@@ -149,7 +149,7 @@ type InferBlockStatement<
       : G
     : never
   : T[0] extends ReturnStatement<infer F, any>
-  ? F extends Node<any>
+  ? F extends BaseNode<any>
     ? InferExpression<F, S> extends infer G
       ? G extends Array<any>
         ? InferBlockStatement<[], G[1], G[0]>
@@ -241,35 +241,44 @@ type InferExpressionStatement<
   : never;
 
 type InferExpression<
-  T extends Node<any>,
-  S extends Record<string, StaticType>,
-> = T extends StringLiteral<infer I, any>
-  ? TypeResult<StringLiteralType<I>, S>
-  : T extends NumericLiteral<infer I, any>
-  ? TypeResult<NumberLiteralType<I>, S>
-  : T extends NullLiteral<any>
-  ? TypeResult<NullType, S>
-  : T extends BooleanLiteral<infer I, any>
-  ? TypeResult<BooleanLiteralType<I>, S>
-  : T extends Identifier<infer N, any, NodeData<infer I, any>>
-  ? N extends keyof S
-    ? TypeResult<S[N], S>
-    : TypeResult<AnyType, S, [TypeError<`Cannot find name '${N}'.`, I>]>
-  : T extends ObjectExpression<infer O, any>
-  ? InferObjectProperties<O, S>
-  : T extends MemberExpression<infer O, infer P, infer C, any>
-  ? InferMemberExpression<O, P, C, S>
-  : T extends ArrayExpression<infer T, any>
-  ? InferArrayElements<T, S>
-  : T extends CallExpression<infer C, infer A, any>
-  ? InferCallExpression<C, A, S>
+  Node extends BaseNode<any>,
+  State extends Record<string, StaticType>,
+> = Node extends StringLiteral<infer Value, any>
+  ? TypeResult<StringLiteralType<Value>, State>
+  : Node extends NumericLiteral<infer Value, any>
+  ? TypeResult<NumberLiteralType<Value>, State>
+  : Node extends NullLiteral<any>
+  ? TypeResult<NullType, State>
+  : Node extends BooleanLiteral<infer Value, any>
+  ? TypeResult<BooleanLiteralType<Value>, State>
+  : Node extends Identifier<infer Name, any, NodeData<infer StartLine, any>>
+  ? Name extends keyof State
+    ? TypeResult<State[Name], State>
+    : TypeResult<
+        AnyType,
+        State,
+        [TypeError<`Cannot find name '${Name}'.`, StartLine>]
+      >
+  : Node extends ObjectExpression<infer Properties, any>
+  ? InferObjectProperties<Properties, State>
+  : Node extends MemberExpression<
+      infer Object,
+      infer Properties,
+      infer Computed,
+      any
+    >
+  ? InferMemberExpression<Object, Properties, Computed, State>
+  : Node extends ArrayExpression<infer Elements, any>
+  ? InferArrayElements<Elements, State>
+  : Node extends CallExpression<infer Callee, infer Arguments, any>
+  ? InferCallExpression<Callee, Arguments, State>
   : UnknownType;
 
 type InferCallExpression<
-  C extends Node<any>,
-  A extends Array<Node<any>>,
+  C extends BaseNode<any>,
+  A extends Array<BaseNode<any>>,
   S extends Record<string, StaticType>,
-> = C extends Node<NodeData<infer L, any>>
+> = C extends BaseNode<NodeData<infer L, any>>
   ? InferExpression<C, S> extends infer G
     ? G extends Array<any>
       ? G[0] extends FunctionType<infer P, infer R>
@@ -306,7 +315,7 @@ type InferCallExpressionHelper<
     >;
 
 type InferExpressionsArray<
-  T extends Array<Node<any>>,
+  T extends Array<BaseNode<any>>,
   S extends Record<string, StaticType>,
   R extends Array<StaticType> = [],
 > = T extends []
@@ -318,12 +327,12 @@ type InferExpressionsArray<
   : never;
 
 type InferArrayElements<
-  T extends Array<Node<any>>,
+  T extends Array<BaseNode<any>>,
   S extends Record<string, StaticType>,
   R extends StaticType = AnyType,
 > = T extends []
   ? [ArrayType<R>, S]
-  : T[0] extends Node<any>
+  : T[0] extends BaseNode<any>
   ? InferExpression<T[0], S> extends infer J
     ? J extends Array<any>
       ? MapLiteralToType<J[0]> extends infer E
@@ -369,8 +378,8 @@ type MapLiteralToType<T extends StaticType> = T extends NumberLiteralType<any>
   : T;
 
 type InferMemberExpression<
-  O extends Node<any>,
-  P extends Node<any>,
+  O extends BaseNode<any>,
+  P extends BaseNode<any>,
   C extends boolean,
   S extends Record<string, StaticType>,
 > = InferExpression<O, S> extends infer J
@@ -380,7 +389,7 @@ type InferMemberExpression<
         ? InferMemberExpressionHelper<J[0], N, S, L>
         : never
       : InferExpression<P, S> extends infer G
-      ? P extends Node<NodeData<infer L, any>>
+      ? P extends BaseNode<NodeData<infer L, any>>
         ? G extends Array<any>
           ? G[0] extends StringLiteralType<infer N>
             ? InferMemberExpressionHelper<J[0], N, S, L>
