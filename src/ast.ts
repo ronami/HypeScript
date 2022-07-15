@@ -147,12 +147,12 @@ export type IfStatement<
 };
 
 export type ReturnStatement<
-  T extends BaseNode<any>,
-  D extends NodeData<any, any>,
+  Argument extends BaseNode<any> | null,
+  Data extends NodeData<any, any>,
 > = {
   type: 'ReturnStatement';
-  argument: T;
-  data: D;
+  argument: Argument;
+  data: Data;
 };
 
 export type BlockStatement<
