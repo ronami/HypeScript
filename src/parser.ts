@@ -479,22 +479,33 @@ type ParseFunctionParamsHelper<
 type ParseBlockStatement<
   TokenList extends Array<Token<any>>,
   InitialLineNumber extends number,
-  F extends boolean,
-  R extends Array<BaseNode<any>> = [],
-  N extends boolean = false,
+  InFunctionScope extends boolean,
+  Result extends Array<BaseNode<any>> = [],
+  NeedSemicolon extends boolean = false,
 > = TokenList extends []
-  ? Head<R> extends BaseNode<NodeData<any, infer S>>
+  ? Result[0] extends BaseNode<NodeData<any, infer S>>
     ? SyntaxError<"'}' expected.", S>
     : SyntaxError<"'}' expected.", InitialLineNumber>
   : TokenList[0] extends GenericToken<'}', TokenData<any, infer E>>
-  ? [BlockStatement<R, NodeData<InitialLineNumber, E>>, Tail<TokenList>]
+  ? [BlockStatement<Result, NodeData<InitialLineNumber, E>>, Tail<TokenList>]
   : TokenList[0] extends GenericToken<';', any>
-  ? ParseBlockStatement<Tail<TokenList>, InitialLineNumber, F, R, false>
-  : N extends false
-  ? ParseBlockStatementHelper<TokenList, InitialLineNumber, F, R>
+  ? ParseBlockStatement<
+      Tail<TokenList>,
+      InitialLineNumber,
+      InFunctionScope,
+      Result,
+      false
+    >
+  : NeedSemicolon extends false
+  ? ParseBlockStatementHelper<
+      TokenList,
+      InitialLineNumber,
+      InFunctionScope,
+      Result
+    >
   : TokenList[0] extends Token<TokenData<infer P, infer L>>
   ? P extends true
-    ? ParseBlockStatementHelper<TokenList, L, F, R>
+    ? ParseBlockStatementHelper<TokenList, L, InFunctionScope, Result>
     : SyntaxError<"';' expected.", L>
   : never;
 
