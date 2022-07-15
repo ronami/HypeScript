@@ -425,7 +425,7 @@ type InferCallExpressionHelper<
     ? TypeResult<ReturnType, State, Push<Errors, TypeError<Message, StartLine>>>
     : TypeResult<ReturnType, State, Errors>
   : TypeResult<
-      AnyType,
+      ReturnType,
       State,
       Push<
         Errors,
