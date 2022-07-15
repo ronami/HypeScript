@@ -483,11 +483,14 @@ type ParseBlockStatement<
   Result extends Array<BaseNode<any>> = [],
   NeedSemicolon extends boolean = false,
 > = TokenList extends []
-  ? Result[0] extends BaseNode<NodeData<any, infer S>>
-    ? SyntaxError<"'}' expected.", S>
+  ? Result[0] extends BaseNode<NodeData<any, infer LineNumber>>
+    ? SyntaxError<"'}' expected.", LineNumber>
     : SyntaxError<"'}' expected.", InitialLineNumber>
-  : TokenList[0] extends GenericToken<'}', TokenData<any, infer E>>
-  ? [BlockStatement<Result, NodeData<InitialLineNumber, E>>, Tail<TokenList>]
+  : TokenList[0] extends GenericToken<'}', TokenData<any, infer LineNumber>>
+  ? [
+      BlockStatement<Result, NodeData<InitialLineNumber, LineNumber>>,
+      Tail<TokenList>,
+    ]
   : TokenList[0] extends GenericToken<';', any>
   ? ParseBlockStatement<
       Tail<TokenList>,
@@ -503,10 +506,12 @@ type ParseBlockStatement<
       InFunctionScope,
       Result
     >
-  : TokenList[0] extends Token<TokenData<infer P, infer L>>
-  ? P extends true
-    ? ParseBlockStatementHelper<TokenList, L, InFunctionScope, Result>
-    : SyntaxError<"';' expected.", L>
+  : TokenList[0] extends Token<
+      TokenData<infer PrecedingLinebreak, infer LineNumber>
+    >
+  ? PrecedingLinebreak extends true
+    ? ParseBlockStatementHelper<TokenList, LineNumber, InFunctionScope, Result>
+    : SyntaxError<"';' expected.", LineNumber>
   : never;
 
 type ParseTopLevel<
