@@ -390,6 +390,12 @@ type InferCallExpression<
           Concat<CalleeErrors, ArgumentsErrors>,
           StartLine
         >
+      : CalleeValue extends AnyType
+      ? TypeResult<
+          AnyType,
+          ArgumentsState,
+          Concat<CalleeErrors, ArgumentsErrors>
+        >
       : TypeResult<
           AnyType,
           ArgumentsState,
