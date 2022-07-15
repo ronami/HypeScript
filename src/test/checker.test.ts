@@ -21,7 +21,7 @@ hello
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Cannot find name 'hello'.",
     lineNumber: 3,
   },
@@ -35,7 +35,7 @@ world;
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Cannot find name 'world'.",
     lineNumber: 3,
   },
@@ -91,7 +91,7 @@ hello.world
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Property 'world' does not exist on type '{ foo: string; }'.",
     lineNumber: 4,
   },
@@ -136,7 +136,7 @@ hello
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Property 'hey' does not exist on type '{ bar: string; }'.",
     lineNumber: 11,
   },
@@ -152,7 +152,7 @@ hello.foo
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Property 'foo' does not exist on type 'string'.",
     lineNumber: 5,
   },
@@ -202,7 +202,7 @@ const hello: number = "hello";
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Type 'string' is not assignable to type 'number'.",
     lineNumber: 3,
   },
@@ -216,7 +216,7 @@ const hello: string = 123;
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Type 'number' is not assignable to type 'string'.",
     lineNumber: 3,
   },
@@ -231,7 +231,7 @@ const foo: number = hello;
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Type 'string' is not assignable to type 'number'.",
     lineNumber: 4,
   },
@@ -257,7 +257,7 @@ const foo: number = hello;
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Type '{ hey: string; }' is not assignable to type 'number'.",
     lineNumber: 5,
   },
@@ -273,7 +273,7 @@ const foo: number = hello.hey;
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Type 'string' is not assignable to type 'number'.",
     lineNumber: 5,
   },
@@ -299,7 +299,7 @@ o["hey"];
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Property 'hey' does not exist on type '{}'.",
     lineNumber: 5,
   },
@@ -327,7 +327,7 @@ o
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Property 'hey' does not exist on type '{}'.",
     lineNumber: 7,
   },
@@ -376,7 +376,7 @@ o[k]["hi"];
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Property 'hi' does not exist on type '{ ho: string; }'.",
     lineNumber: 11,
   },
@@ -398,7 +398,7 @@ o[k][{}];
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Type '{}' cannot be used as an index type.",
     lineNumber: 11,
   },
@@ -416,7 +416,7 @@ o[true];
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Type 'boolean' cannot be used as an index type.",
     lineNumber: 7,
   },
@@ -432,7 +432,7 @@ const b: string = a;
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Type 'number[]' is not assignable to type 'string'.",
     lineNumber: 5,
   },
@@ -448,7 +448,7 @@ const b: string = a;
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Type '(number | string)[]' is not assignable to type 'string'.",
     lineNumber: 5,
   },
@@ -464,7 +464,7 @@ const b: string = a;
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Type 'number | string' is not assignable to type 'string'.",
     lineNumber: 5,
   },
@@ -480,7 +480,7 @@ const b: string = a;
 `>
 >([
   {
-    type: 'SyntaxError',
+    type: 'TypeError',
     message: "Type 'number[][]' is not assignable to type 'string'.",
     lineNumber: 5,
   },
