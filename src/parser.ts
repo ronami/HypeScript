@@ -555,25 +555,31 @@ type ParseTopLevelHelper<
 type ParseIfStatement<
   NodeList extends Array<Token<any>>,
   InFunctionScope extends boolean,
-> = NodeList[0] extends SymbolToken<'if', TokenData<any, infer L>>
-  ? NodeList[1] extends GenericToken<'(', TokenData<any, infer H>>
+> = NodeList[0] extends SymbolToken<'if', TokenData<any, infer IfLineNumber>>
+  ? NodeList[1] extends GenericToken<'(', TokenData<any, infer ParenLineNumber>>
     ? ParseExpression<TailBy<NodeList, 2>> extends infer G
       ? G extends Array<any>
         ? G[0] extends BaseNode<NodeData<any, infer E>>
-          ? ParseIfStatementHelper<G, L, InFunctionScope, E>
+          ? ParseIfStatementHelper<G, IfLineNumber, InFunctionScope, E>
           : G extends Error<any, any, any>
           ? G
           : never
-        : SyntaxError<'Expression expected.', H>
+        : SyntaxError<'Expression expected.', ParenLineNumber>
       : never
-    : SyntaxError<"'(' expected.", L>
+    : SyntaxError<"'(' expected.", IfLineNumber>
   : null;
 
 type ParseReturnStatementHelper<
   TokenList extends Array<Token<any>>,
   LineNumber extends number,
-> = TokenList[0] extends GenericToken<';', TokenData<any, infer K>>
-  ? [ReturnStatement<null, NodeData<LineNumber, K>>, Tail<TokenList>]
+> = TokenList[0] extends GenericToken<
+  ';',
+  TokenData<any, infer SemicolonLineNumber>
+>
+  ? [
+      ReturnStatement<null, NodeData<LineNumber, SemicolonLineNumber>>,
+      Tail<TokenList>,
+    ]
   : ParseExpression<TokenList> extends infer G
   ? G extends Array<any>
     ? G[0] extends BaseNode<NodeData<any, infer K>>
