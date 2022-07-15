@@ -147,7 +147,7 @@ export type IfStatement<
 };
 
 export type ReturnStatement<
-  T extends BaseNode<any> | null,
+  T extends BaseNode<any>,
   D extends NodeData<any, any>,
 > = {
   type: 'ReturnStatement';
