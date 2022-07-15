@@ -1,7 +1,7 @@
 import type { Push } from './utils/arrayUtils';
 import type {
   EatFirstChar,
-  FirstChar,
+  GetFirstChar,
   ConcatStrings,
   StringContains,
 } from './utils/stringUtils';
@@ -18,91 +18,105 @@ import type { SyntaxError } from './errors';
 import type { Succ } from './utils/math';
 
 type TokenizeInput<
-  I extends string,
-  F extends string,
-  E extends string,
-  G extends boolean,
-  L extends number,
-  D extends TokenData<any, any> = TokenData<G, L>,
-> = F extends ','
-  ? [GenericToken<',', D>, E]
-  : F extends '('
-  ? [GenericToken<'(', D>, E]
-  : F extends ')'
-  ? [GenericToken<')', D>, E]
-  : F extends '['
-  ? [GenericToken<'[', D>, E]
-  : F extends ']'
-  ? [GenericToken<']', D>, E]
-  : F extends '{'
-  ? [GenericToken<'{', D>, E]
-  : F extends '}'
-  ? [GenericToken<'}', D>, E]
-  : F extends '.'
-  ? [GenericToken<'.', D>, E]
-  : F extends ';'
-  ? [GenericToken<';', D>, E]
-  : F extends ':'
-  ? [GenericToken<':', D>, E]
-  : F extends Numbers
-  ? TokenizeNumber<I, '', D, F>
-  : F extends '"'
-  ? TokenizeString<E, '"', D>
-  : F extends "'"
-  ? TokenizeString<E, "'", D>
-  : F extends Symbols
-  ? TokenizeSymbol<I, '', D, F>
-  : SyntaxError<`Invalid character.`, L>;
+  Input extends string,
+  FirstChar extends string,
+  InputTail extends string,
+  PrecedingLinebreak extends boolean,
+  LineNumber extends number,
+  Data extends TokenData<any, any> = TokenData<PrecedingLinebreak, LineNumber>,
+> = FirstChar extends ','
+  ? [GenericToken<',', Data>, InputTail]
+  : FirstChar extends '('
+  ? [GenericToken<'(', Data>, InputTail]
+  : FirstChar extends ')'
+  ? [GenericToken<')', Data>, InputTail]
+  : FirstChar extends '['
+  ? [GenericToken<'[', Data>, InputTail]
+  : FirstChar extends ']'
+  ? [GenericToken<']', Data>, InputTail]
+  : FirstChar extends '{'
+  ? [GenericToken<'{', Data>, InputTail]
+  : FirstChar extends '}'
+  ? [GenericToken<'}', Data>, InputTail]
+  : FirstChar extends '.'
+  ? [GenericToken<'.', Data>, InputTail]
+  : FirstChar extends ';'
+  ? [GenericToken<';', Data>, InputTail]
+  : FirstChar extends ':'
+  ? [GenericToken<':', Data>, InputTail]
+  : FirstChar extends Numbers
+  ? TokenizeNumber<Input, '', Data, FirstChar>
+  : FirstChar extends '"'
+  ? TokenizeString<InputTail, '"', Data>
+  : FirstChar extends "'"
+  ? TokenizeString<InputTail, "'", Data>
+  : FirstChar extends Symbols
+  ? TokenizeSymbol<Input, '', Data, FirstChar>
+  : SyntaxError<`Invalid character.`, LineNumber>;
 
 type TokenizeNumber<
-  I extends string,
-  A extends string,
-  G extends TokenData<any, any>,
-  C extends string = FirstChar<I>,
-> = C extends Numbers
-  ? TokenizeNumber<EatFirstChar<I>, ConcatStrings<A, C>, G>
-  : [NumberToken<A, G>, I];
+  Input extends string,
+  Result extends string,
+  PrecedingLinebreak extends TokenData<any, any>,
+  FirstChar extends string = GetFirstChar<Input>,
+> = FirstChar extends Numbers
+  ? TokenizeNumber<
+      EatFirstChar<Input>,
+      ConcatStrings<Result, FirstChar>,
+      PrecedingLinebreak
+    >
+  : [NumberToken<Result, PrecedingLinebreak>, Input];
 
 type TokenizeString<
-  I,
-  W extends '"' | "'",
-  G extends TokenData<any, any>,
-> = I extends `${infer H}${W}${infer J}`
-  ? StringContains<H, '\n'> extends true
-    ? SyntaxError<'Unterminated string literal.', G['lineNumber']>
-    : [StringToken<H, G>, J]
-  : SyntaxError<'Unterminated string literal.', G['lineNumber']>;
+  Input extends string,
+  QuoteType extends '"' | "'",
+  Data extends TokenData<any, any>,
+> = Input extends `${infer Before}${QuoteType}${infer After}`
+  ? StringContains<Before, '\n'> extends true
+    ? SyntaxError<'Unterminated string literal.', Data['lineNumber']>
+    : [StringToken<Before, Data>, After]
+  : SyntaxError<'Unterminated string literal.', Data['lineNumber']>;
 
 type TokenizeSymbol<
-  I extends string,
-  A extends string,
-  G extends TokenData<any, any>,
-  C extends string = FirstChar<I>,
-> = C extends Symbols
-  ? TokenizeSymbol<EatFirstChar<I>, ConcatStrings<A, C>, G>
-  : [SymbolToken<A, G>, I];
+  Input extends string,
+  Result extends string,
+  PrecedingLinebreak extends TokenData<any, any>,
+  FirstChar extends string = GetFirstChar<Input>,
+> = FirstChar extends Symbols
+  ? TokenizeSymbol<
+      EatFirstChar<Input>,
+      ConcatStrings<Result, FirstChar>,
+      PrecedingLinebreak
+    >
+  : [SymbolToken<Result, PrecedingLinebreak>, Input];
 
-export type TokenizeSequence<
-  I extends string,
-  R extends Array<Token<any>>,
-  L extends number,
-  G extends boolean,
-  F extends string = FirstChar<I>,
-  E extends string = EatFirstChar<I>,
-> = I extends ''
-  ? R
-  : F extends ' '
-  ? TokenizeSequence<E, R, L, G>
-  : F extends '\n'
-  ? TokenizeSequence<E, R, Succ<L>, true>
-  : TokenizeInput<I, F, E, G, L> extends infer P
-  ? TokenizeHelper<P, R, L>
+export type Tokenize<
+  Input extends string,
+  Result extends Array<Token<any>> = [],
+  LineNumber extends number = 1,
+  PrecedingLinebreak extends boolean = false,
+  FirstChar extends string = GetFirstChar<Input>,
+  InputTail extends string = EatFirstChar<Input>,
+> = Input extends ''
+  ? Result
+  : FirstChar extends ' '
+  ? Tokenize<InputTail, Result, LineNumber, PrecedingLinebreak>
+  : FirstChar extends '\n'
+  ? Tokenize<InputTail, Result, Succ<LineNumber>, true>
+  : TokenizeInput<
+      Input,
+      FirstChar,
+      InputTail,
+      PrecedingLinebreak,
+      LineNumber
+    > extends infer TokenizeResult
+  ? TokenizeHelper<TokenizeResult, Result, LineNumber>
   : never;
 
 export type TokenizeHelper<
-  P,
+  TokenizeResult,
   R extends Array<any>,
   L extends number,
-> = P extends Array<any> ? TokenizeSequence<P[1], Push<R, P[0]>, L, false> : P;
-
-export type Tokenize<I extends string> = TokenizeSequence<I, [], 1, false>;
+> = TokenizeResult extends Array<any>
+  ? Tokenize<TokenizeResult[1], Push<R, TokenizeResult[0]>, L, false>
+  : TokenizeResult;
