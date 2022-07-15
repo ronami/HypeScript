@@ -485,3 +485,61 @@ const b: string = a;
     lineNumber: 5,
   },
 ]);
+
+expectType<
+  TypeCheck<`
+
+hello
+
+world
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Cannot find name 'hello'.",
+    lineNumber: 3,
+  },
+  {
+    type: 'TypeError',
+    message: "Cannot find name 'world'.",
+    lineNumber: 5,
+  },
+]);
+
+expectType<
+  TypeCheck<`
+
+const a: number = hello
+
+const b: number = a
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Cannot find name 'hello'.",
+    lineNumber: 3,
+  },
+]);
+
+expectType<
+  TypeCheck<`
+
+const a: string = hello
+
+const b: number = a
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Cannot find name 'hello'.",
+    lineNumber: 3,
+  },
+  {
+    type: 'TypeError',
+    message: "Type 'string' is not assignable to type 'number'.",
+    lineNumber: 5,
+  },
+]);

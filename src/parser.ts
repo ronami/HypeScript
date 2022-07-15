@@ -342,36 +342,36 @@ type ParseExpressionHelper<
   : null;
 
 type ParseObject<
-  T extends Array<Token<any>>,
-  E extends number,
-  R extends Array<ObjectProperty<any, any, any>> = [],
-  N extends boolean = false,
-> = T[0] extends GenericToken<'}', TokenData<any, infer L>>
-  ? [ObjectExpression<R, NodeData<E, L>>, Tail<T>]
-  : T extends []
-  ? SyntaxError<"'}' expected.", E>
-  : N extends true
-  ? T[0] extends GenericToken<',', any>
-    ? ParseObjectItem<Tail<T>, E, R>
-    : T[0] extends Token<TokenData<any, infer L>>
+  TokenList extends Array<Token<any>>,
+  InitialLineNumber extends number,
+  Result extends Array<ObjectProperty<any, any, any>> = [],
+  NeedComma extends boolean = false,
+> = TokenList[0] extends GenericToken<'}', TokenData<any, infer L>>
+  ? [ObjectExpression<Result, NodeData<InitialLineNumber, L>>, Tail<TokenList>]
+  : TokenList extends []
+  ? SyntaxError<"'}' expected.", InitialLineNumber>
+  : NeedComma extends true
+  ? TokenList[0] extends GenericToken<',', any>
+    ? ParseObjectItem<Tail<TokenList>, InitialLineNumber, Result>
+    : TokenList[0] extends Token<TokenData<any, infer L>>
     ? SyntaxError<"',' expected.", L>
     : never
-  : ParseObjectItem<T, E, R>;
+  : ParseObjectItem<TokenList, InitialLineNumber, Result>;
 
 type ParseObjectItem<
-  T extends Array<Token<any>>,
-  E extends number,
-  R extends Array<ObjectProperty<any, any, any>> = [],
-> = T[0] extends SymbolToken<infer K, TokenData<any, infer L>>
-  ? T[1] extends GenericToken<':', any>
-    ? ParseExpression<TailBy<T, 2>> extends infer G
+  TokenList extends Array<Token<any>>,
+  InitialLineNumber extends number,
+  Result extends Array<ObjectProperty<any, any, any>> = [],
+> = TokenList[0] extends SymbolToken<infer K, TokenData<any, infer L>>
+  ? TokenList[1] extends GenericToken<':', any>
+    ? ParseExpression<TailBy<TokenList, 2>> extends infer G
       ? G extends Array<any>
         ? G[0] extends BaseNode<NodeData<any, infer W>>
           ? ParseObject<
               G[1],
-              E,
+              InitialLineNumber,
               Push<
-                R,
+                Result,
                 ObjectProperty<
                   Identifier<K, null, NodeData<L, L>>,
                   G[0],
@@ -383,10 +383,10 @@ type ParseObjectItem<
           : never
         : G extends Error<any, any, any>
         ? G
-        : SyntaxError<'Expression expected.', E>
+        : SyntaxError<'Expression expected.', InitialLineNumber>
       : never
-    : SyntaxError<"'}' expected.", E>
-  : SyntaxError<"'}' expected.", E>;
+    : SyntaxError<"'}' expected.", InitialLineNumber>
+  : SyntaxError<"'}' expected.", InitialLineNumber>;
 
 type ParseArrayExpression<
   T extends Array<Token<any>>,
