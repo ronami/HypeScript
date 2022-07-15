@@ -490,15 +490,15 @@ type ParseFunctionParams<
   : ParseFunctionParamsHelper<TokenList, InitialLineNumber, Result>;
 
 type ParseFunctionParamsHelper<
-  T extends Array<Token<any>>,
-  I extends number,
-  R extends Array<BaseNode<any>> = [],
-> = ParseIdentifier<T, true> extends infer G
+  TokenList extends Array<Token<any>>,
+  LineNumber extends number,
+  Result extends Array<BaseNode<any>>,
+> = ParseIdentifier<TokenList, true> extends infer G
   ? G extends Array<any>
-    ? ParseFunctionParams<G[1], I, Push<R, G[0]>, true>
+    ? ParseFunctionParams<G[1], LineNumber, Push<Result, G[0]>, true>
     : G extends Error<any, any, any>
     ? G
-    : SyntaxError<'Identifier expected.', I>
+    : SyntaxError<'Identifier expected.', LineNumber>
   : never;
 
 type ParseBlockStatement<
