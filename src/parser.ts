@@ -570,14 +570,14 @@ type ParseIfStatement<
   : null;
 
 type ParseReturnStatementHelper<
-  T extends Array<Token<any>>,
-  L extends number,
-> = T[0] extends GenericToken<';', TokenData<any, infer K>>
-  ? [ReturnStatement<null, NodeData<L, K>>, Tail<T>]
-  : ParseExpression<T> extends infer G
+  TokenList extends Array<Token<any>>,
+  LineNumber extends number,
+> = TokenList[0] extends GenericToken<';', TokenData<any, infer K>>
+  ? [ReturnStatement<null, NodeData<LineNumber, K>>, Tail<TokenList>]
+  : ParseExpression<TokenList> extends infer G
   ? G extends Array<any>
     ? G[0] extends BaseNode<NodeData<any, infer K>>
-      ? [ReturnStatement<G[0], NodeData<L, K>>, G[1]]
+      ? [ReturnStatement<G[0], NodeData<LineNumber, K>>, G[1]]
       : G
     : never
   : never;
@@ -604,7 +604,7 @@ type ParseReturnStatement<
 type ParseIfStatementHelper<
   G extends Array<any>,
   L extends number,
-  F extends boolean,
+  InFunctionScope extends boolean,
   E extends number,
 > = G[1] extends Array<any>
   ? G[1][0] extends GenericToken<
@@ -612,7 +612,11 @@ type ParseIfStatementHelper<
       TokenData<any, infer ClosingParenLineNumber>
     >
     ? G[1][1] extends GenericToken<'{', TokenData<any, infer CurlyLineNumber>>
-      ? ParseBlockStatement<TailBy<G[1], 2>, CurlyLineNumber, F> extends infer B
+      ? ParseBlockStatement<
+          TailBy<G[1], 2>,
+          CurlyLineNumber,
+          InFunctionScope
+        > extends infer B
         ? B extends Array<any>
           ? B[0] extends BaseNode<NodeData<any, infer E>>
             ? [IfStatement<G[0], B[0], NodeData<L, E>>, B[1]]
