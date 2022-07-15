@@ -47,15 +47,17 @@ import type { Concat, Includes, Push, Tail, Uniq } from './utils/arrayUtils';
 import type { MergeWithOverride } from './utils/generalUtils';
 import type { StateType, TypeResult } from './utils/utilityTypes';
 
-export type Check<NodeList extends Array<BaseNode<any>>> =
-  InferBlockStatement<NodeList> extends TypeResult<any, any, infer Errors>
-    ? Errors
-    : never;
+export type Check<NodeList extends Array<BaseNode<any>>> = InferBlockStatement<
+  NodeList,
+  {}
+> extends TypeResult<any, any, infer Errors>
+  ? Errors
+  : never;
 
 type InferBlockStatement<
   NodeList extends Array<BaseNode<any>>,
+  State extends StateType,
   Result extends StaticType = VoidType,
-  State extends StateType = {},
   Errors extends Array<TypeError<any, any>> = [],
 > = NodeList extends []
   ? TypeResult<Result, State, Errors>
@@ -67,8 +69,8 @@ type InferBlockStatement<
     >
     ? InferBlockStatement<
         Tail<NodeList>,
-        Result,
         ExpressionState,
+        Result,
         Concat<Errors, ExpressionErrors>
       >
     : never
@@ -96,11 +98,18 @@ type InferBlockStatement<
     > extends TypeResult<any, infer DeclarationState, infer DeclarationErrors>
     ? InferBlockStatement<
         Tail<NodeList>,
-        Result,
         DeclarationState,
+        Result,
         Concat<Errors, DeclarationErrors>
       >
     : never
+  : NodeList[0] extends FunctionDeclaration<
+      Identifier<infer Name, any, NodeData<infer StartLine, any>>,
+      infer Params,
+      BlockStatement<infer Body, any>,
+      any
+    >
+  ? InferFunctionDeclaration<Name, Params, Body, State>
   : NodeList[0] extends ReturnStatement<infer ReturnExpression, any>
   ? InferExpression<ReturnExpression, State> extends TypeResult<
       infer ExpressionValue,
@@ -109,12 +118,12 @@ type InferBlockStatement<
     >
     ? InferBlockStatement<
         [],
-        ExpressionValue,
         ExpressionState,
+        ExpressionValue,
         Concat<Errors, ExpressionErrors>
       >
     : never
-  : InferBlockStatement<Tail<NodeList>, VoidType, State, Errors>;
+  : InferBlockStatement<Tail<NodeList>, State, VoidType, Errors>;
 
 type MapAnnotationToType<AnnotationValue extends BaseNode<any>> =
   AnnotationValue extends StringTypeAnnotation<any>
@@ -130,46 +139,75 @@ type MapAnnotationToType<AnnotationValue extends BaseNode<any>> =
     : UnknownType;
 
 type InferFunctionParams<
-  T extends Array<BaseNode<any>>,
-  R extends Array<[string, StaticType]> = [],
-  H extends StateType = {},
-> = T extends []
-  ? [R, H]
-  : T[0] extends Identifier<infer N, infer K, any>
-  ? K extends TypeAnnotation<infer V, any>
-    ? InferFunctionParamsHelper<T, R, H, MapAnnotationToType<V>, N>
-    : InferFunctionParamsHelper<T, R, H, AnyType, N>
+  Params extends Array<BaseNode<any>>,
+  FunctionParams extends Array<[string, StaticType]> = [],
+  ParamsByName extends StateType = {},
+> = Params extends []
+  ? [FunctionParams, ParamsByName]
+  : Params[0] extends Identifier<infer Name, infer Annotation, any>
+  ? Annotation extends TypeAnnotation<infer AnnotationValue, any>
+    ? InferFunctionParamsHelper<
+        Params,
+        FunctionParams,
+        ParamsByName,
+        MapAnnotationToType<AnnotationValue>,
+        Name
+      >
+    : InferFunctionParamsHelper<
+        Params,
+        FunctionParams,
+        ParamsByName,
+        AnyType,
+        Name
+      >
   : never;
 
 type InferFunctionParamsHelper<
-  T extends Array<BaseNode<any>>,
-  R extends Array<[string, StaticType]>,
-  H extends StateType,
-  V extends StaticType,
-  N extends string,
+  Params extends Array<BaseNode<any>>,
+  FunctionParams extends Array<[string, StaticType]>,
+  ParamsByName extends StateType,
+  Type extends StaticType,
+  Name extends string,
 > = InferFunctionParams<
-  Tail<T>,
-  Push<R, [N, V]>,
-  MergeWithOverride<H, { [a in N]: V }>
+  Tail<Params>,
+  Push<FunctionParams, [Name, Type]>,
+  MergeWithOverride<ParamsByName, { [a in Name]: Type }>
 >;
 
 type InferFunctionDeclaration<
-  O extends FunctionDeclaration<any, any, any, any>,
-  S extends StateType,
-> = O extends FunctionDeclaration<
-  Identifier<infer N, any, NodeData<infer L, any>>,
-  infer P,
-  BlockStatement<infer B, any>,
-  any
->
-  ? InferFunctionParams<P> extends infer H
-    ? H extends Array<any>
-      ? InferBlockStatement<B, MergeWithOverride<S, H[1]>> extends infer G
-        ? G extends Array<any>
-          ? [null, MergeWithOverride<S, { [a in N]: FunctionType<H[0], G[0]> }>]
-          : G
+  Name extends string,
+  Params extends Array<BaseNode<any>>,
+  Body extends Array<BaseNode<any>>,
+  State extends StateType,
+> = InferFunctionParams<Params> extends [
+  infer FunctionParams,
+  infer ParamsByName,
+]
+  ? FunctionParams extends Array<[string, StaticType]>
+    ? ParamsByName extends StateType
+      ? InferBlockStatement<
+          Body,
+          MergeWithOverride<State, ParamsByName>
+        > extends TypeResult<
+          infer BlockStatementReturnType,
+          any,
+          infer BlockStatementErrors
+        >
+        ? TypeResult<
+            NullType,
+            MergeWithOverride<
+              State,
+              {
+                [a in Name]: FunctionType<
+                  FunctionParams,
+                  BlockStatementReturnType
+                >;
+              }
+            >,
+            BlockStatementErrors
+          >
         : never
-      : H
+      : never
     : never
   : never;
 
