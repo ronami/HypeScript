@@ -478,20 +478,20 @@ type ParseFunctionParamsHelper<
 
 type ParseBlockStatement<
   TokenList extends Array<Token<any>>,
-  L extends number,
+  InitialLineNumber extends number,
   F extends boolean,
   R extends Array<BaseNode<any>> = [],
   N extends boolean = false,
 > = TokenList extends []
   ? Head<R> extends BaseNode<NodeData<any, infer S>>
     ? SyntaxError<"'}' expected.", S>
-    : SyntaxError<"'}' expected.", L>
+    : SyntaxError<"'}' expected.", InitialLineNumber>
   : TokenList[0] extends GenericToken<'}', TokenData<any, infer E>>
-  ? [BlockStatement<R, NodeData<L, E>>, Tail<TokenList>]
+  ? [BlockStatement<R, NodeData<InitialLineNumber, E>>, Tail<TokenList>]
   : TokenList[0] extends GenericToken<';', any>
-  ? ParseBlockStatement<Tail<TokenList>, L, F, R, false>
+  ? ParseBlockStatement<Tail<TokenList>, InitialLineNumber, F, R, false>
   : N extends false
-  ? ParseBlockStatementHelper<TokenList, L, F, R>
+  ? ParseBlockStatementHelper<TokenList, InitialLineNumber, F, R>
   : TokenList[0] extends Token<TokenData<infer P, infer L>>
   ? P extends true
     ? ParseBlockStatementHelper<TokenList, L, F, R>
@@ -591,16 +591,19 @@ type ParseIfStatementHelper<
   F extends boolean,
   E extends number,
 > = G[1] extends Array<any>
-  ? G[1][0] extends GenericToken<')', TokenData<any, infer I>>
-    ? G[1][1] extends GenericToken<'{', TokenData<any, infer H>>
-      ? ParseBlockStatement<TailBy<G[1], 2>, H, F> extends infer B
+  ? G[1][0] extends GenericToken<
+      ')',
+      TokenData<any, infer ClosingParenLineNumber>
+    >
+    ? G[1][1] extends GenericToken<'{', TokenData<any, infer CurlyLineNumber>>
+      ? ParseBlockStatement<TailBy<G[1], 2>, CurlyLineNumber, F> extends infer B
         ? B extends Array<any>
           ? B[0] extends BaseNode<NodeData<any, infer E>>
             ? [IfStatement<G[0], B[0], NodeData<L, E>>, B[1]]
             : never
           : B
         : never
-      : SyntaxError<"'{' expected.", I>
+      : SyntaxError<"'{' expected.", ClosingParenLineNumber>
     : SyntaxError<"')' expected.", E>
   : never;
 
