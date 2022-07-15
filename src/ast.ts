@@ -1,93 +1,102 @@
-export type NodeData<S extends number, E extends number> = {
-  startLineNumber: S;
-  endLineNumber: E;
+export type NodeData<StartLine extends number, EndLine extends number> = {
+  startLineNumber: StartLine;
+  endLineNumber: EndLine;
 };
 
-export type NullLiteral<D extends NodeData<any, any>> = {
+export type NullLiteral<Data extends NodeData<any, any>> = {
   type: 'NullLiteral';
-  data: D;
+  data: Data;
 };
 
-export type NumericLiteral<T extends string, D extends NodeData<any, any>> = {
+export type NumericLiteral<
+  Value extends string,
+  Data extends NodeData<any, any>,
+> = {
   type: 'NumericLiteral';
-  value: T;
-  data: D;
+  value: Value;
+  data: Data;
 };
 
-export type BooleanLiteral<T extends boolean, D extends NodeData<any, any>> = {
+export type BooleanLiteral<
+  Value extends boolean,
+  Data extends NodeData<any, any>,
+> = {
   type: 'BooleanLiteral';
-  value: T;
-  data: D;
+  value: Value;
+  data: Data;
 };
 
-export type StringLiteral<T extends string, D extends NodeData<any, any>> = {
+export type StringLiteral<
+  Value extends string,
+  Data extends NodeData<any, any>,
+> = {
   type: 'StringLiteral';
-  value: T;
-  data: D;
+  value: Value;
+  data: Data;
 };
 
 export type ArrayExpression<
-  T extends Array<BaseNode<any>>,
-  D extends NodeData<any, any>,
+  Elements extends Array<BaseNode<any>>,
+  Data extends NodeData<any, any>,
 > = {
   type: 'ArrayExpression';
-  elements: T;
-  data: D;
+  elements: Elements;
+  data: Data;
 };
 
 export type ObjectExpression<
-  T extends Array<ObjectProperty<any, any, any>>,
-  D extends NodeData<any, any>,
+  Properties extends Array<ObjectProperty<any, any, any>>,
+  Data extends NodeData<any, any>,
 > = {
   type: 'ObjectExpression';
-  properties: T;
-  data: D;
+  properties: Properties;
+  data: Data;
 };
 
 export type ObjectProperty<
-  K extends Identifier<any, any, any>,
-  T extends BaseNode<any>,
-  D extends NodeData<any, any>,
+  Key extends Identifier<any, any, any>,
+  Value extends BaseNode<any>,
+  Data extends NodeData<any, any>,
 > = {
   type: 'ObjectProperty';
-  key: K;
-  value: T;
-  data: D;
+  key: Key;
+  value: Value;
+  data: Data;
 };
 
 export type VariableDeclaration<
-  H extends Array<VariableDeclarator<any, any, any>>,
-  K extends 'const' | 'let',
-  D extends NodeData<any, any>,
+  Declarations extends Array<VariableDeclarator<any, any, any>>,
+  Kind extends 'const' | 'let',
+  Data extends NodeData<any, any>,
 > = {
   type: 'VariableDeclaration';
-  declarations: H;
-  kind: K;
-  data: D;
+  declarations: Declarations;
+  kind: Kind;
+  data: Data;
 };
 
 export type VariableDeclarator<
-  N extends Identifier<any, any, any>,
-  I extends BaseNode<any>,
-  D extends NodeData<any, any>,
+  Id extends Identifier<any, any, any>,
+  Init extends BaseNode<any>,
+  Data extends NodeData<any, any>,
 > = {
   type: 'VariableDeclarator';
-  id: N;
-  init: I;
-  data: D;
+  id: Id;
+  init: Init;
+  data: Data;
 };
 
 export type FunctionDeclaration<
-  I extends Identifier<any, any, any>,
-  P extends Array<BaseNode<any>>,
-  B extends BlockStatement<any, any>,
-  D extends NodeData<any, any>,
+  Id extends Identifier<any, any, any>,
+  Params extends Array<BaseNode<any>>,
+  Body extends BlockStatement<any, any>,
+  Data extends NodeData<any, any>,
 > = {
   type: 'FunctionDeclaration';
-  id: I;
-  params: P;
-  body: B;
-  data: D;
+  id: Id;
+  params: Params;
+  body: Body;
+  data: Data;
 };
 
 export type Identifier<
@@ -102,47 +111,47 @@ export type Identifier<
 };
 
 export type ExpressionStatement<
-  E extends BaseNode<any>,
-  D extends NodeData<any, any>,
+  Expression extends BaseNode<any>,
+  Data extends NodeData<any, any>,
 > = {
   type: 'ExpressionStatement';
-  expression: E;
-  data: D;
+  expression: Expression;
+  data: Data;
 };
 
 export type CallExpression<
-  C extends BaseNode<any>,
-  A extends Array<BaseNode<any>>,
-  D extends NodeData<any, any>,
+  Callee extends BaseNode<any>,
+  Arguments extends Array<BaseNode<any>>,
+  Data extends NodeData<any, any>,
 > = {
   type: 'CallExpression';
-  callee: C;
-  arguments: A;
-  data: D;
+  callee: Callee;
+  arguments: Arguments;
+  data: Data;
 };
 
 export type MemberExpression<
-  O extends BaseNode<any>,
-  P extends BaseNode<any>,
-  C extends boolean,
-  D extends NodeData<any, any>,
+  Object extends BaseNode<any>,
+  Property extends BaseNode<any>,
+  Computed extends boolean,
+  Data extends NodeData<any, any>,
 > = {
   type: 'MemberExpression';
-  object: O;
-  property: P;
-  computed: C;
-  data: D;
+  object: Object;
+  property: Property;
+  computed: Computed;
+  data: Data;
 };
 
 export type IfStatement<
-  T extends BaseNode<any>,
-  C extends BaseNode<any>,
-  D extends NodeData<any, any>,
+  Test extends BaseNode<any>,
+  Consequent extends BaseNode<any>,
+  Data extends NodeData<any, any>,
 > = {
   type: 'IfStatement';
-  test: T;
-  consequent: C;
-  data: D;
+  test: Test;
+  consequent: Consequent;
+  data: Data;
   // alternate: A;
 };
 
@@ -156,76 +165,76 @@ export type ReturnStatement<
 };
 
 export type BlockStatement<
-  B extends Array<BaseNode<any>>,
-  D extends NodeData<any, any>,
+  Body extends Array<BaseNode<any>>,
+  Data extends NodeData<any, any>,
 > = {
   type: 'BlockStatement';
-  body: B;
-  data: D;
+  body: Body;
+  data: Data;
 };
 
 export type TypeAnnotation<
-  T extends BaseNode<any>,
-  D extends NodeData<any, any>,
+  Annotation extends BaseNode<any>,
+  Data extends NodeData<any, any>,
 > = {
   type: 'TypeAnnotation';
-  typeAnnotation: T;
-  data: D;
+  typeAnnotation: Annotation;
+  data: Data;
 };
 
-export type StringTypeAnnotation<D extends NodeData<any, any>> = {
+export type StringTypeAnnotation<Data extends NodeData<any, any>> = {
   type: 'StringTypeAnnotation';
-  data: D;
+  data: Data;
 };
 
-export type NumberTypeAnnotation<D extends NodeData<any, any>> = {
+export type NumberTypeAnnotation<Data extends NodeData<any, any>> = {
   type: 'NumberTypeAnnotation';
-  data: D;
+  data: Data;
 };
 
-export type NullLiteralTypeAnnotation<D extends NodeData<any, any>> = {
+export type NullLiteralTypeAnnotation<Data extends NodeData<any, any>> = {
   type: 'NullLiteralTypeAnnotation';
-  data: D;
+  data: Data;
 };
 
-export type BooleanTypeAnnotation<D extends NodeData<any, any>> = {
+export type BooleanTypeAnnotation<Data extends NodeData<any, any>> = {
   type: 'BooleanTypeAnnotation';
-  data: D;
+  data: Data;
 };
 
-export type GenericTypeAnnotation<I, D extends NodeData<any, any>> = {
+export type GenericTypeAnnotation<I, Data extends NodeData<any, any>> = {
   type: 'GenericTypeAnnotation';
   id: I;
-  data: D;
+  data: Data;
 };
 
-export type AnyTypeAnnotation<D extends NodeData<any, any>> = {
+export type AnyTypeAnnotation<Data extends NodeData<any, any>> = {
   type: 'AnyTypeAnnotation';
-  data: D;
+  data: Data;
 };
 
-export type BaseNode<D extends NodeData<any, any>> =
-  | NumericLiteral<any, D>
-  | BooleanLiteral<any, D>
-  | StringLiteral<any, D>
-  | ArrayExpression<any, D>
-  | ObjectExpression<any, D>
-  | ObjectProperty<any, any, D>
-  | VariableDeclaration<any, any, D>
-  | VariableDeclarator<any, any, D>
-  | FunctionDeclaration<any, any, any, D>
-  | Identifier<any, any, D>
-  | NullLiteral<D>
-  | ExpressionStatement<any, D>
-  | CallExpression<any, any, D>
-  | MemberExpression<any, any, any, D>
-  | IfStatement<any, any, D>
-  | ReturnStatement<any, D>
-  | BlockStatement<any, D>
-  | TypeAnnotation<any, D>
-  | StringTypeAnnotation<D>
-  | NumberTypeAnnotation<D>
-  | NullLiteralTypeAnnotation<D>
-  | BooleanTypeAnnotation<D>
-  | GenericTypeAnnotation<any, D>
-  | AnyTypeAnnotation<D>;
+export type BaseNode<Data extends NodeData<any, any>> =
+  | NumericLiteral<any, Data>
+  | BooleanLiteral<any, Data>
+  | StringLiteral<any, Data>
+  | ArrayExpression<any, Data>
+  | ObjectExpression<any, Data>
+  | ObjectProperty<any, any, Data>
+  | VariableDeclaration<any, any, Data>
+  | VariableDeclarator<any, any, Data>
+  | FunctionDeclaration<any, any, any, Data>
+  | Identifier<any, any, Data>
+  | NullLiteral<Data>
+  | ExpressionStatement<any, Data>
+  | CallExpression<any, any, Data>
+  | MemberExpression<any, any, any, Data>
+  | IfStatement<any, any, Data>
+  | ReturnStatement<any, Data>
+  | BlockStatement<any, Data>
+  | TypeAnnotation<any, Data>
+  | StringTypeAnnotation<Data>
+  | NumberTypeAnnotation<Data>
+  | NullLiteralTypeAnnotation<Data>
+  | BooleanTypeAnnotation<Data>
+  | GenericTypeAnnotation<any, Data>
+  | AnyTypeAnnotation<Data>;
