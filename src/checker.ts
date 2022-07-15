@@ -45,11 +45,11 @@ import type {
 } from './types';
 import type { Concat, Includes, Push, Tail, Uniq } from './utils/arrayUtils';
 import type { MergeWithOverride } from './utils/generalUtils';
-import type { TypeResult } from './utils/utilityTypes';
+import type { StateType, TypeResult } from './utils/utilityTypes';
 
 export type Check<
   T extends Array<BaseNode<any>>,
-  S extends Record<string, StaticType> = {},
+  S extends StateType = {},
   R extends Array<any> = [],
 > = T extends []
   ? R
@@ -89,7 +89,7 @@ type MapAnnotationToType<A extends BaseNode<any>> =
 type InferFunctionParams<
   T extends Array<BaseNode<any>>,
   R extends Array<[string, StaticType]> = [],
-  H extends Record<string, StaticType> = {},
+  H extends StateType = {},
 > = T extends []
   ? [R, H]
   : T[0] extends Identifier<infer N, infer K, any>
@@ -101,7 +101,7 @@ type InferFunctionParams<
 type InferFunctionParamsHelper<
   T extends Array<BaseNode<any>>,
   R extends Array<[string, StaticType]>,
-  H extends Record<string, StaticType>,
+  H extends StateType,
   V extends StaticType,
   N extends string,
 > = InferFunctionParams<
@@ -112,7 +112,7 @@ type InferFunctionParamsHelper<
 
 type InferFunctionDeclaration<
   O extends FunctionDeclaration<any, any, any, any>,
-  S extends Record<string, StaticType>,
+  S extends StateType,
 > = O extends FunctionDeclaration<
   Identifier<infer N, any, NodeData<infer L, any>>,
   infer P,
@@ -132,7 +132,7 @@ type InferFunctionDeclaration<
 
 type InferBlockStatement<
   T extends Array<BaseNode<any>>,
-  S extends Record<string, StaticType> = {},
+  S extends StateType = {},
   R extends StaticType = VoidType,
 > = T extends []
   ? [R, S]
@@ -197,7 +197,7 @@ type MatchTypeArrays<
 
 type InferVariableDeclaration<
   O extends VariableDeclaration<any, any, any>,
-  S extends Record<string, StaticType>,
+  S extends StateType,
 > = O extends VariableDeclaration<
   [
     VariableDeclarator<
@@ -231,7 +231,7 @@ type InferVariableDeclaration<
 
 type InferExpressionStatement<
   O extends ExpressionStatement<any, any>,
-  S extends Record<string, StaticType>,
+  S extends StateType,
 > = O extends ExpressionStatement<infer E, any>
   ? InferExpression<E, S> extends infer G
     ? G extends Array<any>
@@ -242,7 +242,7 @@ type InferExpressionStatement<
 
 type InferExpression<
   Node extends BaseNode<any>,
-  State extends Record<string, StaticType>,
+  State extends StateType,
 > = Node extends StringLiteral<infer Value, any>
   ? TypeResult<StringLiteralType<Value>, State>
   : Node extends NumericLiteral<infer Value, any>
@@ -277,7 +277,7 @@ type InferExpression<
 type InferCallExpression<
   C extends BaseNode<any>,
   A extends Array<BaseNode<any>>,
-  S extends Record<string, StaticType>,
+  S extends StateType,
 > = C extends BaseNode<NodeData<infer L, any>>
   ? InferExpression<C, S> extends infer G
     ? G extends Array<any>
@@ -301,7 +301,7 @@ type InferCallExpressionHelper<
   P extends Array<[string, StaticType]>,
   H extends Array<StaticType>,
   R extends StaticType,
-  S extends Record<string, StaticType>,
+  S extends StateType,
   L extends number,
 > = P['length'] extends H['length']
   ? MatchTypeArrays<P, H, L> extends infer W
@@ -316,7 +316,7 @@ type InferCallExpressionHelper<
 
 type InferExpressionsArray<
   T extends Array<BaseNode<any>>,
-  S extends Record<string, StaticType>,
+  S extends StateType,
   R extends Array<StaticType> = [],
 > = T extends []
   ? [R, S]
@@ -328,7 +328,7 @@ type InferExpressionsArray<
 
 type InferArrayElements<
   Elements extends Array<BaseNode<any>>,
-  State extends Record<string, StaticType>,
+  State extends StateType,
   Result extends StaticType = AnyType,
   Errors extends Array<TypeError<any, any>> = [],
 > = Elements extends []
@@ -389,7 +389,7 @@ type InferMemberExpression<
   O extends BaseNode<any>,
   P extends BaseNode<any>,
   C extends boolean,
-  S extends Record<string, StaticType>,
+  S extends StateType,
 > = InferExpression<O, S> extends infer J
   ? J extends Array<any>
     ? C extends false
@@ -427,7 +427,7 @@ type InferMemberExpressionObjectHelper<
 type InferMemberExpressionHelper<
   O extends StaticType,
   N extends string,
-  S extends Record<string, StaticType>,
+  S extends StateType,
   L extends number,
 > = O extends ObjectType<infer V>
   ? InferMemberExpressionObjectHelper<V, N> extends infer I
@@ -447,7 +447,7 @@ type InferMemberExpressionHelper<
 type InferMemberExpressionUnionHelper<
   U extends Array<StaticType>,
   N extends string,
-  S extends Record<string, StaticType>,
+  S extends StateType,
   L extends number,
   R extends Array<any> = [],
 > = U extends []
@@ -460,7 +460,7 @@ type InferMemberExpressionUnionHelper<
 
 type InferObjectProperties<
   Properties extends Array<ObjectProperty<any, any, any>>,
-  State extends Record<string, StaticType>,
+  State extends StateType,
   Result extends Array<any> = [],
   Errors extends Array<TypeError<any, any>> = [],
 > = Properties extends []
