@@ -596,7 +596,7 @@ expectType<ParseAst<`hello()`>>([
   },
 ]);
 
-expectType<ParseAst<`hello(\n)`>>([
+expectType<ParseAst<`\n\nhello(\n)`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -606,16 +606,16 @@ expectType<ParseAst<`hello(\n)`>>([
         name: 'hello',
         typeAnnotation: null,
         data: {
-          startLineNumber: 1,
-          endLineNumber: 1,
+          startLineNumber: 3,
+          endLineNumber: 3,
         },
       },
       arguments: [],
-      data: { startLineNumber: 1, endLineNumber: 2 },
+      data: { startLineNumber: 3, endLineNumber: 4 },
     },
     data: {
-      startLineNumber: 1,
-      endLineNumber: 2,
+      startLineNumber: 3,
+      endLineNumber: 4,
     },
   },
 ]);
