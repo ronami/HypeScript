@@ -309,10 +309,9 @@ type CheckExpression<
   : never;
 
 type ParseExpression<
-  T extends Array<Token<any>>,
-  H extends NodeData<any, any> = ExtractTokenData<T[0]>,
-  G extends Array<Token<any>> = Tail<T>,
-> = ParseExpressionHelper<T, H, G> extends infer P
+  TokenList extends Array<Token<any>>,
+  Data extends NodeData<any, any> = ExtractTokenData<TokenList[0]>,
+> = ParseExpressionHelper<TokenList, Data, Tail<TokenList>> extends infer P
   ? P extends Array<any>
     ? CheckExpression<P[0], P[1]>
     : P extends Error<any, any, any>
@@ -321,25 +320,25 @@ type ParseExpression<
   : never;
 
 type ParseExpressionHelper<
-  T extends Array<Token<any>>,
-  H extends NodeData<any, any> = ExtractTokenData<T[0]>,
-  G extends Array<Token<any>> = Tail<T>,
-> = T[0] extends SymbolToken<'true', any>
-  ? [BooleanLiteral<true, H>, G]
-  : T[0] extends SymbolToken<'false', any>
-  ? [BooleanLiteral<false, H>, G]
-  : T[0] extends SymbolToken<'null', any>
-  ? [NullLiteral<H>, G]
-  : T[0] extends NumberToken<infer V, any>
-  ? [NumericLiteral<V, H>, G]
-  : T[0] extends StringToken<infer V, any>
-  ? [StringLiteral<V, H>, G]
-  : T[0] extends SymbolToken<infer V, any>
-  ? [Identifier<V, null, H>, G]
-  : T[0] extends GenericToken<'[', TokenData<any, infer E>>
-  ? ParseArrayExpression<Tail<T>, E>
-  : T[0] extends GenericToken<'{', TokenData<any, infer E>>
-  ? ParseObject<Tail<T>, E>
+  TokenList extends Array<Token<any>>,
+  Data extends NodeData<any, any> = ExtractTokenData<TokenList[0]>,
+  TokenTail extends Array<Token<any>> = Tail<TokenList>,
+> = TokenList[0] extends SymbolToken<'true', any>
+  ? [BooleanLiteral<true, Data>, TokenTail]
+  : TokenList[0] extends SymbolToken<'false', any>
+  ? [BooleanLiteral<false, Data>, TokenTail]
+  : TokenList[0] extends SymbolToken<'null', any>
+  ? [NullLiteral<Data>, TokenTail]
+  : TokenList[0] extends NumberToken<infer Value, any>
+  ? [NumericLiteral<Value, Data>, TokenTail]
+  : TokenList[0] extends StringToken<infer Value, any>
+  ? [StringLiteral<Value, Data>, TokenTail]
+  : TokenList[0] extends SymbolToken<infer Value, any>
+  ? [Identifier<Value, null, Data>, TokenTail]
+  : TokenList[0] extends GenericToken<'[', TokenData<any, infer LineNumber>>
+  ? ParseArrayExpression<Tail<TokenList>, LineNumber>
+  : TokenList[0] extends GenericToken<'{', TokenData<any, infer LineNumber>>
+  ? ParseObject<Tail<TokenList>, LineNumber>
   : null;
 
 type ParseObject<
