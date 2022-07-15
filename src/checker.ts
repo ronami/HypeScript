@@ -508,16 +508,19 @@ type InferMemberExpressionUnionHelper<
       State,
       StartLine,
       Errors
-    > extends infer H
-  ? H extends Array<any>
-    ? InferMemberExpressionUnionHelper<
-        Tail<UnionTypes>,
-        Key,
-        H[1],
-        StartLine,
-        Push<Result, H[0]>
-      >
-    : H
+    > extends TypeResult<
+      infer ExpressionValue,
+      infer ExpressionState,
+      infer ExpressionErrors
+    >
+  ? InferMemberExpressionUnionHelper<
+      Tail<UnionTypes>,
+      Key,
+      ExpressionState,
+      StartLine,
+      Concat<Errors, ExpressionErrors>,
+      Push<Result, ExpressionValue>
+    >
   : never;
 
 type InferObjectProperties<
