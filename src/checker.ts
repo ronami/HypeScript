@@ -263,11 +263,11 @@ type InferExpression<
   ? InferObjectProperties<Properties, State>
   : Node extends MemberExpression<
       infer Object,
-      infer Properties,
+      infer Property,
       infer Computed,
       any
     >
-  ? InferMemberExpression<Object, Properties, Computed, State>
+  ? InferMemberExpression<Object, Property, Computed, State>
   : Node extends ArrayExpression<infer Elements, any>
   ? InferArrayElements<Elements, State>
   : Node extends CallExpression<infer Callee, infer Arguments, any>
@@ -386,75 +386,137 @@ type MapLiteralToType<T extends StaticType> = T extends NumberLiteralType<any>
   : T;
 
 type InferMemberExpression<
-  O extends BaseNode<any>,
-  P extends BaseNode<any>,
-  C extends boolean,
-  S extends StateType,
-> = InferExpression<O, S> extends infer J
-  ? J extends Array<any>
-    ? C extends false
-      ? P extends Identifier<infer N, any, NodeData<infer L, any>>
-        ? InferMemberExpressionHelper<J[0], N, S, L>
-        : never
-      : InferExpression<P, S> extends infer G
-      ? P extends BaseNode<NodeData<infer L, any>>
-        ? G extends Array<any>
-          ? G[0] extends StringLiteralType<infer N>
-            ? InferMemberExpressionHelper<J[0], N, S, L>
-            : G[0] extends NumberLiteralType<infer N>
-            ? InferMemberExpressionHelper<J[0], N, S, L>
-            : SyntaxError<
-                `Type '${Serialize<G[0]>}' cannot be used as an index type.`,
-                L
-              >
-          : G extends null
-          ? never
-          : G
-        : never
+  Object extends BaseNode<any>,
+  Property extends BaseNode<any>,
+  Computed extends boolean,
+  State extends StateType,
+> = InferExpression<Object, State> extends TypeResult<
+  infer ObjectExpressionValue,
+  infer ObjectExpressionState,
+  infer ObjectExpressionErrors
+>
+  ? Computed extends false
+    ? Property extends Identifier<
+        infer Name,
+        any,
+        NodeData<infer StartLine, any>
+      >
+      ? InferMemberExpressionHelper<
+          ObjectExpressionValue,
+          Name,
+          ObjectExpressionState,
+          StartLine,
+          ObjectExpressionErrors
+        >
       : never
-    : J
+    : InferExpression<Property, ObjectExpressionState> extends TypeResult<
+        infer PropertyExpressionValue,
+        infer PropertyExpressionState,
+        infer PropertyExpressionErrors
+      >
+    ? Property extends BaseNode<NodeData<infer StartLine, any>>
+      ? PropertyExpressionValue extends StringLiteralType<infer Value>
+        ? InferMemberExpressionHelper<
+            ObjectExpressionValue,
+            Value,
+            PropertyExpressionState,
+            StartLine,
+            Concat<ObjectExpressionErrors, PropertyExpressionErrors>
+          >
+        : PropertyExpressionValue extends NumberLiteralType<infer Value>
+        ? InferMemberExpressionHelper<
+            ObjectExpressionValue,
+            Value,
+            PropertyExpressionState,
+            StartLine,
+            Concat<ObjectExpressionErrors, PropertyExpressionErrors>
+          >
+        : TypeResult<
+            AnyType,
+            PropertyExpressionState,
+            Push<
+              Concat<ObjectExpressionErrors, PropertyExpressionErrors>,
+              TypeError<
+                `Type '${Serialize<PropertyExpressionValue>}' cannot be used as an index type.`,
+                StartLine
+              >
+            >
+          >
+      : never
+    : never
   : never;
 
-type InferMemberExpressionObjectHelper<
-  V extends Array<[string, StaticType]>,
-  N extends string,
-> = V extends []
+type GetObjectValueByKey<
+  ObjectProperties extends Array<[string, StaticType]>,
+  Key extends string,
+> = ObjectProperties extends []
   ? null
-  : V[0][0] extends N
-  ? V[0][1]
-  : InferMemberExpressionObjectHelper<Tail<V>, N>;
+  : ObjectProperties[0] extends [infer PropertyName, infer PropertyValue]
+  ? PropertyName extends Key
+    ? PropertyValue
+    : GetObjectValueByKey<Tail<ObjectProperties>, Key>
+  : never;
 
 type InferMemberExpressionHelper<
-  O extends StaticType,
-  N extends string,
-  S extends StateType,
-  L extends number,
-> = O extends ObjectType<infer V>
-  ? InferMemberExpressionObjectHelper<V, N> extends infer I
-    ? I extends null
-      ? SyntaxError<
-          `Property '${N}' does not exist on type '${Serialize<O>}'.`,
-          L
+  Object extends StaticType,
+  Key extends string,
+  State extends StateType,
+  StartLine extends number,
+  Errors extends Array<TypeError<any, any>>,
+> = Object extends ObjectType<infer ObjectProperties>
+  ? GetObjectValueByKey<
+      ObjectProperties,
+      Key
+    > extends infer MemberExpressionValue
+    ? MemberExpressionValue extends StaticType
+      ? TypeResult<MemberExpressionValue, State, Errors>
+      : TypeResult<
+          NullType,
+          State,
+          Push<
+            Errors,
+            TypeError<
+              `Property '${Key}' does not exist on type '${Serialize<Object>}'.`,
+              StartLine
+            >
+          >
         >
-      : [I, S]
     : never
-  : O extends ArrayType<infer V>
-  ? [V, S]
-  : O extends UnionType<infer U>
-  ? InferMemberExpressionUnionHelper<U, N, S, L>
-  : SyntaxError<`Property '${N}' does not exist on type '${Serialize<O>}'.`, L>;
+  : Object extends ArrayType<infer ElementsType>
+  ? TypeResult<ElementsType, State, Errors>
+  : Object extends UnionType<infer UnionTypes>
+  ? InferMemberExpressionUnionHelper<UnionTypes, Key, State, StartLine, Errors>
+  : Object extends AnyType
+  ? TypeResult<AnyType, State, Errors>
+  : TypeError<
+      `Property '${Key}' does not exist on type '${Serialize<Object>}'.`,
+      StartLine
+    >;
 
 type InferMemberExpressionUnionHelper<
-  U extends Array<StaticType>,
-  N extends string,
-  S extends StateType,
-  L extends number,
-  R extends Array<any> = [],
-> = U extends []
-  ? [UnionType<R>, S]
-  : InferMemberExpressionHelper<U[0], N, S, L> extends infer H
+  UnionTypes extends Array<StaticType>,
+  Key extends string,
+  State extends StateType,
+  StartLine extends number,
+  Errors extends Array<TypeError<any, any>>,
+  Result extends Array<any> = [],
+> = UnionTypes extends []
+  ? TypeResult<UnionType<Result>, State, Errors>
+  : InferMemberExpressionHelper<
+      UnionTypes[0],
+      Key,
+      State,
+      StartLine,
+      Errors
+    > extends infer H
   ? H extends Array<any>
-    ? InferMemberExpressionUnionHelper<Tail<U>, N, H[1], L, Push<R, H[0]>>
+    ? InferMemberExpressionUnionHelper<
+        Tail<UnionTypes>,
+        Key,
+        H[1],
+        StartLine,
+        Push<Result, H[0]>
+      >
     : H
   : never;
 
