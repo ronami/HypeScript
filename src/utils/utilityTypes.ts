@@ -11,3 +11,5 @@ export type TypeResult<
   state: State;
   errors: Errors;
 };
+
+export type StateType = Record<string, StaticType>;
