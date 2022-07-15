@@ -50,9 +50,9 @@ export type FunctionType<
   return: R;
 };
 
-export type ObjectType<O extends Array<[string, StaticType]>> = {
+export type ObjectType<Properties extends Array<[string, StaticType]>> = {
   type: 'ObjectType';
-  object: O;
+  properties: Properties;
 };
 
 export type ArrayType<V extends StaticType> = {
