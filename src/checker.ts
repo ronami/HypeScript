@@ -73,6 +73,47 @@ export type Check<
     : never
   : never;
 
+type InferBlockStatement<
+  NodeList extends Array<BaseNode<any>>,
+  Result extends StaticType = VoidType,
+  State extends StateType = {},
+  Errors extends Array<TypeError<any, any>> = [],
+> = NodeList extends []
+  ? TypeResult<Result, State, Errors>
+  : NodeList[0] extends ExpressionStatement<infer Expression, any>
+  ? InferExpression<Expression, State> extends TypeResult<
+      any,
+      infer ExpressionState,
+      infer ExpressionErrors
+    >
+    ? InferBlockStatement<
+        Tail<NodeList>,
+        Result,
+        ExpressionState,
+        Concat<Errors, ExpressionErrors>
+      >
+    : never
+  : NodeList[0] extends VariableDeclaration<any, any, any>
+  ? InferVariableDeclaration<NodeList[0], State> extends infer G
+    ? G extends Array<any>
+      ? InferBlockStatement<Tail<NodeList>, G[1], Result>
+      : G
+    : never
+  : NodeList[0] extends ReturnStatement<infer ReturnExpression, any>
+  ? InferExpression<ReturnExpression, State> extends TypeResult<
+      infer ExpressionValue,
+      infer ExpressionState,
+      infer ExpressionErrors
+    >
+    ? InferBlockStatement<
+        [],
+        ExpressionValue,
+        ExpressionState,
+        Concat<Errors, ExpressionErrors>
+      >
+    : never
+  : InferBlockStatement<Tail<NodeList>, VoidType, State, Errors>;
+
 type MapAnnotationToType<A extends BaseNode<any>> =
   A extends StringTypeAnnotation<any>
     ? StringType
@@ -128,34 +169,6 @@ type InferFunctionDeclaration<
         : never
       : H
     : never
-  : never;
-
-type InferBlockStatement<
-  T extends Array<BaseNode<any>>,
-  S extends StateType = {},
-  R extends StaticType = VoidType,
-> = T extends []
-  ? [R, S]
-  : T[0] extends ExpressionStatement<any, any>
-  ? InferExpressionStatement<T[0], S> extends infer G
-    ? G extends Array<any>
-      ? InferBlockStatement<Tail<T>, G[1], R>
-      : G
-    : never
-  : T[0] extends VariableDeclaration<any, any, any>
-  ? InferVariableDeclaration<T[0], S> extends infer G
-    ? G extends Array<any>
-      ? InferBlockStatement<Tail<T>, G[1], R>
-      : G
-    : never
-  : T[0] extends ReturnStatement<infer F, any>
-  ? F extends BaseNode<any>
-    ? InferExpression<F, S> extends infer G
-      ? G extends Array<any>
-        ? InferBlockStatement<[], G[1], G[0]>
-        : G
-      : never
-    : InferBlockStatement<Tail<T>, S, VoidType>
   : never;
 
 type MatchType<A extends StaticType, B extends StaticType> = A extends AnyType
