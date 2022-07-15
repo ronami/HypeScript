@@ -27,7 +27,7 @@ export type StringLiteral<T extends string, D extends NodeData<any, any>> = {
 };
 
 export type ArrayExpression<
-  T extends Array<Node<any>>,
+  T extends Array<BaseNode<any>>,
   D extends NodeData<any, any>,
 > = {
   type: 'ArrayExpression';
@@ -46,7 +46,7 @@ export type ObjectExpression<
 
 export type ObjectProperty<
   K extends Identifier<any, any, any>,
-  T extends Node<any>,
+  T extends BaseNode<any>,
   D extends NodeData<any, any>,
 > = {
   type: 'ObjectProperty';
@@ -68,7 +68,7 @@ export type VariableDeclaration<
 
 export type VariableDeclarator<
   N extends Identifier<any, any, any>,
-  I extends Node<any>,
+  I extends BaseNode<any>,
   D extends NodeData<any, any>,
 > = {
   type: 'VariableDeclarator';
@@ -79,7 +79,7 @@ export type VariableDeclarator<
 
 export type FunctionDeclaration<
   I extends Identifier<any, any, any>,
-  P extends Array<Node<any>>,
+  P extends Array<BaseNode<any>>,
   B extends BlockStatement<any, any>,
   D extends NodeData<any, any>,
 > = {
@@ -102,7 +102,7 @@ export type Identifier<
 };
 
 export type ExpressionStatement<
-  E extends Node<any>,
+  E extends BaseNode<any>,
   D extends NodeData<any, any>,
 > = {
   type: 'ExpressionStatement';
@@ -111,8 +111,8 @@ export type ExpressionStatement<
 };
 
 export type CallExpression<
-  C extends Node<any>,
-  A extends Array<Node<any>>,
+  C extends BaseNode<any>,
+  A extends Array<BaseNode<any>>,
   D extends NodeData<any, any>,
 > = {
   type: 'CallExpression';
@@ -122,8 +122,8 @@ export type CallExpression<
 };
 
 export type MemberExpression<
-  O extends Node<any>,
-  P extends Node<any>,
+  O extends BaseNode<any>,
+  P extends BaseNode<any>,
   C extends boolean,
   D extends NodeData<any, any>,
 > = {
@@ -135,8 +135,8 @@ export type MemberExpression<
 };
 
 export type IfStatement<
-  T extends Node<any>,
-  C extends Node<any>,
+  T extends BaseNode<any>,
+  C extends BaseNode<any>,
   D extends NodeData<any, any>,
 > = {
   type: 'IfStatement';
@@ -147,7 +147,7 @@ export type IfStatement<
 };
 
 export type ReturnStatement<
-  T extends Node<any> | null,
+  T extends BaseNode<any> | null,
   D extends NodeData<any, any>,
 > = {
   type: 'ReturnStatement';
@@ -156,7 +156,7 @@ export type ReturnStatement<
 };
 
 export type BlockStatement<
-  B extends Array<Node<any>>,
+  B extends Array<BaseNode<any>>,
   D extends NodeData<any, any>,
 > = {
   type: 'BlockStatement';
@@ -165,7 +165,7 @@ export type BlockStatement<
 };
 
 export type TypeAnnotation<
-  T extends Node<any>,
+  T extends BaseNode<any>,
   D extends NodeData<any, any>,
 > = {
   type: 'TypeAnnotation';
@@ -204,7 +204,7 @@ export type AnyTypeAnnotation<D extends NodeData<any, any>> = {
   data: D;
 };
 
-export type Node<D extends NodeData<any, any>> =
+export type BaseNode<D extends NodeData<any, any>> =
   | NumericLiteral<any, D>
   | BooleanLiteral<any, D>
   | StringLiteral<any, D>
