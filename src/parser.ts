@@ -91,25 +91,31 @@ type ParseIdentifier<
   : null;
 
 type ParseVariableDeclarationHelper<
-  R extends Array<Token<any>>,
-  N extends Identifier<any, any, any>,
-  L extends number,
-  S extends number,
-  K extends number,
-> = ParseExpression<Tail<R>> extends infer G
+  TokenList extends Array<Token<any>>,
+  Id extends Identifier<any, any, any>,
+  KindLineNumber extends number,
+  IdentifierLineNumber extends number,
+  EqualsLineNumber extends number,
+> = ParseExpression<Tail<TokenList>> extends infer G
   ? G extends Array<any>
-    ? G[0] extends BaseNode<NodeData<infer E, any>>
+    ? G[0] extends BaseNode<NodeData<infer InitLineNumber, any>>
       ? [
           VariableDeclaration<
-            [VariableDeclarator<N, G[0], NodeData<S, E>>],
+            [
+              VariableDeclarator<
+                Id,
+                G[0],
+                NodeData<IdentifierLineNumber, InitLineNumber>
+              >,
+            ],
             'const',
-            NodeData<L, E>
+            NodeData<KindLineNumber, InitLineNumber>
           >,
           G[1],
         ]
       : never
     : G extends null
-    ? SyntaxError<'Expression expected.', K>
+    ? SyntaxError<'Expression expected.', EqualsLineNumber>
     : G
   : never;
 
