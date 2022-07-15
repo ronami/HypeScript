@@ -47,20 +47,47 @@ type ExtractTokenData<
   : never;
 
 type ParseIdentifier<
-  T extends Array<Token<any>>,
-  O extends boolean,
-> = T[0] extends SymbolToken<infer N, TokenData<any, infer L>>
-  ? O extends true
-    ? T[1] extends GenericToken<':', TokenData<any, infer G>>
-      ? ParseTypeAnnotation<TailBy<T, 2>> extends infer J
+  TokenList extends Array<Token<any>>,
+  CanBeAnnotated extends boolean,
+> = TokenList[0] extends SymbolToken<
+  infer Name,
+  TokenData<any, infer IdentifierLineNumber>
+>
+  ? CanBeAnnotated extends true
+    ? TokenList[1] extends GenericToken<
+        ':',
+        TokenData<any, infer ColonLineNumber>
+      >
+      ? ParseTypeAnnotation<TailBy<TokenList, 2>> extends infer J
         ? J extends Array<any>
-          ? [Identifier<N, J[0], NodeData<L, L>>, J[1]]
+          ? [
+              Identifier<
+                Name,
+                J[0],
+                NodeData<IdentifierLineNumber, IdentifierLineNumber>
+              >,
+              J[1],
+            ]
           : J extends Error<any, any, any>
           ? J
-          : SyntaxError<'Type expected.', G>
+          : SyntaxError<'Type expected.', ColonLineNumber>
         : never
-      : [Identifier<N, null, NodeData<L, L>>, Tail<T>]
-    : [Identifier<N, null, NodeData<L, L>>, Tail<T>]
+      : [
+          Identifier<
+            Name,
+            null,
+            NodeData<IdentifierLineNumber, IdentifierLineNumber>
+          >,
+          Tail<TokenList>,
+        ]
+    : [
+        Identifier<
+          Name,
+          null,
+          NodeData<IdentifierLineNumber, IdentifierLineNumber>
+        >,
+        Tail<TokenList>,
+      ]
   : null;
 
 type ParseVariableDeclarationHelper<
