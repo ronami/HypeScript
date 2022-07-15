@@ -446,23 +446,29 @@ type ParseFunctionDeclaration<T extends Array<Token<any>>> =
     : null;
 
 type ParseFunctionParams<
-  T extends Array<Token<any>>,
-  I extends number,
-  R extends Array<BaseNode<any>> = [],
-  N extends boolean = false,
-> = T[0] extends GenericToken<')', TokenData<any, infer L>>
-  ? T[1] extends GenericToken<'{', TokenData<any, infer K>>
-    ? [R, TailBy<T, 2>, K]
-    : SyntaxError<"'{' expected.", L>
-  : T extends []
-  ? SyntaxError<"')' expected.", I>
-  : N extends true
-  ? T[0] extends GenericToken<',', any>
-    ? ParseFunctionParamsHelper<Tail<T>, I, R>
-    : Head<R> extends BaseNode<NodeData<any, infer I>>
-    ? SyntaxError<"',' expected.", I>
+  TokenList extends Array<Token<any>>,
+  InitialLineNumber extends number,
+  Result extends Array<BaseNode<any>> = [],
+  NeedSemicolon extends boolean = false,
+> = TokenList[0] extends GenericToken<
+  ')',
+  TokenData<any, infer ParenLineNumber>
+>
+  ? TokenList[1] extends GenericToken<
+      '{',
+      TokenData<any, infer CurlyLineNumber>
+    >
+    ? [Result, TailBy<TokenList, 2>, CurlyLineNumber]
+    : SyntaxError<"'{' expected.", ParenLineNumber>
+  : TokenList extends []
+  ? SyntaxError<"')' expected.", InitialLineNumber>
+  : NeedSemicolon extends true
+  ? TokenList[0] extends GenericToken<',', any>
+    ? ParseFunctionParamsHelper<Tail<TokenList>, InitialLineNumber, Result>
+    : Result[0] extends BaseNode<NodeData<any, infer LineNumber>>
+    ? SyntaxError<"',' expected.", LineNumber>
     : never
-  : ParseFunctionParamsHelper<T, I, R>;
+  : ParseFunctionParamsHelper<TokenList, InitialLineNumber, Result>;
 
 type ParseFunctionParamsHelper<
   T extends Array<Token<any>>,
