@@ -93,10 +93,13 @@ type InferBlockStatement<
       Init,
       State,
       StartLine
-    > extends infer G
-    ? G extends Array<any>
-      ? InferBlockStatement<Tail<NodeList>, G[1], Result>
-      : G
+    > extends TypeResult<any, infer DeclarationState, infer DeclarationErrors>
+    ? InferBlockStatement<
+        Tail<NodeList>,
+        Result,
+        DeclarationState,
+        Concat<Errors, DeclarationErrors>
+      >
     : never
   : NodeList[0] extends ReturnStatement<infer ReturnExpression, any>
   ? InferExpression<ReturnExpression, State> extends TypeResult<
