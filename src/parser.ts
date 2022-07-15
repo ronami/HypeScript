@@ -209,31 +209,41 @@ type ParseVariableDeclaration<NodeList extends Array<Token<any>>> =
 type ParseMemberExpression<
   Node extends BaseNode<any>,
   TokenList extends Array<Token<any>>,
-> = Node extends BaseNode<NodeData<infer S, infer E>>
-  ? TokenList[0] extends GenericToken<'.', TokenData<any, infer E>>
-    ? TokenList[1] extends SymbolToken<infer N, TokenData<any, infer L>>
+> = Node extends BaseNode<NodeData<infer NodeLineNumber, any>>
+  ? TokenList[0] extends GenericToken<'.', TokenData<any, infer DotLineNumber>>
+    ? TokenList[1] extends SymbolToken<
+        infer Name,
+        TokenData<any, infer IdentifierLineNumber>
+      >
       ? [
           MemberExpression<
             Node,
-            Identifier<N, null, NodeData<L, L>>,
+            Identifier<
+              Name,
+              null,
+              NodeData<IdentifierLineNumber, IdentifierLineNumber>
+            >,
             false,
-            NodeData<S, L>
+            NodeData<NodeLineNumber, IdentifierLineNumber>
           >,
           TailBy<TokenList, 2>,
         ]
-      : SyntaxError<'Identifier expected.', E>
-    : TokenList[0] extends GenericToken<'[', TokenData<any, infer E>>
+      : SyntaxError<'Identifier expected.', DotLineNumber>
+    : TokenList[0] extends GenericToken<
+        '[',
+        TokenData<any, infer BracketLineNumber>
+      >
     ? ParseExpression<Tail<TokenList>> extends infer G
       ? G extends [infer Q, infer W]
         ? Q extends BaseNode<NodeData<infer S, any>>
           ? W extends Array<Token<any>>
-            ? W[0] extends GenericToken<']', TokenData<any, infer E>>
+            ? W[0] extends GenericToken<']', any>
               ? [MemberExpression<Node, Q, true, NodeData<1, 1>>, Tail<W>]
               : SyntaxError<"']' expected.", S>
             : never
           : never
         : G extends null
-        ? SyntaxError<'Expression expected.', E>
+        ? SyntaxError<'Expression expected.', BracketLineNumber>
         : G
       : never
     : null
