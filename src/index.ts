@@ -4,7 +4,7 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 
-foo.bar.hello
+foo[hey].bar
 
 `>;
 type R = Parse<T>;

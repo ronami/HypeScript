@@ -423,6 +423,12 @@ type InferMemberExpression<
             StartLine,
             Concat<ObjectExpressionErrors, PropertyExpressionErrors>
           >
+        : PropertyExpressionValue extends AnyType
+        ? TypeResult<
+            AnyType,
+            PropertyExpressionState,
+            Concat<ObjectExpressionErrors, PropertyExpressionErrors>
+          >
         : TypeResult<
             AnyType,
             PropertyExpressionState,
