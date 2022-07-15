@@ -47,31 +47,10 @@ import type { Concat, Includes, Push, Tail, Uniq } from './utils/arrayUtils';
 import type { MergeWithOverride } from './utils/generalUtils';
 import type { StateType, TypeResult } from './utils/utilityTypes';
 
-export type Check<
-  T extends Array<BaseNode<any>>,
-  S extends StateType = {},
-  R extends Array<any> = [],
-> = T extends []
-  ? R
-  : T[0] extends ExpressionStatement<any, any>
-  ? InferExpressionStatement<T[0], S> extends infer G
-    ? G extends Array<any>
-      ? Check<Tail<T>, G[1], R>
-      : Check<Tail<T>, S, Push<R, G>>
-    : never
-  : T[0] extends VariableDeclaration<any, any, any>
-  ? InferVariableDeclaration<T[0], S> extends infer G
-    ? G extends Array<any>
-      ? Check<Tail<T>, G[1], R>
-      : Check<Tail<T>, S, Push<R, G>>
-    : never
-  : T[0] extends FunctionDeclaration<any, any, any, any>
-  ? InferFunctionDeclaration<T[0], S> extends infer G
-    ? G extends Array<any>
-      ? Check<Tail<T>, G[1], R>
-      : Check<Tail<T>, S, Push<R, G>>
-    : never
-  : never;
+export type Check<NodeList extends Array<BaseNode<any>>> =
+  InferBlockStatement<NodeList> extends TypeResult<any, any, infer Errors>
+    ? Errors
+    : never;
 
 type InferBlockStatement<
   NodeList extends Array<BaseNode<any>>,
