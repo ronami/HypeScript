@@ -612,3 +612,38 @@ foo(1, 'a')
     lineNumber: 5,
   },
 ]);
+
+expectType<
+  TypeCheck<`
+
+function foo(a: number) {
+  return 5
+}
+
+const a = foo('a', bar, bazz)
+
+const b: string = a;
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Cannot find name 'bar'.",
+    lineNumber: 7,
+  },
+  {
+    type: 'TypeError',
+    message: "Cannot find name 'bazz'.",
+    lineNumber: 7,
+  },
+  {
+    type: 'TypeError',
+    message: 'Expected 1 arguments, but got 3.',
+    lineNumber: 7,
+  },
+  {
+    type: 'TypeError',
+    message: "Type 'number' is not assignable to type 'string'.",
+    lineNumber: 9,
+  },
+]);
