@@ -595,3 +595,20 @@ const b: number = a
     lineNumber: 5,
   },
 ]);
+
+expectType<
+  TypeCheck<`
+
+function foo(a: string, b: number) {}
+
+foo(1, 'a')
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message:
+      "Argument of type 'number' is not assignable to parameter of type 'string'.",
+    lineNumber: 5,
+  },
+]);
