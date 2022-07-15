@@ -86,56 +86,95 @@ type ParseVariableDeclarationHelper<
     : G
   : never;
 
-type ParseTypeAnnotation<T extends Array<Token<any>>> =
-  T[0] extends SymbolToken<'string', TokenData<any, infer L>>
-    ? [
-        TypeAnnotation<StringTypeAnnotation<NodeData<L, L>>, NodeData<L, L>>,
-        Tail<T>,
-      ]
-    : T[0] extends SymbolToken<'boolean', TokenData<any, infer L>>
-    ? [
-        TypeAnnotation<BooleanTypeAnnotation<NodeData<L, L>>, NodeData<L, L>>,
-        Tail<T>,
-      ]
-    : T[0] extends SymbolToken<'null', TokenData<any, infer L>>
+type ParseTypeAnnotation<TokenList extends Array<Token<any>>> =
+  TokenList[0] extends SymbolToken<'string', TokenData<any, infer LineNumber>>
     ? [
         TypeAnnotation<
-          NullLiteralTypeAnnotation<NodeData<L, L>>,
-          NodeData<L, L>
+          StringTypeAnnotation<NodeData<LineNumber, LineNumber>>,
+          NodeData<LineNumber, LineNumber>
         >,
-        Tail<T>,
+        Tail<TokenList>,
       ]
-    : T[0] extends SymbolToken<'number', TokenData<any, infer L>>
-    ? [
-        TypeAnnotation<NumberTypeAnnotation<NodeData<L, L>>, NodeData<L, L>>,
-        Tail<T>,
-      ]
-    : T[0] extends SymbolToken<'any', TokenData<any, infer L>>
-    ? [
-        TypeAnnotation<AnyTypeAnnotation<NodeData<L, L>>, NodeData<L, L>>,
-        Tail<T>,
-      ]
-    : T[0] extends SymbolToken<infer E, TokenData<any, infer L>>
+    : TokenList[0] extends SymbolToken<
+        'boolean',
+        TokenData<any, infer LineNumber>
+      >
     ? [
         TypeAnnotation<
-          GenericTypeAnnotation<E, NodeData<L, L>>,
-          NodeData<L, L>
+          BooleanTypeAnnotation<NodeData<LineNumber, LineNumber>>,
+          NodeData<LineNumber, LineNumber>
         >,
-        Tail<T>,
+        Tail<TokenList>,
+      ]
+    : TokenList[0] extends SymbolToken<'null', TokenData<any, infer LineNumber>>
+    ? [
+        TypeAnnotation<
+          NullLiteralTypeAnnotation<NodeData<LineNumber, LineNumber>>,
+          NodeData<LineNumber, LineNumber>
+        >,
+        Tail<TokenList>,
+      ]
+    : TokenList[0] extends SymbolToken<
+        'number',
+        TokenData<any, infer LineNumber>
+      >
+    ? [
+        TypeAnnotation<
+          NumberTypeAnnotation<NodeData<LineNumber, LineNumber>>,
+          NodeData<LineNumber, LineNumber>
+        >,
+        Tail<TokenList>,
+      ]
+    : TokenList[0] extends SymbolToken<'any', TokenData<any, infer LineNumber>>
+    ? [
+        TypeAnnotation<
+          AnyTypeAnnotation<NodeData<LineNumber, LineNumber>>,
+          NodeData<LineNumber, LineNumber>
+        >,
+        Tail<TokenList>,
+      ]
+    : TokenList[0] extends SymbolToken<
+        infer E,
+        TokenData<any, infer LineNumber>
+      >
+    ? [
+        TypeAnnotation<
+          GenericTypeAnnotation<E, NodeData<LineNumber, LineNumber>>,
+          NodeData<LineNumber, LineNumber>
+        >,
+        Tail<TokenList>,
       ]
     : null;
 
-type ParseVariableDeclaration<T extends Array<Token<any>>> =
-  T[0] extends SymbolToken<'const', TokenData<any, infer L>>
-    ? ParseIdentifier<Tail<T>, true> extends infer N
-      ? N extends [Identifier<any, any, NodeData<infer S, any>>, infer R]
+type ParseVariableDeclaration<NodeList extends Array<Token<any>>> =
+  NodeList[0] extends SymbolToken<'const', TokenData<any, infer KindLineNumber>>
+    ? ParseIdentifier<Tail<NodeList>, true> extends infer N
+      ? N extends [
+          Identifier<any, any, NodeData<infer IdentifierLineNumber, any>>,
+          infer R,
+        ]
         ? R extends Array<any>
-          ? R[0] extends SymbolToken<'=', TokenData<any, infer K>>
-            ? ParseVariableDeclarationHelper<R, N[0], L, S, K>
-            : SyntaxError<"'const' declarations must be initialized.", S>
+          ? R[0] extends SymbolToken<
+              '=',
+              TokenData<any, infer EqualsLineNumber>
+            >
+            ? ParseVariableDeclarationHelper<
+                R,
+                N[0],
+                KindLineNumber,
+                IdentifierLineNumber,
+                EqualsLineNumber
+              >
+            : SyntaxError<
+                "'const' declarations must be initialized.",
+                IdentifierLineNumber
+              >
           : never
         : N extends null
-        ? SyntaxError<'Variable declaration list cannot be empty.', L>
+        ? SyntaxError<
+            'Variable declaration list cannot be empty.',
+            KindLineNumber
+          >
         : N
       : never
     : null;
@@ -334,11 +373,11 @@ type ParseArrayExpression<
     : A
   : never;
 
-type ParseExpressionStatement<T extends Array<Token<any>>> =
-  ParseExpression<T> extends infer G
+type ParseExpressionStatement<NodeList extends Array<Token<any>>> =
+  ParseExpression<NodeList> extends infer G
     ? G extends Array<any>
-      ? G[0] extends BaseNode<infer D>
-        ? [ExpressionStatement<G[0], D>, G[1]]
+      ? G[0] extends BaseNode<infer Data>
+        ? [ExpressionStatement<G[0], Data>, G[1]]
         : never
       : G
     : never;
@@ -402,24 +441,24 @@ type ParseFunctionParamsHelper<
   : never;
 
 type ParseBlockStatement<
-  T extends Array<Token<any>>,
+  TokenList extends Array<Token<any>>,
   L extends number,
   F extends boolean,
   R extends Array<BaseNode<any>> = [],
   N extends boolean = false,
-> = T extends []
+> = TokenList extends []
   ? Head<R> extends BaseNode<NodeData<any, infer S>>
     ? SyntaxError<"'}' expected.", S>
     : SyntaxError<"'}' expected.", L>
-  : T[0] extends GenericToken<'}', TokenData<any, infer E>>
-  ? [BlockStatement<R, NodeData<L, E>>, Tail<T>]
-  : T[0] extends GenericToken<';', any>
-  ? ParseBlockStatement<Tail<T>, L, F, R, false>
+  : TokenList[0] extends GenericToken<'}', TokenData<any, infer E>>
+  ? [BlockStatement<R, NodeData<L, E>>, Tail<TokenList>]
+  : TokenList[0] extends GenericToken<';', any>
+  ? ParseBlockStatement<Tail<TokenList>, L, F, R, false>
   : N extends false
-  ? ParseBlockStatementHelper<T, L, F, R>
-  : T[0] extends Token<TokenData<infer P, infer L>>
+  ? ParseBlockStatementHelper<TokenList, L, F, R>
+  : TokenList[0] extends Token<TokenData<infer P, infer L>>
   ? P extends true
-    ? ParseBlockStatementHelper<T, L, F, R>
+    ? ParseBlockStatementHelper<TokenList, L, F, R>
     : SyntaxError<"';' expected.", L>
   : never;
 
@@ -433,10 +472,12 @@ type ParseTopLevel<
   ? ParseTopLevel<Tail<TokenList>, Result, false>
   : NeedSemicolon extends false
   ? ParseTopLevelHelper<TokenList, Result>
-  : TokenList[0] extends Token<TokenData<infer P, infer L>>
-  ? P extends true
+  : TokenList[0] extends Token<
+      TokenData<infer PrecedingLinebreak, infer LineNumber>
+    >
+  ? PrecedingLinebreak extends true
     ? ParseTopLevelHelper<TokenList, Result>
-    : SyntaxError<"';' expected.", L>
+    : SyntaxError<"';' expected.", LineNumber>
   : never;
 
 type ParseBlockStatementHelper<
@@ -451,23 +492,23 @@ type ParseBlockStatementHelper<
   : never;
 
 type ParseTopLevelHelper<
-  T extends Array<Token<any>>,
-  R extends Array<BaseNode<any>>,
-> = ParseStatementHelper<T, false> extends infer G
+  TokenList extends Array<Token<any>>,
+  Result extends Array<BaseNode<any>>,
+> = ParseStatementHelper<TokenList, false> extends infer G
   ? G extends Array<any>
-    ? ParseTopLevel<G[1], Push<R, G[0]>, G[2]>
+    ? ParseTopLevel<G[1], Push<Result, G[0]>, G[2]>
     : G
   : never;
 
 type ParseIfStatement<
-  T extends Array<Token<any>>,
-  F extends boolean,
-> = T[0] extends SymbolToken<'if', TokenData<any, infer L>>
-  ? T[1] extends GenericToken<'(', TokenData<any, infer H>>
-    ? ParseExpression<TailBy<T, 2>> extends infer G
+  NodeList extends Array<Token<any>>,
+  InFunctionScope extends boolean,
+> = NodeList[0] extends SymbolToken<'if', TokenData<any, infer L>>
+  ? NodeList[1] extends GenericToken<'(', TokenData<any, infer H>>
+    ? ParseExpression<TailBy<NodeList, 2>> extends infer G
       ? G extends Array<any>
         ? G[0] extends BaseNode<NodeData<any, infer E>>
-          ? ParseIfStatementHelper<G, L, F, E>
+          ? ParseIfStatementHelper<G, L, InFunctionScope, E>
           : G extends Error<any, any, any>
           ? G
           : never
@@ -490,18 +531,21 @@ type ParseReturnStatementHelper<
   : never;
 
 type ParseReturnStatement<
-  T extends Array<Token<any>>,
-  F extends boolean,
-> = T[0] extends SymbolToken<'return', TokenData<any, infer L>>
-  ? F extends true
-    ? T[1] extends Token<TokenData<infer P, any>, any>
-      ? P extends false
-        ? ParseReturnStatementHelper<Tail<T>, L>
-        : [ReturnStatement<null, NodeData<L, L>>, Tail<T>]
-      : [ReturnStatement<null, NodeData<L, L>>, []]
+  NodeList extends Array<Token<any>>,
+  InFunctionScope extends boolean,
+> = NodeList[0] extends SymbolToken<'return', TokenData<any, infer LineNumber>>
+  ? InFunctionScope extends true
+    ? NodeList[1] extends Token<TokenData<infer PrecedingLinebreak, any>, any>
+      ? PrecedingLinebreak extends false
+        ? ParseReturnStatementHelper<Tail<NodeList>, LineNumber>
+        : [
+            ReturnStatement<null, NodeData<LineNumber, LineNumber>>,
+            Tail<NodeList>,
+          ]
+      : [ReturnStatement<null, NodeData<LineNumber, LineNumber>>, []]
     : SyntaxError<
         "A 'return' statement can only be used within a function body.",
-        L
+        LineNumber
       >
   : null;
 
@@ -525,29 +569,29 @@ type ParseIfStatementHelper<
   : never;
 
 type ParseStatementHelper<
-  T extends Array<Token<any>>,
-  F extends boolean,
-> = ParseFunctionDeclaration<T> extends infer P
+  TokenList extends Array<Token<any>>,
+  InFunctionScope extends boolean,
+> = ParseFunctionDeclaration<TokenList> extends infer P
   ? P extends Array<any>
     ? [...P, false]
     : P extends Error<any, any, any>
     ? P
-    : ParseVariableDeclaration<T> extends infer P
+    : ParseVariableDeclaration<TokenList> extends infer P
     ? P extends Array<any>
       ? [...P, true]
       : P extends Error<any, any, any>
       ? P
-      : ParseIfStatement<T, F> extends infer P
+      : ParseIfStatement<TokenList, InFunctionScope> extends infer P
       ? P extends Array<any>
         ? [...P, false]
         : P extends Error<any, any, any>
         ? P
-        : ParseReturnStatement<T, F> extends infer P
+        : ParseReturnStatement<TokenList, InFunctionScope> extends infer P
         ? P extends Array<any>
           ? [...P, true]
           : P extends Error<any, any, any>
           ? P
-          : ParseExpressionStatement<T> extends infer P
+          : ParseExpressionStatement<TokenList> extends infer P
           ? P extends Array<any>
             ? [...P, true]
             : P extends Error<any, any, any>
