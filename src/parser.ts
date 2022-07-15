@@ -424,18 +424,18 @@ type ParseBlockStatement<
   : never;
 
 type ParseTopLevel<
-  T extends Array<Token<any>>,
-  R extends Array<BaseNode<any>> = [],
-  N extends boolean = false,
-> = T extends []
-  ? R
-  : T[0] extends GenericToken<';', any>
-  ? ParseTopLevel<Tail<T>, R, false>
-  : N extends false
-  ? ParseTopLevelHelper<T, R>
-  : T[0] extends Token<TokenData<infer P, infer L>>
+  TokenList extends Array<Token<any>>,
+  Result extends Array<BaseNode<any>> = [],
+  NeedSemicolon extends boolean = false,
+> = TokenList extends []
+  ? Result
+  : TokenList[0] extends GenericToken<';', any>
+  ? ParseTopLevel<Tail<TokenList>, Result, false>
+  : NeedSemicolon extends false
+  ? ParseTopLevelHelper<TokenList, Result>
+  : TokenList[0] extends Token<TokenData<infer P, infer L>>
   ? P extends true
-    ? ParseTopLevelHelper<T, R>
+    ? ParseTopLevelHelper<TokenList, Result>
     : SyntaxError<"';' expected.", L>
   : never;
 
@@ -559,4 +559,5 @@ type ParseStatementHelper<
     : never
   : never;
 
-export type Parse<T extends Array<Token<any>>> = ParseTopLevel<T>;
+export type Parse<TokenList extends Array<Token<any>>> =
+  ParseTopLevel<TokenList>;
