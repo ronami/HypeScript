@@ -246,7 +246,11 @@ type InferVariableDeclaration<
             >
         : never
       : never
-    : [null, MergeWithOverride<State, { [a in Name]: InitExpressionValue }>]
+    : TypeResult<
+        NullType,
+        MergeWithOverride<State, { [a in Name]: InitExpressionValue }>,
+        InitExpressionErrors
+      >
   : never;
 
 type InferExpression<
