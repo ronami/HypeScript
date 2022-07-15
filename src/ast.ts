@@ -91,14 +91,14 @@ export type FunctionDeclaration<
 };
 
 export type Identifier<
-  N extends string,
-  T extends TypeAnnotation<any, any> | null,
-  D extends NodeData<any, any>,
+  Name extends string,
+  Annotation extends TypeAnnotation<any, any> | null,
+  Data extends NodeData<any, any>,
 > = {
   type: 'Identifier';
-  name: N;
-  typeAnnotation: T;
-  data: D;
+  name: Name;
+  typeAnnotation: Annotation;
+  data: Data;
 };
 
 export type ExpressionStatement<

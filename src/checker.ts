@@ -72,8 +72,28 @@ type InferBlockStatement<
         Concat<Errors, ExpressionErrors>
       >
     : never
-  : NodeList[0] extends VariableDeclaration<any, any, any>
-  ? InferVariableDeclaration<NodeList[0], State> extends infer G
+  : NodeList[0] extends VariableDeclaration<
+      [
+        VariableDeclarator<
+          Identifier<
+            infer Name,
+            infer Annotation,
+            NodeData<infer StartLine, any>
+          >,
+          infer Init,
+          any
+        >,
+      ],
+      any,
+      any
+    >
+  ? InferVariableDeclaration<
+      Name,
+      Annotation,
+      Init,
+      State,
+      StartLine
+    > extends infer G
     ? G extends Array<any>
       ? InferBlockStatement<Tail<NodeList>, G[1], Result>
       : G
@@ -93,18 +113,18 @@ type InferBlockStatement<
     : never
   : InferBlockStatement<Tail<NodeList>, VoidType, State, Errors>;
 
-type MapAnnotationToType<A extends BaseNode<any>> =
-  A extends StringTypeAnnotation<any>
+type MapAnnotationToType<AnnotationValue extends BaseNode<any>> =
+  AnnotationValue extends StringTypeAnnotation<any>
     ? StringType
-    : A extends NumberTypeAnnotation<any>
+    : AnnotationValue extends NumberTypeAnnotation<any>
     ? NumberType
-    : A extends BooleanTypeAnnotation<any>
+    : AnnotationValue extends BooleanTypeAnnotation<any>
     ? BooleanType
-    : A extends NullLiteralTypeAnnotation<any>
+    : AnnotationValue extends NullLiteralTypeAnnotation<any>
     ? NullType
-    : A extends AnyTypeAnnotation<any>
+    : AnnotationValue extends AnyTypeAnnotation<any>
     ? AnyType
-    : never;
+    : UnknownType;
 
 type InferFunctionParams<
   T extends Array<BaseNode<any>>,
@@ -188,48 +208,45 @@ type MatchTypeArrays<
     >;
 
 type InferVariableDeclaration<
-  O extends VariableDeclaration<any, any, any>,
-  S extends StateType,
-> = O extends VariableDeclaration<
-  [
-    VariableDeclarator<
-      Identifier<infer N, infer T, NodeData<infer L, any>>,
-      infer I,
-      any
-    >,
-  ],
-  any,
-  any
+  Name extends string,
+  Annotation extends TypeAnnotation<any, any> | null,
+  Init extends BaseNode<any>,
+  State extends StateType,
+  StartLine extends number,
+> = InferExpression<Init, State> extends TypeResult<
+  infer InitExpressionValue,
+  infer InitExpressionState,
+  infer InitExpressionErrors
 >
-  ? InferExpression<I, S> extends infer G
-    ? G extends Array<any>
-      ? T extends TypeAnnotation<infer T, any>
-        ? MapAnnotationToType<T> extends infer P
-          ? P extends StaticType
-            ? MatchType<P, G[0]> extends true
-              ? [null, MergeWithOverride<S, { [a in N]: P }>]
-              : SyntaxError<
-                  `Type '${Serialize<
-                    G[0]
-                  >}' is not assignable to type '${Serialize<P>}'.`,
-                  L
+  ? Annotation extends TypeAnnotation<infer AnnotationValue, any>
+    ? MapAnnotationToType<AnnotationValue> extends infer ExpectedType
+      ? ExpectedType extends StaticType
+        ? MatchType<ExpectedType, InitExpressionValue> extends true
+          ? TypeResult<
+              NullType,
+              MergeWithOverride<
+                InitExpressionState,
+                { [a in Name]: ExpectedType }
+              >,
+              InitExpressionErrors
+            >
+          : TypeResult<
+              NullType,
+              MergeWithOverride<
+                InitExpressionState,
+                { [a in Name]: ExpectedType }
+              >,
+              Push<
+                InitExpressionErrors,
+                TypeError<
+                  `Type '${Serialize<InitExpressionValue>}' is not assignable to type '${Serialize<ExpectedType>}'.`,
+                  StartLine
                 >
-            : never
-          : never
-        : [null, MergeWithOverride<S, { [a in N]: G[0] }>]
-      : G
-    : never
-  : never;
-
-type InferExpressionStatement<
-  O extends ExpressionStatement<any, any>,
-  S extends StateType,
-> = O extends ExpressionStatement<infer E, any>
-  ? InferExpression<E, S> extends infer G
-    ? G extends Array<any>
-      ? [null, S]
-      : G
-    : never
+              >
+            >
+        : never
+      : never
+    : [null, MergeWithOverride<State, { [a in Name]: InitExpressionValue }>]
   : never;
 
 type InferExpression<
