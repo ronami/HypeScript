@@ -255,8 +255,15 @@ type ParseMemberExpression<
 type ParseCallExpression<
   Node extends BaseNode<any>,
   TokenList extends Array<Token<any>>,
-> = TokenList[0] extends GenericToken<'(', TokenData<any, infer E>>
-  ? ParseCallExpressionArguments<Tail<TokenList>, E, ')'> extends infer G
+> = TokenList[0] extends GenericToken<
+  '(',
+  TokenData<any, infer ParenLineNumber>
+>
+  ? ParseCallExpressionArguments<
+      Tail<TokenList>,
+      ParenLineNumber,
+      ')'
+    > extends infer G
     ? G extends Array<any>
       ? Node extends BaseNode<NodeData<infer NodeStartLine, any>>
         ? G[2] extends Token<TokenData<any, infer L>>
@@ -268,31 +275,47 @@ type ParseCallExpression<
   : null;
 
 type ParseCallExpressionArguments<
-  T extends Array<Token<any>>,
-  E extends number,
-  J extends string,
-  N extends boolean = false,
-  R extends Array<BaseNode<any>> = [],
-> = T[0] extends GenericToken<J, any>
-  ? [R, Tail<T>, T[0]]
-  : T extends []
-  ? SyntaxError<`'${J}' expected.`, E>
-  : N extends true
-  ? T[0] extends GenericToken<',', any>
-    ? ParseCallExpressionArgumentsHelper<Tail<T>, E, J, R>
-    : T[0] extends Token<TokenData<any, infer L>>
-    ? SyntaxError<"',' expected.", L>
+  TokenList extends Array<Token<any>>,
+  ParenLineNumber extends number,
+  ClosingString extends string,
+  NeedComma extends boolean = false,
+  Result extends Array<BaseNode<any>> = [],
+> = TokenList[0] extends GenericToken<ClosingString, any>
+  ? [Result, Tail<TokenList>, TokenList[0]]
+  : TokenList extends []
+  ? SyntaxError<`'${ClosingString}' expected.`, ParenLineNumber>
+  : NeedComma extends true
+  ? TokenList[0] extends GenericToken<',', any>
+    ? ParseCallExpressionArgumentsHelper<
+        Tail<TokenList>,
+        ParenLineNumber,
+        ClosingString,
+        Result
+      >
+    : TokenList[0] extends Token<TokenData<any, infer LineNumber>>
+    ? SyntaxError<"',' expected.", LineNumber>
     : never
-  : ParseCallExpressionArgumentsHelper<T, E, J, R>;
+  : ParseCallExpressionArgumentsHelper<
+      TokenList,
+      ParenLineNumber,
+      ClosingString,
+      Result
+    >;
 
 type ParseCallExpressionArgumentsHelper<
-  T extends Array<Token<any>>,
-  E extends number,
-  J extends string,
-  R extends Array<BaseNode<any>> = [],
-> = ParseExpression<T> extends infer G
+  TokenList extends Array<Token<any>>,
+  ParenLineNumber extends number,
+  ClosingString extends string,
+  Result extends Array<BaseNode<any>> = [],
+> = ParseExpression<TokenList> extends infer G
   ? G extends Array<any>
-    ? ParseCallExpressionArguments<G[1], E, J, true, Push<R, G[0]>>
+    ? ParseCallExpressionArguments<
+        G[1],
+        ParenLineNumber,
+        ClosingString,
+        true,
+        Push<Result, G[0]>
+      >
     : G
   : never;
 
