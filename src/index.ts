@@ -4,11 +4,9 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 
-function foo() {
-    
-}
+function foo() {}
 
-const a: string = foo
+foo()
 
 `>;
 type R = Parse<T>;
