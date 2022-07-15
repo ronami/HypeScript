@@ -484,17 +484,20 @@ type InferArrayElementsHelper<
   ? UnionType<Push<U, R>>
   : UnionType<[R, E]>;
 
-type MapLiteralToType<T extends StaticType> = T extends NumberLiteralType<any>
-  ? NumberType
-  : T extends StringLiteralType<any>
-  ? StringType
-  : T extends BooleanLiteralType<any>
-  ? BooleanType
-  : T extends ObjectType<infer O>
-  ? ObjectType<{
-      [P in keyof O]: O[P] extends StaticType ? MapLiteralToType<O[P]> : never;
-    }>
-  : T;
+type MapLiteralToType<Type extends StaticType> =
+  Type extends NumberLiteralType<any>
+    ? NumberType
+    : Type extends StringLiteralType<any>
+    ? StringType
+    : Type extends BooleanLiteralType<any>
+    ? BooleanType
+    : Type extends ObjectType<infer Properties>
+    ? ObjectType<{
+        [P in keyof Properties]: Properties[P] extends StaticType
+          ? MapLiteralToType<Properties[P]>
+          : never;
+      }>
+    : Type;
 
 type InferMemberExpression<
   Object extends BaseNode<any>,
