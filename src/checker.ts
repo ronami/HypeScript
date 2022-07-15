@@ -130,7 +130,7 @@ type InferBlockStatement<
       >
     : never
   : NodeList[0] extends ReturnStatement<infer ReturnExpression, any>
-  ? InferExpression<ReturnExpression, State> extends TypeResult<
+  ? InferReturnStatement<ReturnExpression, State> extends TypeResult<
       infer ExpressionValue,
       infer ExpressionState,
       infer ExpressionErrors
@@ -143,6 +143,19 @@ type InferBlockStatement<
       >
     : never
   : InferBlockStatement<Tail<NodeList>, State, VoidType, Errors>;
+
+type InferReturnStatement<
+  ReturnExpression extends BaseNode<any> | null,
+  State extends StateType,
+> = ReturnExpression extends BaseNode<any>
+  ? InferExpression<ReturnExpression, State> extends TypeResult<
+      infer ExpressionValue,
+      infer ExpressionState,
+      infer ExpressionErrors
+    >
+    ? TypeResult<ExpressionValue, ExpressionState, ExpressionErrors>
+    : never
+  : TypeResult<NullType, State>;
 
 type MapAnnotationToType<AnnotationValue extends BaseNode<any>> =
   AnnotationValue extends StringTypeAnnotation<any>
