@@ -418,21 +418,40 @@ type ParseExpressionStatement<NodeList extends Array<Token<any>>> =
       : G
     : never;
 
-type ParseFunctionDeclaration<T extends Array<Token<any>>> =
-  T[0] extends SymbolToken<'function', TokenData<any, infer L>>
-    ? T[1] extends SymbolToken<infer N, TokenData<any, infer O>>
-      ? T[2] extends GenericToken<'(', TokenData<any, infer I>>
-        ? ParseFunctionParams<TailBy<T, 3>, I> extends infer G
+type ParseFunctionDeclaration<TokenList extends Array<Token<any>>> =
+  TokenList[0] extends SymbolToken<
+    'function',
+    TokenData<any, infer FunctionLineNumber>
+  >
+    ? TokenList[1] extends SymbolToken<
+        infer Name,
+        TokenData<any, infer FunctionNameLineNumber>
+      >
+      ? TokenList[2] extends GenericToken<
+          '(',
+          TokenData<any, infer ParenLineNumber>
+        >
+        ? ParseFunctionParams<
+            TailBy<TokenList, 3>,
+            ParenLineNumber
+          > extends infer G
           ? G extends Array<any>
             ? ParseBlockStatement<G[1], G[2], true> extends infer H
               ? H extends Array<any>
-                ? H[0] extends BaseNode<NodeData<any, infer E>>
+                ? H[0] extends BaseNode<NodeData<any, infer BodyLineNumber>>
                   ? [
                       FunctionDeclaration<
-                        Identifier<N, null, NodeData<O, O>>,
+                        Identifier<
+                          Name,
+                          null,
+                          NodeData<
+                            FunctionNameLineNumber,
+                            FunctionNameLineNumber
+                          >
+                        >,
                         G[0],
                         H[0],
-                        NodeData<L, E>
+                        NodeData<FunctionLineNumber, BodyLineNumber>
                       >,
                       H[1],
                     ]
@@ -441,8 +460,8 @@ type ParseFunctionDeclaration<T extends Array<Token<any>>> =
               : never
             : G
           : never
-        : SyntaxError<"'(' expected.", O>
-      : SyntaxError<'Identifier expected.', L>
+        : SyntaxError<"'(' expected.", FunctionNameLineNumber>
+      : SyntaxError<'Identifier expected.', FunctionLineNumber>
     : null;
 
 type ParseFunctionParams<
