@@ -104,12 +104,23 @@ type InferBlockStatement<
       >
     : never
   : NodeList[0] extends FunctionDeclaration<
-      Identifier<infer Name, any, NodeData<infer StartLine, any>>,
+      Identifier<infer Name, any, any>,
       infer Params,
       BlockStatement<infer Body, any>,
       any
     >
-  ? InferFunctionDeclaration<Name, Params, Body, State>
+  ? InferFunctionDeclaration<Name, Params, Body, State> extends TypeResult<
+      any,
+      infer DeclarationState,
+      infer DeclarationErrors
+    >
+    ? InferBlockStatement<
+        Tail<NodeList>,
+        DeclarationState,
+        Result,
+        Concat<Errors, DeclarationErrors>
+      >
+    : never
   : NodeList[0] extends ReturnStatement<infer ReturnExpression, any>
   ? InferExpression<ReturnExpression, State> extends TypeResult<
       infer ExpressionValue,
@@ -324,30 +335,39 @@ type InferExpression<
   ? InferMemberExpression<Object, Property, Computed, State>
   : Node extends ArrayExpression<infer Elements, any>
   ? InferArrayElements<Elements, State>
-  : Node extends CallExpression<infer Callee, infer Arguments, any>
-  ? InferCallExpression<Callee, Arguments, State>
+  : Node extends CallExpression<
+      infer Callee,
+      infer Arguments,
+      NodeData<infer StartLine, any>
+    >
+  ? InferCallExpression<Callee, Arguments, State, StartLine>
   : UnknownType;
 
 type InferCallExpression<
-  C extends BaseNode<any>,
-  A extends Array<BaseNode<any>>,
-  S extends StateType,
-> = C extends BaseNode<NodeData<infer L, any>>
-  ? InferExpression<C, S> extends infer G
-    ? G extends Array<any>
-      ? G[0] extends FunctionType<infer P, infer R>
-        ? InferExpressionsArray<A, S> extends infer H
-          ? H extends Array<any>
-            ? InferCallExpressionHelper<P, H[0], R, S, L>
-            : H
-          : never
-        : SyntaxError<
-            `This expression is not callable. Type '${Serialize<
-              G[0]
-            >}' has no call signatures.`,
-            L
-          >
-      : G
+  Callee extends BaseNode<any>,
+  Arguments extends Array<BaseNode<any>>,
+  State extends StateType,
+  StartLine extends number,
+> = InferExpression<Callee, State> extends TypeResult<
+  infer CalleeValue,
+  infer CalleeState,
+  infer CalleeErrors
+>
+  ? InferExpressionsArray<Arguments, State> extends infer H
+    ? CalleeValue extends FunctionType<infer P, infer R>
+      ? H extends Array<any>
+        ? InferCallExpressionHelper<P, H[0], R, State, StartLine>
+        : H
+      : TypeResult<
+          AnyType,
+          State,
+          [
+            TypeError<
+              `This expression is not callable. Type '${Serialize<CalleeValue>}' has no call signatures.`,
+              StartLine
+            >,
+          ]
+        >
     : never
   : never;
 
@@ -355,17 +375,17 @@ type InferCallExpressionHelper<
   P extends Array<[string, StaticType]>,
   H extends Array<StaticType>,
   R extends StaticType,
-  S extends StateType,
-  L extends number,
+  State extends StateType,
+  StartLine extends number,
 > = P['length'] extends H['length']
-  ? MatchTypeArrays<P, H, L> extends infer W
+  ? MatchTypeArrays<P, H, StartLine> extends infer W
     ? W extends true
-      ? [R, S]
+      ? [R, State]
       : W
     : never
-  : SyntaxError<
+  : TypeError<
       `Expected ${P['length']} arguments, but got ${H['length']}.`,
-      L
+      StartLine
     >;
 
 type InferExpressionsArray<
