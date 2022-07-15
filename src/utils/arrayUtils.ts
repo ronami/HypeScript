@@ -7,12 +7,7 @@ export type Tail<T extends Array<any>> = ((...t: T) => void) extends (
 
 export type Push<T extends Array<any>, E> = [...T, E];
 
-export type Unshift<T extends Array<any>, E> = ((
-  h: E,
-  ...t: T
-) => void) extends (...t: infer R) => void
-  ? R
-  : never;
+export type Unshift<T extends Array<any>, E> = [E, ...T];
 
 export type Reverse<
   T extends Array<any>,
