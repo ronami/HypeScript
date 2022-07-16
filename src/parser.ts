@@ -35,7 +35,7 @@ import type {
   Token,
   TokenData,
 } from './tokens';
-import type { Head, Push, Tail, TailBy } from './utils/arrayUtils';
+import type { Push, Tail, TailBy } from './utils/arrayUtils';
 
 type ExtractTokenData<
   T extends Token<any>,

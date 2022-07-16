@@ -14,10 +14,6 @@ export type Reverse<
   R extends Array<any> = [],
 > = T extends [] ? R : Reverse<Tail<T>, Unshift<R, T[0]>>;
 
-export type Head<T extends Array<any>> = T extends [any, ...Array<any>]
-  ? T['0']
-  : never;
-
 export type Concat<T1 extends Array<any>, T2 extends Array<any>> = [
   ...T1,
   ...T2,
