@@ -178,11 +178,12 @@ type InferBlockStatement<
       any,
       infer IfStatementErrors
     >
-    ? // ? TypeResult<IfStatementValue, State, Errors>
-      InferBlockStatement<
+    ? InferBlockStatement<
         Tail<NodeList>,
         State,
-        Push<Result, IfStatementValue>,
+        IfStatementValue extends VoidType
+          ? Result
+          : Push<Result, IfStatementValue>,
         Concat<Errors, IfStatementErrors>
       >
     : never
