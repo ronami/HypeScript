@@ -399,20 +399,27 @@ type ParseObjectItem<
   TokenList extends Array<Token<any>>,
   InitialLineNumber extends number,
   Result extends Array<ObjectProperty<any, any, any>> = [],
-> = TokenList[0] extends SymbolToken<infer K, TokenData<any, infer L>>
+> = TokenList[0] extends SymbolToken<
+  infer Name,
+  TokenData<any, infer NameLineNumber>
+>
   ? TokenList[1] extends GenericToken<':', any>
     ? ParseExpression<TailBy<TokenList, 2>> extends infer G
       ? G extends Array<any>
-        ? G[0] extends BaseNode<NodeData<any, infer W>>
+        ? G[0] extends BaseNode<NodeData<any, infer ValueLineNumber>>
           ? ParseObject<
               G[1],
               InitialLineNumber,
               Push<
                 Result,
                 ObjectProperty<
-                  Identifier<K, null, NodeData<L, L>>,
+                  Identifier<
+                    Name,
+                    null,
+                    NodeData<NameLineNumber, NameLineNumber>
+                  >,
                   G[0],
-                  NodeData<L, W>
+                  NodeData<NameLineNumber, ValueLineNumber>
                 >
               >,
               true
