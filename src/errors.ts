@@ -1,17 +1,19 @@
-export type Error<T extends string, M extends string, L extends number> = {
-  type: T;
-  message: M;
-  lineNumber: L;
+export type Error<
+  Type extends string,
+  Message extends string,
+  LineNumber extends number,
+> = {
+  type: Type;
+  message: Message;
+  lineNumber: LineNumber;
 };
 
-export type SyntaxError<M extends string, L extends number> = Error<
-  'SyntaxError',
-  M,
-  L
->;
+export type SyntaxError<
+  Message extends string,
+  LineNumber extends number,
+> = Error<'SyntaxError', Message, LineNumber>;
 
-export type TypeError<M extends string, L extends number> = Error<
-  'TypeError',
-  M,
-  L
->;
+export type TypeError<
+  Message extends string,
+  LineNumber extends number,
+> = Error<'TypeError', Message, LineNumber>;

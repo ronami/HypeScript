@@ -14,4 +14,4 @@ const b: string = a;
 
 `>;
 type R = Parse<T>;
-type C = Check<R>[3];
+type C = Check<R>;
