@@ -17,8 +17,8 @@ import type {
 } from './types';
 import type { Tail } from './utils/arrayUtils';
 
-export type Serialize<T extends StaticType> =
-  MapLiteralToType<T> extends infer H
+export type Serialize<Type extends StaticType> =
+  MapLiteralToType<Type> extends infer H
     ? H extends StringType
       ? 'string'
       : H extends BooleanType
@@ -33,39 +33,39 @@ export type Serialize<T extends StaticType> =
       ? 'any'
       : H extends UnknownType
       ? 'unknown'
-      : H extends ArrayType<infer I>
-      ? SerializeArray<I>
-      : H extends UnionType<infer U>
-      ? SerializeUnion<U>
-      : H extends ObjectType<infer O>
-      ? SerializeObject<O>
-      : H extends FunctionType<infer P, infer R>
-      ? SerializeFunction<P, R>
+      : H extends ArrayType<infer ElementsType>
+      ? SerializeArray<ElementsType>
+      : H extends UnionType<infer UnionTypes>
+      ? SerializeUnion<UnionTypes>
+      : H extends ObjectType<infer Properties>
+      ? SerializeObject<Properties>
+      : H extends FunctionType<infer Params, infer Return>
+      ? SerializeFunction<Params, Return>
       : never
     : never;
 
 type SerializeFunction<
-  P extends Array<[string, StaticType]>,
-  R extends StaticType,
-> = SerializeFunctionParams<P> extends infer H
+  Params extends Array<[string, StaticType]>,
+  Return extends StaticType,
+> = SerializeFunctionParams<Params> extends infer H
   ? H extends string
-    ? `(${H}) => ${Serialize<R>}`
+    ? `(${H}) => ${Serialize<Return>}`
     : never
   : never;
 
 type SerializeFunctionParams<
-  P extends Array<[string, StaticType]>,
-  R extends string = '',
-> = P extends []
-  ? R
-  : P[0] extends [infer K, infer V]
-  ? V extends StaticType
-    ? K extends string
+  Params extends Array<[string, StaticType]>,
+  Result extends string = '',
+> = Params extends []
+  ? Result
+  : Params[0] extends [infer Key, infer Value]
+  ? Value extends StaticType
+    ? Key extends string
       ? SerializeFunctionParams<
-          Tail<P>,
-          `${R}${K}: ${Serialize<V>}` extends infer U
+          Tail<Params>,
+          `${Result}${Key}: ${Serialize<Value>}` extends infer U
             ? U extends string
-              ? P['length'] extends 1
+              ? Params['length'] extends 1
                 ? `${U}`
                 : `${U}, `
               : never
@@ -75,57 +75,59 @@ type SerializeFunctionParams<
     : never
   : never;
 
-type MapLiteralToType<T extends StaticType> = T extends NumberLiteralType<any>
-  ? NumberType
-  : T extends StringLiteralType<any>
-  ? StringType
-  : T extends BooleanLiteralType<any>
-  ? BooleanType
-  : T;
+type MapLiteralToType<Type extends StaticType> =
+  Type extends NumberLiteralType<any>
+    ? NumberType
+    : Type extends StringLiteralType<any>
+    ? StringType
+    : Type extends BooleanLiteralType<any>
+    ? BooleanType
+    : Type;
 
-type ShouldUseParens<I extends StaticType> = I extends UnionType<any>
+type ShouldUseParens<Type extends StaticType> = Type extends UnionType<any>
   ? true
-  : I extends FunctionType<any, any>
+  : Type extends FunctionType<any, any>
   ? true
   : false;
 
-type SerializeArray<I extends StaticType> = Serialize<I> extends infer H
-  ? H extends string
-    ? ShouldUseParens<I> extends true
-      ? `(${H})[]`
-      : `${H}[]`
-    : never
-  : never;
+type SerializeArray<ElementsType extends StaticType> =
+  Serialize<ElementsType> extends infer H
+    ? H extends string
+      ? ShouldUseParens<ElementsType> extends true
+        ? `(${H})[]`
+        : `${H}[]`
+      : never
+    : never;
 
 type SerializeUnion<
-  U extends Array<StaticType>,
-  R extends string = '',
-> = U extends []
-  ? R
-  : U[0] extends StaticType
-  ? Serialize<U[0]> extends infer H
+  UnionTypes extends Array<StaticType>,
+  Result extends string = '',
+> = UnionTypes extends []
+  ? Result
+  : UnionTypes[0] extends StaticType
+  ? Serialize<UnionTypes[0]> extends infer H
     ? H extends string
       ? SerializeUnion<
-          Tail<U>,
-          U['length'] extends 1 ? `${R}${H}` : `${R}${H} | `
+          Tail<UnionTypes>,
+          UnionTypes['length'] extends 1 ? `${Result}${H}` : `${Result}${H} | `
         >
       : never
     : never
   : never;
 
 type SerializeObject<
-  U extends Array<[string, StaticType]>,
-  R extends string = '',
-> = U extends []
-  ? R extends ''
+  Properties extends Array<[string, StaticType]>,
+  Result extends string = '',
+> = Properties extends []
+  ? Result extends ''
     ? '{}'
-    : `{ ${R} }`
-  : U[0] extends [string, StaticType]
-  ? `${U[0][0]}: ${Serialize<U[0][1]>}` extends infer H
+    : `{ ${Result} }`
+  : Properties[0] extends [infer Key, infer Value]
+  ? `${Properties[0][0]}: ${Serialize<Properties[0][1]>}` extends infer H
     ? H extends string
       ? SerializeObject<
-          Tail<U>,
-          U['length'] extends 1 ? `${R}${H};` : `${R}${H}; `
+          Tail<Properties>,
+          Properties['length'] extends 1 ? `${Result}${H};` : `${Result}${H}; `
         >
       : never
     : never
