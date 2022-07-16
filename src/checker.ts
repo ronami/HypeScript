@@ -198,7 +198,11 @@ type InferReturnStatement<
       infer ExpressionState,
       infer ExpressionErrors
     >
-    ? TypeResult<ExpressionValue, ExpressionState, ExpressionErrors>
+    ? TypeResult<
+        MapLiteralToType<ExpressionValue>,
+        ExpressionState,
+        ExpressionErrors
+      >
     : never
   : TypeResult<NullType, State>;
 
@@ -763,7 +767,7 @@ type InferObjectProperties<
     ? InferObjectProperties<
         Tail<Properties>,
         ExpressionState,
-        Push<Result, [Name, ExpressionValue]>,
+        Push<Result, [Name, MapLiteralToType<ExpressionValue>]>,
         Concat<Errors, ExpressionErrors>
       >
     : never
