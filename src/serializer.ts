@@ -18,28 +18,28 @@ import type {
 import type { Tail } from './utils/arrayUtils';
 
 export type Serialize<Type extends StaticType> =
-  MapLiteralToType<Type> extends infer H
-    ? H extends StringType
+  MapLiteralToType<Type> extends infer MappedType
+    ? MappedType extends StringType
       ? 'string'
-      : H extends BooleanType
+      : MappedType extends BooleanType
       ? 'boolean'
-      : H extends NumberType
+      : MappedType extends NumberType
       ? 'number'
-      : H extends NullType
+      : MappedType extends NullType
       ? 'null'
-      : H extends VoidType
+      : MappedType extends VoidType
       ? 'void'
-      : H extends AnyType
+      : MappedType extends AnyType
       ? 'any'
-      : H extends UnknownType
+      : MappedType extends UnknownType
       ? 'unknown'
-      : H extends ArrayType<infer ElementsType>
+      : MappedType extends ArrayType<infer ElementsType>
       ? SerializeArray<ElementsType>
-      : H extends UnionType<infer UnionTypes>
+      : MappedType extends UnionType<infer UnionTypes>
       ? SerializeUnion<UnionTypes>
-      : H extends ObjectType<infer Properties>
+      : MappedType extends ObjectType<infer Properties>
       ? SerializeObject<Properties>
-      : H extends FunctionType<infer Params, infer Return>
+      : MappedType extends FunctionType<infer Params, infer Return>
       ? SerializeFunction<Params, Return>
       : never
     : never;
@@ -47,9 +47,9 @@ export type Serialize<Type extends StaticType> =
 type SerializeFunction<
   Params extends Array<[string, StaticType]>,
   Return extends StaticType,
-> = SerializeFunctionParams<Params> extends infer H
-  ? H extends string
-    ? `(${H}) => ${Serialize<Return>}`
+> = SerializeFunctionParams<Params> extends infer SerializedParams
+  ? SerializedParams extends string
+    ? `(${SerializedParams}) => ${Serialize<Return>}`
     : never
   : never;
 
@@ -63,11 +63,11 @@ type SerializeFunctionParams<
     ? Key extends string
       ? SerializeFunctionParams<
           Tail<Params>,
-          `${Result}${Key}: ${Serialize<Value>}` extends infer U
-            ? U extends string
+          `${Result}${Key}: ${Serialize<Value>}` extends infer SerializedSignature
+            ? SerializedSignature extends string
               ? Params['length'] extends 1
-                ? `${U}`
-                : `${U}, `
+                ? `${SerializedSignature}`
+                : `${SerializedSignature}, `
               : never
             : never
         >
@@ -91,11 +91,11 @@ type ShouldUseParens<Type extends StaticType> = Type extends UnionType<any>
   : false;
 
 type SerializeArray<ElementsType extends StaticType> =
-  Serialize<ElementsType> extends infer H
-    ? H extends string
+  Serialize<ElementsType> extends infer SerializedElements
+    ? SerializedElements extends string
       ? ShouldUseParens<ElementsType> extends true
-        ? `(${H})[]`
-        : `${H}[]`
+        ? `(${SerializedElements})[]`
+        : `${SerializedElements}[]`
       : never
     : never;
 
@@ -105,11 +105,13 @@ type SerializeUnion<
 > = UnionTypes extends []
   ? Result
   : UnionTypes[0] extends StaticType
-  ? Serialize<UnionTypes[0]> extends infer H
-    ? H extends string
+  ? Serialize<UnionTypes[0]> extends infer SerializedType
+    ? SerializedType extends string
       ? SerializeUnion<
           Tail<UnionTypes>,
-          UnionTypes['length'] extends 1 ? `${Result}${H}` : `${Result}${H} | `
+          UnionTypes['length'] extends 1
+            ? `${Result}${SerializedType}`
+            : `${Result}${SerializedType} | `
         >
       : never
     : never
@@ -123,12 +125,18 @@ type SerializeObject<
     ? '{}'
     : `{ ${Result} }`
   : Properties[0] extends [infer Key, infer Value]
-  ? `${Properties[0][0]}: ${Serialize<Properties[0][1]>}` extends infer H
-    ? H extends string
-      ? SerializeObject<
-          Tail<Properties>,
-          Properties['length'] extends 1 ? `${Result}${H};` : `${Result}${H}; `
-        >
+  ? Value extends StaticType
+    ? Key extends string
+      ? `${Key}: ${Serialize<Value>}` extends infer SerializedProperty
+        ? SerializedProperty extends string
+          ? SerializeObject<
+              Tail<Properties>,
+              Properties['length'] extends 1
+                ? `${Result}${SerializedProperty};`
+                : `${Result}${SerializedProperty}; `
+            >
+          : never
+        : never
       : never
     : never
   : never;
