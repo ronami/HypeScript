@@ -37,15 +37,6 @@ import type {
 } from './tokens';
 import type { Push, Tail, TailBy } from './utils/arrayUtils';
 
-type ExtractTokenData<
-  T extends Token<any>,
-  R extends Token<any> = T,
-> = T extends Token<TokenData<any, infer D>>
-  ? R extends Token<TokenData<any, infer H>>
-    ? NodeData<D, H>
-    : never
-  : never;
-
 type ParseIdentifier<
   TokenList extends Array<Token<any>>,
   CanBeAnnotated extends boolean,
@@ -350,21 +341,25 @@ type CheckExpression<
     : never
   : never;
 
-type ParseExpression<
-  TokenList extends Array<Token<any>>,
-  Data extends NodeData<any, any> = ExtractTokenData<TokenList[0]>,
-> = ParseExpressionHelper<TokenList, Data, Tail<TokenList>> extends infer P
-  ? P extends Array<any>
-    ? CheckExpression<P[0], P[1]>
-    : P extends Error<any, any, any>
-    ? P
-    : null
+type ParseExpression<TokenList extends Array<Token<any>>> =
+  ParseExpressionHelper<TokenList, Tail<TokenList>> extends infer P
+    ? P extends Array<any>
+      ? CheckExpression<P[0], P[1]>
+      : P extends Error<any, any, any>
+      ? P
+      : null
+    : never;
+
+type TokenToNodeData<InputToken extends Token<any>> = InputToken extends Token<
+  TokenData<any, infer LineNumber>
+>
+  ? NodeData<LineNumber, LineNumber>
   : never;
 
 type ParseExpressionHelper<
   TokenList extends Array<Token<any>>,
-  Data extends NodeData<any, any> = ExtractTokenData<TokenList[0]>,
   TokenTail extends Array<Token<any>> = Tail<TokenList>,
+  Data extends NodeData<any, any> = TokenToNodeData<TokenList[0]>,
 > = TokenList[0] extends SymbolToken<'true', any>
   ? [BooleanLiteral<true, Data>, TokenTail]
   : TokenList[0] extends SymbolToken<'false', any>
