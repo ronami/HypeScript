@@ -1,11 +1,11 @@
-import type { TypeError } from './errors';
+import type { Error } from './errors';
 import type { Push, Tail } from './utils/arrayUtils';
 
 export type Format<
-  Errors extends Array<TypeError<any, any>>,
+  Errors extends Array<Error<any, any>>,
   Result extends Array<string> = [],
 > = Errors extends []
   ? Result
-  : Errors[0] extends TypeError<infer Message, infer LineNumber>
-  ? Format<Tail<Errors>, Push<Result, `Line ${LineNumber}: ${Message}`>>
+  : Errors[0] extends Error<infer Message, infer LineNumber>
+  ? Format<Tail<Errors>, Push<Result, `${LineNumber}: ${Message}`>>
   : never;
