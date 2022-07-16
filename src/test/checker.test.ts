@@ -647,3 +647,41 @@ const b: string = a;
     lineNumber: 9,
   },
 ]);
+
+expectType<
+  TypeCheck<`
+
+function foo(a: number, b: boolean) {
+  return 5
+}
+
+const b: string = foo;
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message:
+      "Type '(a: number, b: boolean) => number' is not assignable to type 'string'.",
+    lineNumber: 7,
+  },
+]);
+
+expectType<
+  TypeCheck<`
+
+function foo(a: number, b: boolean) {
+  return 5
+}
+
+const b: string = { hello: true, world: foo, hey: [1, {}] };
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message:
+      "Type '{ hello: boolean; world: (a: number, b: boolean) => number; hey: (number | {})[]; }' is not assignable to type 'string'.",
+    lineNumber: 7,
+  },
+]);
