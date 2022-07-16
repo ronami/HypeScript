@@ -2,10 +2,18 @@ import type { TypeCheck } from '.';
 
 type Errors = TypeCheck<`
 
-function foo(name: number) {
-  return name;
+function foo() {
+  if (a) {
+    return 'hello';
+  }
+
+  return 'world';
 }
 
-foo('not a number');
+const b = {
+    hello: 'hello'
+};
+
+const c = b[b.hello]
 
 `>;
