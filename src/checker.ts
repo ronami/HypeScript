@@ -23,6 +23,7 @@ import type {
   TypeAnnotation,
   VariableDeclaration,
   VariableDeclarator,
+  IfStatement,
 } from './ast';
 import type { TypeError } from './errors';
 import type { Serialize } from './serializer';
@@ -62,13 +63,39 @@ export type Check<NodeList extends Array<BaseNode<any>>> = InferBlockStatement<
   ? Errors
   : never;
 
+type InferBlockStatementHelper<
+  TypeList extends Array<StaticType>,
+  Result extends StaticType,
+> = TypeList extends []
+  ? Result
+  : InferBlockStatementHelper<Tail<TypeList>, MergeTypes<TypeList[0], Result>>;
+
+type MergeTypes<TypeA extends StaticType, TypeB extends StaticType> = MatchType<
+  TypeA,
+  TypeB
+> extends true
+  ? TypeA
+  : MatchType<TypeB, TypeA> extends true
+  ? TypeB
+  : TypeA extends UnionType<infer UnionTypesA>
+  ? TypeB extends UnionType<infer UnionTypesB>
+    ? UnionType<[...UnionTypesA, ...UnionTypesB]>
+    : UnionType<[...UnionTypesA, TypeB]>
+  : TypeB extends UnionType<infer UnionTypesB>
+  ? UnionType<[...UnionTypesB, TypeA]>
+  : UnionType<[TypeA, TypeB]>;
+
 type InferBlockStatement<
   NodeList extends Array<BaseNode<any>>,
   State extends StateType,
-  Result extends StaticType = VoidType,
+  Result extends Array<StaticType> = [],
   Errors extends Array<TypeError<any, any>> = [],
 > = NodeList extends []
-  ? TypeResult<Result, State, Errors>
+  ? InferBlockStatementHelper<Result, VoidType> extends infer ReturnType
+    ? ReturnType extends StaticType
+      ? TypeResult<ReturnType, State, Errors>
+      : never
+    : never
   : NodeList[0] extends ExpressionStatement<infer Expression, any>
   ? InferExpression<Expression, State> extends TypeResult<
       any,
@@ -131,18 +158,35 @@ type InferBlockStatement<
     : never
   : NodeList[0] extends ReturnStatement<infer ReturnExpression, any>
   ? InferReturnStatement<ReturnExpression, State> extends TypeResult<
-      infer ExpressionValue,
-      infer ExpressionState,
-      infer ExpressionErrors
+      infer ReturnValue,
+      infer ReturnState,
+      infer ReturnErrors
     >
-    ? InferBlockStatement<
-        [],
-        ExpressionState,
-        ExpressionValue,
-        Concat<Errors, ExpressionErrors>
+    ? InferBlockStatementHelper<Result, ReturnValue> extends infer ReturnType
+      ? ReturnType extends StaticType
+        ? TypeResult<ReturnType, ReturnState, Concat<Errors, ReturnErrors>>
+        : never
+      : never
+    : never
+  : NodeList[0] extends IfStatement<
+      any,
+      BlockStatement<infer BlockBody, any>,
+      any
+    >
+  ? InferBlockStatement<BlockBody, State> extends TypeResult<
+      infer IfStatementValue,
+      any,
+      infer IfStatementErrors
+    >
+    ? // ? TypeResult<IfStatementValue, State, Errors>
+      InferBlockStatement<
+        Tail<NodeList>,
+        State,
+        Push<Result, IfStatementValue>,
+        Concat<Errors, IfStatementErrors>
       >
     : never
-  : InferBlockStatement<Tail<NodeList>, State, VoidType, Errors>;
+  : InferBlockStatement<Tail<NodeList>, State, Result, Errors>;
 
 type InferReturnStatement<
   ReturnExpression extends BaseNode<any> | null,
