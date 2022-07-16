@@ -2,27 +2,27 @@ export type StringType = {
   type: 'StringType';
 };
 
-export type StringLiteralType<V extends string> = {
+export type StringLiteralType<Value extends string> = {
   type: 'StringLiteralType';
-  value: V;
+  value: Value;
 };
 
 export type NumberType = {
   type: 'NumberType';
 };
 
-export type NumberLiteralType<V extends string> = {
+export type NumberLiteralType<Value extends string> = {
   type: 'NumberLiteralType';
-  value: V;
+  value: Value;
 };
 
 export type BooleanType = {
   type: 'BooleanType';
 };
 
-export type BooleanLiteralType<V extends boolean> = {
+export type BooleanLiteralType<Value extends boolean> = {
   type: 'BooleanLiteralType';
-  value: V;
+  value: Value;
 };
 
 export type NullType = {
@@ -42,12 +42,12 @@ export type AnyType = {
 };
 
 export type FunctionType<
-  P extends Array<[string, StaticType]>,
-  R extends StaticType,
+  Params extends Array<[string, StaticType]>,
+  Return extends StaticType,
 > = {
   type: 'FunctionType';
-  params: P;
-  return: R;
+  params: Params;
+  return: Return;
 };
 
 export type ObjectType<Properties extends Array<[string, StaticType]>> = {
@@ -55,14 +55,14 @@ export type ObjectType<Properties extends Array<[string, StaticType]>> = {
   properties: Properties;
 };
 
-export type ArrayType<V extends StaticType> = {
+export type ArrayType<ElementsType extends StaticType> = {
   type: 'ArrayType';
-  elements: V;
+  elements: ElementsType;
 };
 
-export type UnionType<V extends Array<StaticType>> = {
+export type UnionType<Types extends Array<StaticType>> = {
   type: 'UnionType';
-  types: V;
+  types: Types;
 };
 
 export type CallArgumentsType<Arguments extends Array<StaticType>> = {
