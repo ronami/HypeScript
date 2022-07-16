@@ -113,10 +113,15 @@ export type Tokenize<
   ? TokenizeHelper<TokenizeResult, Result, LineNumber>
   : never;
 
-export type TokenizeHelper<
+type TokenizeHelper<
   TokenizeResult,
-  R extends Array<any>,
-  L extends number,
+  Result extends Array<any>,
+  LineNumber extends number,
 > = TokenizeResult extends Array<any>
-  ? Tokenize<TokenizeResult[1], Push<R, TokenizeResult[0]>, L, false>
+  ? Tokenize<
+      TokenizeResult[1],
+      Push<Result, TokenizeResult[0]>,
+      LineNumber,
+      false
+    >
   : TokenizeResult;
