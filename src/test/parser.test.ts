@@ -112,13 +112,13 @@ expectType<ParseAst<`\n\nnull`>>([
 ]);
 
 expectType<ParseAst<`hello world`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "';' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`hello "world"`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "';' expected.",
   lineNumber: 1,
 });
@@ -316,49 +316,49 @@ expectType<ParseAst<`\nconst \nhello\n = \n123;`>>([
 ]);
 
 expectType<ParseAst<`const`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: 'Variable declaration list cannot be empty.',
   lineNumber: 1,
 });
 
 expectType<ParseAst<`const hello`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "'const' declarations must be initialized.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`const hello =`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: 'Expression expected.',
   lineNumber: 1,
 });
 
 expectType<ParseAst<`const hello \n = ;`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: 'Expression expected.',
   lineNumber: 2,
 });
 
 expectType<ParseAst<`const hello: `>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: 'Type expected.',
   lineNumber: 1,
 });
 
 expectType<ParseAst<`hello.`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: 'Identifier expected.',
   lineNumber: 1,
 });
 
 expectType<ParseAst<`hello..world`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: 'Identifier expected.',
   lineNumber: 1,
 });
 
 expectType<ParseAst<`\nhello."world"`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: 'Identifier expected.',
   lineNumber: 2,
 });
@@ -506,13 +506,13 @@ expectType<ParseAst<`hello.\nworld.\nfoo`>>([
 ]);
 
 expectType<ParseAst<`hello.\nworld..foo`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: 'Identifier expected.',
   lineNumber: 2,
 });
 
 expectType<ParseAst<`hello.\nworld.`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: 'Identifier expected.',
   lineNumber: 2,
 });
@@ -861,36 +861,36 @@ expectType<ParseAst<`hello.world(foo(1))`>>([
 ]);
 
 expectType<ParseAst<`foo(`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "')' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`foo(1 2`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "',' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`[\n1 2`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "',' expected.",
   lineNumber: 2,
 });
 expectType<ParseAst<`[`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "']' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`[1 2`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "',' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`[\n1 2`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "',' expected.",
   lineNumber: 2,
 });
@@ -1075,25 +1075,25 @@ expectType<ParseAst<`const array = [1]`>>([
 ]);
 
 expectType<ParseAst<`{`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "'}' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`{ hello`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "'}' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`{hello world`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "'}' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`{\n1 2`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "'}' expected.",
   lineNumber: 1,
 });
@@ -1711,55 +1711,55 @@ expectType<ParseAst<`function foo(a, b) { function bar() {} }`>>([
 ]);
 
 expectType<ParseAst<`function`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: 'Identifier expected.',
   lineNumber: 1,
 });
 
 expectType<ParseAst<`function foo`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "'(' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`function foo(`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "')' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`function foo()`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "'{' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`function foo()`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "'{' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`function foo() {`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "'}' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`function foo(a, ) {}`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: 'Identifier expected.',
   lineNumber: 1,
 });
 
 expectType<ParseAst<`function foo(a b) {}`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "',' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`}`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: 'Declaration or statement expected.',
   lineNumber: 1,
 });
@@ -2113,55 +2113,55 @@ expectType<ParseAst<`if (foo()) { bar(); } bazz()`>>([
 ]);
 
 expectType<ParseAst<`if`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "'(' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`if (`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: 'Expression expected.',
   lineNumber: 1,
 });
 
 expectType<ParseAst<`if ("foo"`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "')' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`if (123)`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "'{' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`if (true) {`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "'}' expected.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`if () {`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: 'Expression expected.',
   lineNumber: 1,
 });
 
 expectType<ParseAst<`return 123`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "A 'return' statement can only be used within a function body.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`if (a) { return 123 }`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "A 'return' statement can only be used within a function body.",
   lineNumber: 1,
 });
 
 expectType<ParseAst<`return;`>>({
-  type: 'SyntaxError',
+  type: 'ParsingError',
   message: "A 'return' statement can only be used within a function body.",
   lineNumber: 1,
 });
