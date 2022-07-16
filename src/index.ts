@@ -6,7 +6,6 @@ type T = Tokenize<`
 
 function foo() {
   if (a) {
-    return 'hello';
   }
 
   return 'world';
