@@ -23,7 +23,7 @@ foo('not a number');
 
 // Errors is now equal to the following type:
 type Expected = [
-  "Line 7: Argument of type 'string' is not assignable to parameter of type 'number'."
+  "7: Argument of type 'string' is not assignable to parameter of type 'number'."
 ];
 ```
 
