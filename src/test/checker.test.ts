@@ -685,3 +685,68 @@ const b: string = { hello: true, world: foo, hey: [1, {}] };
     lineNumber: 7,
   },
 ]);
+
+expectType<
+  TypeCheck<`
+
+function bar() {
+  if (a) {
+    return 2;
+  }
+
+  return 1;
+}
+
+const b: number = bar;
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Type '() => number' is not assignable to type 'number'.",
+    lineNumber: 11,
+  },
+]);
+
+expectType<
+  TypeCheck<`
+
+function bar() {
+  if (a) {
+    return 'foo';
+  }
+
+  return 1;
+}
+
+const b: number = bar;
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Type '() => string | number' is not assignable to type 'number'.",
+    lineNumber: 11,
+  },
+]);
+
+expectType<
+  TypeCheck<`
+
+function bar() {
+  return {
+    hello: 'world'
+  }
+}
+
+const b: number = bar;
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message:
+      "Type '() => { hello: string; }' is not assignable to type 'number'.",
+    lineNumber: 9,
+  },
+]);
