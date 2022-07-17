@@ -750,3 +750,22 @@ const b: number = bar;
     lineNumber: 9,
   },
 ]);
+
+expectType<
+  TypeCheck<`
+
+const a = [1, 'a'];
+const b = [true, null];
+const c = [a[1], b[0]];
+
+const num: number = c;
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message:
+      "Type '(number | string | boolean | null)[]' is not assignable to type 'number'.",
+    lineNumber: 7,
+  },
+]);
