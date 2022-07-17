@@ -769,3 +769,61 @@ const num: number = c;
     lineNumber: 7,
   },
 ]);
+
+expectType<
+  TypeCheck<`
+
+function bar() {
+  if (a) {
+    return {
+      hello: 'world'
+      };
+  }
+
+  if (a) {
+    return {
+      hello: 123
+    };
+  }
+
+  return {
+    hello: '1'
+  };
+}
+
+const b: string = bar().hello;
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Type 'number | string' is not assignable to type 'string'.",
+    lineNumber: 21,
+  },
+]);
+
+expectType<
+  TypeCheck<`
+
+function bar() {
+  if (a) {
+    return {
+      hello: 'world'
+      };
+  }
+
+  if (a) {
+    return {
+      hello: '123'
+    };
+  }
+
+  return {
+    hello: '1'
+  };
+}
+
+const b: string = bar().hello;
+
+`>
+>([]);
