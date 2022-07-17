@@ -345,9 +345,7 @@ type ParseExpression<TokenList extends Array<Token<any>>> =
   ParseExpressionHelper<TokenList, Tail<TokenList>> extends infer P
     ? P extends Array<any>
       ? CheckExpression<P[0], P[1]>
-      : P extends ParsingError<any, any>
-      ? P
-      : null
+      : P
     : never;
 
 type TokenToNodeData<InputToken extends Token<any>> = InputToken extends Token<
