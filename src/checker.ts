@@ -597,8 +597,10 @@ type MapLiteralToType<Type extends StaticType> =
     ? BooleanType
     : Type extends ObjectType<infer Properties>
     ? ObjectType<{
-        [P in keyof Properties]: Properties[P] extends StaticType
-          ? MapLiteralToType<Properties[P]>
+        [P in keyof Properties]: Properties[P] extends [infer Key, infer Value]
+          ? Value extends StaticType
+            ? [Key, MapLiteralToType<Value>]
+            : never
           : never;
       }>
     : Type;
