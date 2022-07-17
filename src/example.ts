@@ -10,14 +10,24 @@ import type { Check } from './checker';
 type T = Tokenize<`
 
 function bar() {
-    if (a) {
-        return 2;
-    }
+  if (a) {
+    return {
+      hello: 'world'
+    };
+  }
 
-    return 1;
+  if (a) {
+    return {
+      foo: '123'
+    };
+  }
+
+  return {
+    hello: '1'
+  };
 }
 
-const b: number = bar;
+const b: string = bar().hello;
 
 `>;
 type P = Parse<T>;
