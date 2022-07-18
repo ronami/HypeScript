@@ -581,6 +581,7 @@ type InferExpressionsArray<
 type InferArrayElements<
   Elements extends Array<BaseNode<any>>,
   State extends StateType,
+  First extends boolean = true,
   Result extends StaticType = AnyType,
   Errors extends Array<TypeError<any, any>> = [],
 > = Elements extends []
@@ -593,37 +594,17 @@ type InferArrayElements<
     >
     ? MapLiteralToType<ExpressionValue> extends infer E
       ? E extends StaticType
-        ? InferArrayElementsHelper<Result, E> extends infer U
-          ? U extends StaticType
-            ? InferArrayElements<
-                Tail<Elements>,
-                ExpressionState,
-                U,
-                Concat<Errors, ExpressionErrors>
-              >
-            : never
-          : never
+        ? InferArrayElements<
+            Tail<Elements>,
+            ExpressionState,
+            false,
+            First extends true ? E : MergeTypes<Result, E>,
+            Concat<Errors, ExpressionErrors>
+          >
         : never
       : never
     : never
   : never;
-
-type InferArrayElementsHelper<
-  R extends StaticType,
-  E extends StaticType,
-> = R extends AnyType
-  ? E
-  : R extends E
-  ? E
-  : R extends UnionType<infer U>
-  ? E extends UnionType<infer I>
-    ? UnionType<Uniq<[...U, ...I]>>
-    : Includes<U, E> extends true
-    ? R
-    : UnionType<Push<U, E>>
-  : E extends UnionType<infer U>
-  ? UnionType<Push<U, R>>
-  : UnionType<[R, E]>;
 
 type MapLiteralToType<Type extends StaticType> =
   Type extends NumberLiteralType<any>
