@@ -41,6 +41,7 @@ import type {
   StaticType,
   StringLiteralType,
   StringType,
+  UndefinedType,
   UnionType,
   UnknownType,
   VoidType,
@@ -204,7 +205,7 @@ type InferReturnStatement<
         ExpressionErrors
       >
     : never
-  : TypeResult<NullType, State>;
+  : TypeResult<UndefinedType, State>;
 
 type MapAnnotationToType<AnnotationValue extends BaseNode<any>> =
   AnnotationValue extends StringTypeAnnotation<any>
@@ -275,7 +276,7 @@ type InferFunctionDeclaration<
           infer BlockStatementErrors
         >
         ? TypeResult<
-            NullType,
+            UndefinedType,
             MergeWithOverride<
               State,
               {
@@ -383,7 +384,7 @@ type InferVariableDeclaration<
       ? ExpectedType extends StaticType
         ? MatchType<ExpectedType, InitExpressionValue> extends true
           ? TypeResult<
-              NullType,
+              UndefinedType,
               MergeWithOverride<
                 InitExpressionState,
                 { [a in Name]: ExpectedType }
@@ -391,7 +392,7 @@ type InferVariableDeclaration<
               InitExpressionErrors
             >
           : TypeResult<
-              NullType,
+              UndefinedType,
               MergeWithOverride<
                 InitExpressionState,
                 { [a in Name]: ExpectedType }
@@ -407,7 +408,7 @@ type InferVariableDeclaration<
         : never
       : never
     : TypeResult<
-        NullType,
+        UndefinedType,
         MergeWithOverride<State, { [a in Name]: InitExpressionValue }>,
         InitExpressionErrors
       >
@@ -697,7 +698,7 @@ type InferMemberExpressionHelper<
     ? MemberExpressionValue extends StaticType
       ? TypeResult<MemberExpressionValue, State, Errors>
       : TypeResult<
-          NullType,
+          UndefinedType,
           State,
           Push<
             Errors,
@@ -744,7 +745,7 @@ type InferMemberExpressionUnionHelper<
       Key,
       ExpressionState,
       StartLine,
-      Concat<Errors, ExpressionErrors>,
+      Errors,
       Push<Result, ExpressionValue>
     >
   : never;

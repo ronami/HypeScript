@@ -11,6 +11,7 @@ import type {
   StaticType,
   StringLiteralType,
   StringType,
+  UndefinedType,
   UnionType,
   UnknownType,
   VoidType,
@@ -27,6 +28,8 @@ export type Serialize<Type extends StaticType> =
       ? 'number'
       : MappedType extends NullType
       ? 'null'
+      : MappedType extends UndefinedType
+      ? 'undefined'
       : MappedType extends VoidType
       ? 'void'
       : MappedType extends AnyType

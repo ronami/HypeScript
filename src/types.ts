@@ -29,6 +29,10 @@ export type NullType = {
   type: 'NullType';
 };
 
+export type UndefinedType = {
+  type: 'UndefinedType';
+};
+
 export type UnknownType = {
   type: 'UnknownType';
 };
@@ -86,6 +90,7 @@ export type StaticType =
   | VoidType
   | AnyType
   | NullType
+  | UndefinedType
   | FunctionType<any, any>
   | ObjectType<any>
   | ArrayType<any>
