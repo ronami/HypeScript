@@ -9,19 +9,9 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 
-function f1(a: number) {
-  return 1;
-}
+const a = [1,2,'3'];
 
-function f2(a: string) {
-  return 'a';
-}
-
-const a = [f1, f2];
-
-const fn = a[0];
-
-const b: number = fn(1);
+const b: string = a;
 
 `>;
 type P = Parse<T>;
