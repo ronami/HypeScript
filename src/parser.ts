@@ -629,8 +629,13 @@ type ParseIfStatement<
     >
     ? ParseExpression<TailBy<TokenList, 2>> extends infer G
       ? G extends Array<any>
-        ? G[0] extends BaseNode<NodeData<any, infer E>>
-          ? ParseIfStatementHelper<G, IfLineNumber, InFunctionScope, E>
+        ? G[0] extends BaseNode<NodeData<any, infer IfExpressionLineNumber>>
+          ? ParseIfStatementHelper<
+              G,
+              IfLineNumber,
+              InFunctionScope,
+              IfExpressionLineNumber
+            >
           : G extends ParsingError<any, any>
           ? G
           : never
@@ -681,7 +686,7 @@ type ParseIfStatementHelper<
   G extends Array<any>,
   StartLineNumber extends number,
   InFunctionScope extends boolean,
-  E extends number,
+  IfExpressionLineNumber extends number,
 > = G[1] extends Array<any>
   ? G[1][0] extends GenericToken<
       ')',
@@ -707,7 +712,7 @@ type ParseIfStatementHelper<
           : B
         : never
       : ParsingError<"'{' expected.", ClosingParenLineNumber>
-    : ParsingError<"')' expected.", E>
+    : ParsingError<"')' expected.", IfExpressionLineNumber>
   : never;
 
 type ParseStatementHelper<
