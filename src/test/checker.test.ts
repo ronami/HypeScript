@@ -457,6 +457,23 @@ const b: string = a;
 expectType<
   TypeCheck<`
 
+const c: any = 1;
+
+const a = [c, 2, '3'];
+
+const b: string = a;
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Type 'any[]' is not assignable to type 'string'.",
+    lineNumber: 7,
+  },
+]);
+expectType<
+  TypeCheck<`
+
 const a = [1,2,'3'][0];
 
 const b: string = a;
