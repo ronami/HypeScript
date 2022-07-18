@@ -467,60 +467,96 @@ type InferCallExpression<
       infer ArgumentsState,
       infer ArgumentsErrors
     >
-    ? CalleeValue extends FunctionType<infer ParamsType, infer ReturnType>
-      ? InferCallExpressionHelper<
-          ParamsType,
-          ArgumentsType,
-          ReturnType,
-          ArgumentsState,
-          Concat<CalleeErrors, ArgumentsErrors>,
-          StartLine
-        >
-      : CalleeValue extends AnyType
-      ? TypeResult<
-          AnyType,
-          ArgumentsState,
-          Concat<CalleeErrors, ArgumentsErrors>
-        >
-      : TypeResult<
-          AnyType,
-          ArgumentsState,
-          Unshift<
-            Concat<CalleeErrors, ArgumentsErrors>,
-            TypeError<
-              `This expression is not callable. Type '${Serialize<CalleeValue>}' has no call signatures.`,
-              StartLine
-            >
-          >
-        >
+    ? InferCallExpressionHelper<
+        CalleeValue,
+        ArgumentsType,
+        ArgumentsState,
+        Concat<CalleeErrors, ArgumentsErrors>,
+        StartLine
+      >
     : never
   : never;
 
 type InferCallExpressionHelper<
-  ParamsType extends Array<[string, StaticType]>,
+  CalleeValue extends StaticType,
   ArgumentsType extends Array<StaticType>,
-  ReturnType extends StaticType,
   State extends StateType,
   Errors extends Array<TypeError<any, any>>,
   StartLine extends number,
-> = ParamsType['length'] extends ArgumentsType['length']
-  ? MatchTypeArrays<ParamsType, ArgumentsType, StartLine> extends TypeError<
-      infer Message,
-      infer StartLine
-    >
-    ? TypeResult<ReturnType, State, Push<Errors, TypeError<Message, StartLine>>>
-    : TypeResult<ReturnType, State, Errors>
-  : TypeResult<
-      ReturnType,
+> = CalleeValue extends FunctionType<infer ParamsType, infer ReturnType>
+  ? ParamsType['length'] extends ArgumentsType['length']
+    ? MatchTypeArrays<ParamsType, ArgumentsType, StartLine> extends TypeError<
+        infer Message,
+        infer StartLine
+      >
+      ? TypeResult<
+          ReturnType,
+          State,
+          Push<Errors, TypeError<Message, StartLine>>
+        >
+      : TypeResult<ReturnType, State, Errors>
+    : TypeResult<
+        ReturnType,
+        State,
+        Push<
+          Errors,
+          TypeError<
+            `Expected ${ParamsType['length']} arguments, but got ${ArgumentsType['length']}.`,
+            StartLine
+          >
+        >
+      >
+  : CalleeValue extends AnyType
+  ? TypeResult<AnyType, State, Errors>
+  : CalleeValue extends UnionType<infer UnionTypes>
+  ? InferCallExpressionUnionHelper<
+      UnionTypes,
+      ArgumentsType,
       State,
-      Push<
+      StartLine,
+      Errors
+    >
+  : TypeResult<
+      AnyType,
+      State,
+      Unshift<
         Errors,
         TypeError<
-          `Expected ${ParamsType['length']} arguments, but got ${ArgumentsType['length']}.`,
+          `This expression is not callable. Type '${Serialize<CalleeValue>}' has no call signatures.`,
           StartLine
         >
       >
     >;
+
+type InferCallExpressionUnionHelper<
+  UnionTypes extends Array<StaticType>,
+  ArgumentsType extends Array<StaticType>,
+  State extends StateType,
+  StartLine extends number,
+  Errors extends Array<TypeError<any, any>>,
+  Result extends Array<any> = [],
+> = UnionTypes extends []
+  ? TypeResult<UnionType<Result>, State, Errors>
+  : InferCallExpressionHelper<
+      UnionTypes[0],
+      ArgumentsType,
+      State,
+      Errors,
+      StartLine
+    > extends TypeResult<
+      infer ExpressionValue,
+      infer ExpressionState,
+      infer ExpressionErrors
+    >
+  ? InferCallExpressionUnionHelper<
+      Tail<UnionTypes>,
+      ArgumentsType,
+      ExpressionState,
+      StartLine,
+      ExpressionErrors,
+      Push<Result, ExpressionValue>
+    >
+  : never;
 
 type InferExpressionsArray<
   NodeList extends Array<BaseNode<any>>,
