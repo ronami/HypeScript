@@ -5,7 +5,7 @@ import type {
   ConcatStrings,
   StringContains,
 } from './utils/stringUtils';
-import type { Numbers, Symbols } from './utils/generalUtils';
+import type { GenericTokens, Numbers, Symbols } from './utils/generalUtils';
 import type {
   Token,
   NumberToken,
@@ -24,26 +24,8 @@ type TokenizeInput<
   PrecedingLinebreak extends boolean,
   LineNumber extends number,
   Data extends TokenData<any, any> = TokenData<PrecedingLinebreak, LineNumber>,
-> = FirstChar extends ','
-  ? [GenericToken<',', Data>, InputTail]
-  : FirstChar extends '('
-  ? [GenericToken<'(', Data>, InputTail]
-  : FirstChar extends ')'
-  ? [GenericToken<')', Data>, InputTail]
-  : FirstChar extends '['
-  ? [GenericToken<'[', Data>, InputTail]
-  : FirstChar extends ']'
-  ? [GenericToken<']', Data>, InputTail]
-  : FirstChar extends '{'
-  ? [GenericToken<'{', Data>, InputTail]
-  : FirstChar extends '}'
-  ? [GenericToken<'}', Data>, InputTail]
-  : FirstChar extends '.'
-  ? [GenericToken<'.', Data>, InputTail]
-  : FirstChar extends ';'
-  ? [GenericToken<';', Data>, InputTail]
-  : FirstChar extends ':'
-  ? [GenericToken<':', Data>, InputTail]
+> = FirstChar extends GenericTokens
+  ? [GenericToken<FirstChar, Data>, InputTail]
   : FirstChar extends Numbers
   ? TokenizeNumber<Input, '', Data, FirstChar>
   : FirstChar extends '"'
