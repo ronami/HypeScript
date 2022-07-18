@@ -592,13 +592,13 @@ type InferArrayElements<
       infer ExpressionState,
       infer ExpressionErrors
     >
-    ? MapLiteralToType<ExpressionValue> extends infer E
-      ? E extends StaticType
+    ? MapLiteralToType<ExpressionValue> extends infer LiteralType
+      ? LiteralType extends StaticType
         ? InferArrayElements<
             Tail<Elements>,
             ExpressionState,
             false,
-            First extends true ? E : MergeTypes<Result, E>,
+            First extends true ? LiteralType : MergeTypes<Result, LiteralType>,
             Concat<Errors, ExpressionErrors>
           >
         : never

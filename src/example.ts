@@ -10,7 +10,7 @@ import type { Check } from './checker';
 type T = Tokenize<`
 const c: any = 1
 
-const a=[1,'3',c];
+const a = [1,'3',c];
 
 const b: string = a;
 
