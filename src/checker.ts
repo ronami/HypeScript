@@ -733,7 +733,7 @@ type InferMemberExpressionUnionHelper<
       Key,
       State,
       StartLine,
-      Errors
+      []
     > extends TypeResult<
       infer ExpressionValue,
       infer ExpressionState,
