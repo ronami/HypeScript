@@ -827,3 +827,35 @@ const b: string = bar().hello;
 
 `>
 >([]);
+
+expectType<
+  TypeCheck<`
+
+function bar() {
+  if (a) {
+    return {
+      hello: 'world'
+      };
+  }
+
+  if (a) {
+    return {
+      foo: '123'
+    };
+  }
+
+  return {
+    hello: '1'
+  };
+}
+
+const b: string = bar().hello;
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Type 'undefined | string' is not assignable to type 'string'.",
+    lineNumber: 21,
+  },
+]);
