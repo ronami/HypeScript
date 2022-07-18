@@ -181,7 +181,7 @@ type ParseVariableDeclaration<TokenList extends Array<Token<any>>> =
           infer R,
         ]
         ? R extends Array<any>
-          ? R[0] extends SymbolToken<
+          ? R[0] extends GenericToken<
               '=',
               TokenData<any, infer EqualsLineNumber>
             >

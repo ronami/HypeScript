@@ -8,8 +8,9 @@ import type { Check } from './checker';
 // import type { BaseNode } from './ast';
 
 type T = Tokenize<`
+const c: any = 1
 
-const a = [1,2,'3'];
+const a=[1,'3',c];
 
 const b: string = a;
 
