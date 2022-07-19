@@ -720,6 +720,11 @@ const b: number = bar;
 >([
   {
     type: 'TypeError',
+    message: "Cannot find name 'a'.",
+    lineNumber: 4,
+  },
+  {
+    type: 'TypeError',
     message: "Type '() => number' is not assignable to type 'number'.",
     lineNumber: 11,
   },
@@ -740,6 +745,11 @@ const b: number = bar;
 
 `>
 >([
+  {
+    type: 'TypeError',
+    message: "Cannot find name 'a'.",
+    lineNumber: 4,
+  },
   {
     type: 'TypeError',
     message: "Type '() => string | number' is not assignable to type 'number'.",
@@ -814,6 +824,16 @@ const b: string = bar().hello;
 >([
   {
     type: 'TypeError',
+    message: "Cannot find name 'a'.",
+    lineNumber: 4,
+  },
+  {
+    type: 'TypeError',
+    message: "Cannot find name 'a'.",
+    lineNumber: 10,
+  },
+  {
+    type: 'TypeError',
     message: "Type 'number | string' is not assignable to type 'string'.",
     lineNumber: 21,
   },
@@ -843,7 +863,18 @@ function bar() {
 const b: string = bar().hello;
 
 `>
->([]);
+>([
+  {
+    type: 'TypeError',
+    message: "Cannot find name 'a'.",
+    lineNumber: 4,
+  },
+  {
+    type: 'TypeError',
+    message: "Cannot find name 'a'.",
+    lineNumber: 10,
+  },
+]);
 
 expectType<
   TypeCheck<`
@@ -852,7 +883,7 @@ function bar() {
   if (a) {
     return {
       hello: 'world'
-      };
+    };
   }
 
   if (a) {
@@ -870,6 +901,16 @@ const b: string = bar().hello;
 
 `>
 >([
+  {
+    type: 'TypeError',
+    message: "Cannot find name 'a'.",
+    lineNumber: 4,
+  },
+  {
+    type: 'TypeError',
+    message: "Cannot find name 'a'.",
+    lineNumber: 10,
+  },
   {
     type: 'TypeError',
     message: "Type 'undefined | string' is not assignable to type 'string'.",

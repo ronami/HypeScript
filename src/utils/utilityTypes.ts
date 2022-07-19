@@ -3,7 +3,7 @@ import type { TypeError } from '../errors';
 
 export type TypeResult<
   Value extends StaticType,
-  State extends Record<string, StaticType>,
+  State extends StateType,
   Errors extends Array<TypeError<any, any>> = [],
 > = {
   type: 'TypeResult';
