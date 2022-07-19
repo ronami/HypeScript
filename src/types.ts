@@ -45,6 +45,10 @@ export type AnyType = {
   type: 'AnyType';
 };
 
+export type NeverType = {
+  type: 'NeverType';
+};
+
 export type FunctionType<
   Params extends Array<[string, StaticType]>,
   Return extends StaticType,
@@ -91,6 +95,7 @@ export type StaticType =
   | AnyType
   | NullType
   | UndefinedType
+  | NeverType
   | FunctionType<any, any>
   | ObjectType<any>
   | ArrayType<any>

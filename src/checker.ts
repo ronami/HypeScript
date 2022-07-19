@@ -34,6 +34,7 @@ import type {
   BooleanType,
   CallArgumentsType,
   FunctionType,
+  NeverType,
   NullType,
   NumberLiteralType,
   NumberType,
@@ -70,6 +71,50 @@ type InferBlockStatementHelper<
 > = TypeList extends []
   ? Result
   : InferBlockStatementHelper<Tail<TypeList>, MergeTypes<TypeList[0], Result>>;
+
+type MergeFunctionTypes<
+  FunctionTypes extends Array<FunctionType<any, any>>,
+  ReturnType extends FunctionType<any, any>,
+> = FunctionTypes extends []
+  ? ReturnType
+  : FunctionTypes[0] extends FunctionType<infer Params, infer Return>
+  ? MergeFunctionTypes<
+      Tail<FunctionTypes>,
+      MergeFunctions<Params, Return, ReturnType>
+    >
+  : never;
+
+type MergeFunctions<
+  Params extends Array<[string, StaticType]>,
+  Return extends StaticType,
+  Function extends FunctionType<any, any>,
+> = Function extends FunctionType<infer OtherParams, infer OtherReturn>
+  ? MergeFunctionParams<Params, OtherParams> extends infer P
+    ? P extends Array<[string, StaticType]>
+      ? FunctionType<P, MergeTypes<Return, OtherReturn>>
+      : never
+    : never
+  : never;
+
+type MergeFunctionParams<
+  ParamsA extends Array<[string, StaticType]>,
+  ParamsB extends Array<[string, StaticType]>,
+  Return extends Array<[string, StaticType]> = [],
+> = ParamsA extends []
+  ? ParamsB extends []
+    ? Return
+    : [...Return, ...ParamsB]
+  : ParamsB extends []
+  ? [...Return, ...ParamsA]
+  : MatchType<ParamsA[0][1], ParamsB[0][1]> extends true
+  ? MergeFunctionParams<Tail<ParamsA>, Tail<ParamsB>, Push<Return, ParamsB[0]>>
+  : MatchType<ParamsB[0][1], ParamsA[0][1]> extends true
+  ? MergeFunctionParams<Tail<ParamsA>, Tail<ParamsB>, Push<Return, ParamsA[0]>>
+  : MergeFunctionParams<
+      Tail<ParamsA>,
+      Tail<ParamsB>,
+      Push<Return, [ParamsA[0][0], NeverType]>
+    >;
 
 type MergeTypes<
   TypeA extends StaticType,
@@ -562,27 +607,13 @@ type InferCallExpressionUnionHelper<
   State extends StateType,
   StartLine extends number,
   Errors extends Array<TypeError<any, any>>,
-  Result extends Array<any> = [],
-> = UnionTypes extends []
-  ? TypeResult<UnionType<Result>, State, Errors>
-  : InferCallExpressionHelper<
-      UnionTypes[0],
+> = UnionTypes extends Array<FunctionType<any, any>>
+  ? InferCallExpressionHelper<
+      MergeFunctionTypes<Tail<UnionTypes>, UnionTypes[0]>,
       ArgumentsType,
       State,
       Errors,
       StartLine
-    > extends TypeResult<
-      infer ExpressionValue,
-      infer ExpressionState,
-      infer ExpressionErrors
-    >
-  ? InferCallExpressionUnionHelper<
-      Tail<UnionTypes>,
-      ArgumentsType,
-      ExpressionState,
-      StartLine,
-      ExpressionErrors,
-      Push<Result, ExpressionValue>
     >
   : never;
 
