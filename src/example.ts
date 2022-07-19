@@ -17,4 +17,4 @@ const a: number = foo;
 
 `>;
 type P = Parse<T>;
-type C = Check<P>[3];
+type C = Check<P>;
