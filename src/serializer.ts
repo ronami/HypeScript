@@ -4,6 +4,7 @@ import type {
   BooleanLiteralType,
   BooleanType,
   FunctionType,
+  NeverType,
   NullType,
   NumberLiteralType,
   NumberType,
@@ -36,6 +37,8 @@ export type Serialize<Type extends StaticType> =
       ? 'any'
       : MappedType extends UnknownType
       ? 'unknown'
+      : MappedType extends NeverType
+      ? 'never'
       : MappedType extends ArrayType<infer ElementsType>
       ? SerializeArray<ElementsType>
       : MappedType extends UnionType<infer UnionTypes>
