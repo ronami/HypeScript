@@ -174,23 +174,29 @@ type InferBlockStatement<
       : never
     : never
   : NodeList[0] extends IfStatement<
-      any,
+      infer Test,
       BlockStatement<infer BlockBody, any>,
       any
     >
-  ? InferBlockStatement<BlockBody, State> extends TypeResult<
-      infer IfStatementValue,
-      any,
-      infer IfStatementErrors
+  ? InferExpression<Test, State> extends TypeResult<
+      infer TestValue,
+      infer TestState,
+      infer TestErrors
     >
-    ? InferBlockStatement<
-        Tail<NodeList>,
-        State,
-        IfStatementValue extends VoidType
-          ? Result
-          : Push<Result, IfStatementValue>,
-        Concat<Errors, IfStatementErrors>
+    ? InferBlockStatement<BlockBody, TestState> extends TypeResult<
+        infer IfStatementValue,
+        any,
+        infer IfStatementErrors
       >
+      ? InferBlockStatement<
+          Tail<NodeList>,
+          TestState,
+          IfStatementValue extends VoidType
+            ? Result
+            : Push<Result, IfStatementValue>,
+          [...Errors, ...TestErrors, ...IfStatementErrors]
+        >
+      : never
     : never
   : InferBlockStatement<Tail<NodeList>, State, Result, Errors>;
 
