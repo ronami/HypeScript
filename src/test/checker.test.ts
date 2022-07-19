@@ -894,3 +894,37 @@ const b: string = a;
     lineNumber: 7,
   },
 ]);
+
+expectType<
+  TypeCheck<`
+
+function foo(bar, hello) {
+  hey()
+}
+
+const a: number = foo;
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Parameter 'bar' implicitly has an 'any' type.",
+    lineNumber: 3,
+  },
+  {
+    type: 'TypeError',
+    message: "Parameter 'hello' implicitly has an 'any' type.",
+    lineNumber: 3,
+  },
+  {
+    type: 'TypeError',
+    message: "Cannot find name 'hey'.",
+    lineNumber: 4,
+  },
+  {
+    type: 'TypeError',
+    message:
+      "Type '(bar: any, hello: any) => void' is not assignable to type 'number'.",
+    lineNumber: 7,
+  },
+]);
