@@ -228,23 +228,36 @@ type InferFunctionParams<
   Params extends Array<BaseNode<any>>,
   FunctionParams extends Array<[string, StaticType]> = [],
   ParamsByName extends StateType = {},
+  Errors extends Array<TypeError<any, any>> = [],
 > = Params extends []
-  ? [FunctionParams, ParamsByName]
-  : Params[0] extends Identifier<infer Name, infer Annotation, any>
+  ? [FunctionParams, ParamsByName, Errors]
+  : Params[0] extends Identifier<
+      infer Name,
+      infer Annotation,
+      NodeData<infer LineNumber, any>
+    >
   ? Annotation extends TypeAnnotation<infer AnnotationValue, any>
     ? InferFunctionParamsHelper<
         Params,
         FunctionParams,
         ParamsByName,
         MapAnnotationToType<AnnotationValue>,
-        Name
+        Name,
+        Errors
       >
     : InferFunctionParamsHelper<
         Params,
         FunctionParams,
         ParamsByName,
         AnyType,
-        Name
+        Name,
+        Push<
+          Errors,
+          TypeError<
+            `Parameter '${Name}' implicitly has an 'any' type.`,
+            LineNumber
+          >
+        >
       >
   : never;
 
@@ -254,10 +267,12 @@ type InferFunctionParamsHelper<
   ParamsByName extends StateType,
   Type extends StaticType,
   Name extends string,
+  Errors extends Array<TypeError<any, any>>,
 > = InferFunctionParams<
   Tail<Params>,
   Push<FunctionParams, [Name, Type]>,
-  MergeWithOverride<ParamsByName, { [a in Name]: Type }>
+  MergeWithOverride<ParamsByName, { [a in Name]: Type }>,
+  Errors
 >;
 
 type InferFunctionDeclaration<
@@ -268,30 +283,33 @@ type InferFunctionDeclaration<
 > = InferFunctionParams<Params> extends [
   infer FunctionParams,
   infer ParamsByName,
+  infer Errors,
 ]
   ? FunctionParams extends Array<[string, StaticType]>
     ? ParamsByName extends StateType
-      ? InferBlockStatement<
-          Body,
-          MergeWithOverride<State, ParamsByName>
-        > extends TypeResult<
-          infer BlockStatementReturnType,
-          any,
-          infer BlockStatementErrors
-        >
-        ? TypeResult<
-            UndefinedType,
-            MergeWithOverride<
-              State,
-              {
-                [a in Name]: FunctionType<
-                  FunctionParams,
-                  BlockStatementReturnType
-                >;
-              }
-            >,
-            BlockStatementErrors
+      ? Errors extends Array<TypeError<any, any>>
+        ? InferBlockStatement<
+            Body,
+            MergeWithOverride<State, ParamsByName>
+          > extends TypeResult<
+            infer BlockStatementReturnType,
+            any,
+            infer BlockStatementErrors
           >
+          ? TypeResult<
+              UndefinedType,
+              MergeWithOverride<
+                State,
+                {
+                  [a in Name]: FunctionType<
+                    FunctionParams,
+                    BlockStatementReturnType
+                  >;
+                }
+              >,
+              Concat<Errors, BlockStatementErrors>
+            >
+          : never
         : never
       : never
     : never
