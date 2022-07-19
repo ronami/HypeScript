@@ -9,12 +9,12 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 
-const c: any = 1
+function foo(bar, hello) {
+  hey()
+}
 
-const a = [1, c, 'a'];
-
-const b: string = a;
+const a: number = foo;
 
 `>;
 type P = Parse<T>;
-type C = Check<P>;
+type C = Check<P>[3];
