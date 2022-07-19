@@ -583,6 +583,7 @@ type InferCallExpressionHelper<
   ? TypeResult<AnyType, State, Errors>
   : CalleeValue extends UnionType<infer UnionTypes>
   ? InferCallExpressionUnionHelper<
+      CalleeValue,
       UnionTypes,
       ArgumentsType,
       State,
@@ -602,6 +603,7 @@ type InferCallExpressionHelper<
     >;
 
 type InferCallExpressionUnionHelper<
+  CalleeValue extends UnionType<any>,
   UnionTypes extends Array<StaticType>,
   ArgumentsType extends Array<StaticType>,
   State extends StateType,
@@ -615,7 +617,17 @@ type InferCallExpressionUnionHelper<
       Errors,
       StartLine
     >
-  : never;
+  : TypeResult<
+      AnyType,
+      State,
+      Push<
+        Errors,
+        TypeError<
+          `This expression is not callable. Not all constituents of type '${Serialize<CalleeValue>}' are callable.`,
+          StartLine
+        >
+      >
+    >;
 
 type InferExpressionsArray<
   NodeList extends Array<BaseNode<any>>,
