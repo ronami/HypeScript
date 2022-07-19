@@ -24,15 +24,3 @@ export type TailBy<
   B extends number,
   A extends Array<any> = [],
 > = B extends A['length'] ? T : TailBy<Tail<T>, B, Push<A, 0>>;
-
-export type Includes<T extends Array<any>, E> = T extends []
-  ? false
-  : T[0] extends E
-  ? true
-  : Includes<Tail<T>, E>;
-
-export type Uniq<T extends Array<any>, R extends Array<any> = []> = T extends []
-  ? R
-  : Includes<R, T[0]> extends true
-  ? Uniq<Tail<T>, R>
-  : Uniq<Tail<T>, Push<R, T[0]>>;
