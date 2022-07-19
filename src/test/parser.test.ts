@@ -1,10 +1,11 @@
 import type { Tokenize } from '../tokenizer';
 import type { Parse } from '../parser';
-import type { Cast } from '../utils/generalUtils';
 import { expectType } from './utils';
 
 type ParseAst<T extends string> = Tokenize<T> extends infer G
-  ? Parse<Cast<G, Array<any>>>
+  ? G extends Array<any>
+    ? Parse<G>
+    : never
   : never;
 
 expectType<ParseAst<`hello`>>([

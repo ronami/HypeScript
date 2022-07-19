@@ -1,5 +1,3 @@
-export type Cast<A, B> = A extends B ? A : B;
-
 export type MergeWithOverride<T1, T2> = Omit<T1, keyof T2> & T2;
 
 export type GenericTokens =
@@ -82,5 +80,3 @@ export type Symbols =
   | '9'
   | '_'
   | '$';
-
-export type IsNever<T> = [T] extends [never] ? true : false;
