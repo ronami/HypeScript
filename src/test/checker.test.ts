@@ -876,3 +876,21 @@ const b: string = bar().hello;
     lineNumber: 21,
   },
 ]);
+
+expectType<
+  TypeCheck<`
+
+const c: any = 1
+
+const a = [1, c, 'a'];
+
+const b: string = a;
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Type 'any[]' is not assignable to type 'string'.",
+    lineNumber: 7,
+  },
+]);
