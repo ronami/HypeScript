@@ -71,19 +71,23 @@ type InferBlockStatementHelper<
   ? Result
   : InferBlockStatementHelper<Tail<TypeList>, MergeTypes<TypeList[0], Result>>;
 
-type MergeTypes<TypeA extends StaticType, TypeB extends StaticType> = MatchType<
-  TypeA,
-  TypeB
-> extends true
-  ? TypeA
-  : MatchType<TypeB, TypeA> extends true
-  ? TypeB
+type MergeTypes<
+  TypeA extends StaticType,
+  TypeB extends StaticType,
+> = TypeA extends AnyType
+  ? AnyType
+  : TypeB extends AnyType
+  ? AnyType
   : TypeA extends UnionType<infer UnionTypesA>
   ? TypeB extends UnionType<infer UnionTypesB>
     ? UnionType<[...UnionTypesA, ...UnionTypesB]>
     : UnionType<[...UnionTypesA, TypeB]>
   : TypeB extends UnionType<infer UnionTypesB>
   ? UnionType<[...UnionTypesB, TypeA]>
+  : MatchType<TypeA, TypeB> extends true
+  ? TypeA
+  : MatchType<TypeB, TypeA> extends true
+  ? TypeB
   : UnionType<[TypeA, TypeB]>;
 
 type InferBlockStatement<
