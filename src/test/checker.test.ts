@@ -969,3 +969,159 @@ const a: number = foo;
     lineNumber: 7,
   },
 ]);
+
+expectType<
+  TypeCheck<`
+
+function a (a: number) {
+  return '1';
+}
+
+function b () {
+    return 1;
+}
+
+const c = [a, 'b'];
+
+const d: number = c[0](1);
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message:
+      "This expression is not callable. Not all constituents of type '(a: number) => string | string' are callable.",
+    lineNumber: 1,
+  },
+]);
+
+expectType<
+  TypeCheck<`
+
+function a (a: number) {
+  return '1';
+}
+
+function b () {
+    return 1;
+}
+
+const c = [a, b];
+
+const d: number = c[0](1);
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Type 'number | string' is not assignable to type 'number'.",
+    lineNumber: 13,
+  },
+]);
+
+expectType<
+  TypeCheck<`
+
+function a (a: number) {
+  return '1';
+}
+
+function b () {
+    return 1;
+}
+
+const c = [a, b];
+
+const d: number = c[0]();
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: 'Expected 1 arguments, but got 0.',
+    lineNumber: 1,
+  },
+  {
+    type: 'TypeError',
+    message: "Type 'number | string' is not assignable to type 'number'.",
+    lineNumber: 13,
+  },
+]);
+
+expectType<
+  TypeCheck<`
+
+function a (a: number) {
+  return '1';
+}
+
+function b (b: string) {
+    return 1;
+}
+
+const c = [a, b];
+
+const d: number = c[0](1);
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message:
+      "Argument of type 'number' is not assignable to parameter of type 'never'.",
+    lineNumber: 1,
+  },
+  {
+    type: 'TypeError',
+    message: "Type 'number | string' is not assignable to type 'number'.",
+    lineNumber: 13,
+  },
+]);
+
+expectType<
+  TypeCheck<`
+
+function a (a: number) {
+  return '1';
+}
+
+function b (b: any) {
+    return 1;
+}
+
+const c = [a, b];
+
+const d: number = c[0](1);
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Type 'number | string' is not assignable to type 'number'.",
+    lineNumber: 13,
+  },
+]);
+
+expectType<
+  TypeCheck<`
+
+function a (a: number, c: boolean) {
+  return '1';
+}
+
+function b (b: any) {
+    return 1;
+}
+
+const c = [a, b];
+
+const d: number = c[0](1, false);
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Type 'number | string' is not assignable to type 'number'.",
+    lineNumber: 13,
+  },
+]);
