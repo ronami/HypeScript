@@ -58,13 +58,6 @@ export type Check<NodeList extends Array<BaseNode<any>>> = InferBlockStatement<
   ? Errors
   : never;
 
-type InferBlockStatementHelper<
-  TypeList extends Array<StaticType>,
-  Result extends StaticType,
-> = TypeList extends []
-  ? Result
-  : InferBlockStatementHelper<Tail<TypeList>, MergeTypes<TypeList[0], Result>>;
-
 type MergeFunctionTypes<
   FunctionTypes extends Array<FunctionType<any, any>>,
   ReturnType extends FunctionType<any, any>,
@@ -84,7 +77,11 @@ type MergeFunctions<
 > = Function extends FunctionType<infer OtherParams, infer OtherReturn>
   ? MergeFunctionParams<Params, OtherParams> extends infer P
     ? P extends Array<[string, StaticType]>
-      ? FunctionType<P, MergeTypes<Return, OtherReturn>>
+      ? MergeTypes<Return, OtherReturn> extends infer ReturnType
+        ? ReturnType extends StaticType
+          ? FunctionType<P, ReturnType>
+          : never
+        : never
       : never
     : never
   : never;
@@ -112,29 +109,33 @@ type MergeFunctionParams<
 type MergeTypes<
   TypeA extends StaticType,
   TypeB extends StaticType,
-> = TypeA extends AnyType
+> = TypeA extends NeverType
+  ? TypeB
+  : TypeB extends NeverType
+  ? TypeA
+  : TypeA extends AnyType
   ? AnyType
   : TypeB extends AnyType
   ? AnyType
+  : MatchType<TypeA, TypeB> extends true
+  ? TypeA
+  : MatchType<TypeB, TypeA> extends true
+  ? TypeB
   : TypeA extends UnionType<infer UnionTypesA>
   ? TypeB extends UnionType<infer UnionTypesB>
     ? UnionType<[...UnionTypesA, ...UnionTypesB]>
     : UnionType<[...UnionTypesA, TypeB]>
   : TypeB extends UnionType<infer UnionTypesB>
   ? UnionType<[...UnionTypesB, TypeA]>
-  : MatchType<TypeA, TypeB> extends true
-  ? TypeA
-  : MatchType<TypeB, TypeA> extends true
-  ? TypeB
   : UnionType<[TypeA, TypeB]>;
 
 type InferBlockStatement<
   NodeList extends Array<BaseNode<any>>,
   State extends StateType,
-  Result extends Array<StaticType> = [],
+  Result extends StaticType = NeverType,
   Errors extends Array<TypeError<any, any>> = [],
 > = NodeList extends []
-  ? InferBlockStatementHelper<Result, VoidType> extends infer ReturnType
+  ? MergeTypes<Result, VoidType> extends infer ReturnType
     ? ReturnType extends StaticType
       ? TypeResult<ReturnType, State, Errors>
       : never
@@ -205,7 +206,7 @@ type InferBlockStatement<
       infer ReturnState,
       infer ReturnErrors
     >
-    ? InferBlockStatementHelper<Result, ReturnValue> extends infer ReturnType
+    ? MergeTypes<Result, ReturnValue> extends infer ReturnType
       ? ReturnType extends StaticType
         ? TypeResult<ReturnType, ReturnState, Concat<Errors, ReturnErrors>>
         : never
@@ -229,9 +230,13 @@ type InferBlockStatement<
       ? InferBlockStatement<
           Tail<NodeList>,
           TestState,
-          IfStatementValue extends VoidType
-            ? Result
-            : Push<Result, IfStatementValue>,
+          MergeTypes<Result, IfStatementValue> extends infer ReturnType
+            ? ReturnType extends StaticType
+              ? IfStatementValue extends VoidType
+                ? Result
+                : ReturnType
+              : never
+            : never,
           [...Errors, ...TestErrors, ...IfStatementErrors]
         >
       : never
@@ -362,7 +367,11 @@ type InferFunctionDeclaration<
 type MatchType<
   TypeA extends StaticType,
   TypeB extends StaticType,
-> = TypeA extends AnyType
+> = TypeA extends NeverType
+  ? false
+  : TypeB extends NeverType
+  ? false
+  : TypeA extends AnyType
   ? true
   : TypeB extends AnyType
   ? true
@@ -370,12 +379,6 @@ type MatchType<
   ? TypeB extends TypeA
     ? true
     : false
-  : TypeA extends UnionType<infer UnionTypesA>
-  ? TypeB extends UnionType<infer UnionTypesB>
-    ? UnionMatchUnion<UnionTypesA, UnionTypesB>
-    : TypeMatchUnion<UnionTypesA, TypeB>
-  : TypeB extends UnionType<infer UnionTypesB>
-  ? UnionMatchType<TypeA, UnionTypesB>
   : TypeA extends StringType
   ? TypeB extends StringLiteralType<any>
     ? true
@@ -388,6 +391,12 @@ type MatchType<
   ? TypeB extends NumberLiteralType<any>
     ? true
     : false
+  : TypeA extends UnionType<infer UnionTypesA>
+  ? TypeB extends UnionType<infer UnionTypesB>
+    ? UnionMatchUnion<UnionTypesA, UnionTypesB>
+    : TypeMatchUnion<UnionTypesA, TypeB>
+  : TypeB extends UnionType<infer UnionTypesB>
+  ? UnionMatchType<TypeA, UnionTypesB>
   : false;
 
 type UnionMatchUnion<
@@ -658,13 +667,17 @@ type InferArrayElements<
     >
     ? MapLiteralToType<ExpressionValue> extends infer LiteralType
       ? LiteralType extends StaticType
-        ? InferArrayElements<
-            Tail<Elements>,
-            ExpressionState,
-            false,
-            First extends true ? LiteralType : MergeTypes<Result, LiteralType>,
-            Concat<Errors, ExpressionErrors>
-          >
+        ? MergeTypes<Result, LiteralType> extends infer ReturnType
+          ? ReturnType extends StaticType
+            ? InferArrayElements<
+                Tail<Elements>,
+                ExpressionState,
+                false,
+                First extends true ? LiteralType : ReturnType,
+                Concat<Errors, ExpressionErrors>
+              >
+            : never
+          : never
         : never
       : never
     : never
