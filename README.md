@@ -39,9 +39,9 @@ Alternatively, install `hypescript` in your own project with `yarn` or `npm` ([T
 yarn add hypescript
 ```
 
-### Supported features and syntax
+### Example showcase
 
-Some [TypeScript](https://github.com/microsoft/TypeScript) syntax and features haven't been implemented and won't work. Here's a list of examples (with browser demo links) for some of the capabilites:
+Some [TypeScript](https://github.com/microsoft/TypeScript) syntax and features haven't been implemented and won't work. Here's a list of examples (with browser demo links) for some capabilites:
 
 - [Calling a function with insufficient arguments]()
 - [Calling a function with wrong argument types]()
@@ -52,8 +52,8 @@ Some [TypeScript](https://github.com/microsoft/TypeScript) syntax and features h
 
 ### Additional links
 
-- [The Super Tiny Compiler](https://github.com/jamiebuilds/the-super-tiny-compiler)
 - [TypeScripts Type System is Turing Complete](https://github.com/microsoft/TypeScript/issues/14833)
 - [Typing the Technical Interview in TypeScript](https://gal.hagever.com/posts/typing-the-technical-interview-in-typescript/)
 - [Functions and algorithms implemented purely with TypeScript's type system](https://github.com/ronami/meta-typing)
 - [A SQL database implemented purely in TypeScript type annotations](https://github.com/codemix/ts-sql)
+- [Collection of TypeScript type challenges with online judge](https://github.com/type-challenges/type-challenges)
