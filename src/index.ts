@@ -15,11 +15,7 @@ export type TypeCheck<Input extends string> =
         ? NodeList extends Error<any, any>
           ? Format<[NodeList]>
           : NodeList extends Array<BaseNode<any>>
-          ? Check<NodeList> extends infer Errors
-            ? Errors extends Array<Error<any, any>>
-              ? Format<Errors>
-              : never
-            : never
+          ? Format<Check<NodeList>>
           : never
         : never
       : never
