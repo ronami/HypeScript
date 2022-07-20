@@ -834,7 +834,7 @@ const b: string = bar().hello;
   },
   {
     type: 'TypeError',
-    message: "Type 'number | string' is not assignable to type 'string'.",
+    message: "Type 'string | number' is not assignable to type 'string'.",
     lineNumber: 21,
   },
 ]);
@@ -913,7 +913,7 @@ const b: string = bar().hello;
   },
   {
     type: 'TypeError',
-    message: "Type 'undefined | string' is not assignable to type 'string'.",
+    message: "Type 'string | undefined' is not assignable to type 'string'.",
     lineNumber: 21,
   },
 ]);
