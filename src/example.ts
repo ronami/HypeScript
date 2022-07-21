@@ -9,7 +9,7 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 
-hello.bar;
+[hello.bar];
 
 `>;
 type P = Parse<T>;
