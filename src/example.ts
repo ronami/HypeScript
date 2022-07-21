@@ -23,4 +23,4 @@ const d: number = c[0](1);
 
 `>;
 type P = Parse<T>;
-type C = Check<P>;
+// type C = Check<P>;
