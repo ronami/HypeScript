@@ -198,9 +198,11 @@ type ParseVariableDeclaration<TokenList extends Array<Token<any>>> =
             Node['data']['startLineNumber'],
             EqualsLineNumber
           >
-        : ParsingError<
-            "'const' declarations must be initialized.",
-            Node['data']['startLineNumber']
+        : ParseError<
+            ParsingError<
+              "'const' declarations must be initialized.",
+              Node['data']['startLineNumber']
+            >
           >
       : ParseError<
           ParsingError<
@@ -527,8 +529,8 @@ type ParseFunctionDeclaration<TokenList extends Array<Token<any>>> =
               : never
             : null
           : never
-        : ParsingError<"'(' expected.", FunctionNameLineNumber>
-      : ParsingError<'Identifier expected.', FunctionLineNumber>
+        : ParseError<ParsingError<"'(' expected.", FunctionNameLineNumber>>
+      : ParseError<ParsingError<'Identifier expected.', FunctionLineNumber>>
     : null;
 
 type ParseFunctionParams<
@@ -568,7 +570,7 @@ type ParseFunctionParamsHelper<
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
     : ParseFunctionParams<TokenList, LineNumber, Push<Result, Node>, true>
-  : ParsingError<'Identifier expected.', LineNumber>;
+  : ParseError<ParsingError<'Identifier expected.', LineNumber>>;
 
 type ParseBlockStatement<
   TokenList extends Array<Token<any>>,
@@ -613,7 +615,7 @@ type ParseTopLevel<
   Result extends Array<BaseNode<any>> = [],
   NeedSemicolon extends boolean = false,
 > = TokenList extends []
-  ? Result
+  ? ParseResult<any, TokenList, null, Result>
   : TokenList[0] extends GenericToken<';', any>
   ? ParseTopLevel<Tail<TokenList>, Result, false>
   : NeedSemicolon extends false
@@ -623,7 +625,7 @@ type ParseTopLevel<
     >
   ? PrecedingLinebreak extends true
     ? ParseTopLevelHelper<TokenList, Result>
-    : ParsingError<"';' expected.", LineNumber>
+    : ParseError<ParsingError<"';' expected.", LineNumber>>
   : never;
 
 type ParseBlockStatementHelper<
@@ -822,4 +824,13 @@ type ParseStatementHelper<
   : ParseError<ParsingError<'Declaration or statement expected.', 1>>;
 
 export type Parse<TokenList extends Array<Token<any>>> =
-  ParseTopLevel<TokenList>;
+  ParseTopLevel<TokenList> extends ParseResult<
+    any,
+    infer TokenList,
+    infer Error,
+    infer Data
+  >
+    ? Error extends ParsingError<any, any>
+      ? Error
+      : Data
+    : never;
