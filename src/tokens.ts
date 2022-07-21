@@ -8,7 +8,7 @@ export type TokenData<
 
 export type GenericToken<
   Value extends string,
-  Data extends TokenData<any, any>,
+  Data extends TokenData<boolean, number>,
 > = {
   type: 'generic';
   value: Value;
@@ -17,7 +17,7 @@ export type GenericToken<
 
 export type NumberToken<
   Value extends string,
-  Data extends TokenData<any, any>,
+  Data extends TokenData<boolean, number>,
 > = {
   type: 'number';
   value: Value;
@@ -26,7 +26,7 @@ export type NumberToken<
 
 export type StringToken<
   Value extends string,
-  Data extends TokenData<any, any>,
+  Data extends TokenData<boolean, number>,
 > = {
   type: 'string';
   value: Value;
@@ -35,7 +35,7 @@ export type StringToken<
 
 export type SymbolToken<
   Value extends string,
-  Data extends TokenData<any, any>,
+  Data extends TokenData<boolean, number>,
 > = {
   type: 'symbol';
   value: Value;
@@ -43,7 +43,7 @@ export type SymbolToken<
 };
 
 export type Token<
-  Data extends TokenData<any, any>,
+  Data extends TokenData<boolean, number>,
   Value extends string = string,
 > =
   | GenericToken<Value, Data>
