@@ -290,7 +290,7 @@ type ParseCallExpressionArguments<
 > = TokenList[0] extends GenericToken<ClosingString, any>
   ? [Result, Tail<TokenList>, TokenList[0]]
   : TokenList extends []
-  ? ParsingError<`'${ClosingString}' expected.`, ParenLineNumber>
+  ? ParseError<ParsingError<`'${ClosingString}' expected.`, ParenLineNumber>>
   : NeedComma extends true
   ? TokenList[0] extends GenericToken<',', any>
     ? ParseCallExpressionArgumentsHelper<
@@ -300,7 +300,7 @@ type ParseCallExpressionArguments<
         Result
       >
     : TokenList[0] extends Token<TokenData<any, infer LineNumber>>
-    ? ParsingError<"',' expected.", LineNumber>
+    ? ParseError<ParsingError<"',' expected.", LineNumber>>
     : never
   : ParseCallExpressionArgumentsHelper<
       TokenList,
@@ -441,9 +441,9 @@ type ParseObjectItem<
             true
           >
         : never
-      : ParsingError<'Expression expected.', InitialLineNumber>
-    : ParsingError<"'}' expected.", InitialLineNumber>
-  : ParsingError<"'}' expected.", InitialLineNumber>;
+      : ParseError<ParsingError<'Expression expected.', InitialLineNumber>>
+    : ParseError<ParsingError<"'}' expected.", InitialLineNumber>>
+  : ParseError<ParsingError<"'}' expected.", InitialLineNumber>>;
 
 type ParseArrayExpression<
   TokenList extends Array<Token<any>>,
