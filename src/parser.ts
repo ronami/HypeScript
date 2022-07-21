@@ -599,25 +599,36 @@ type ParseBlockStatementHelper<
   LineNumber extends number,
   InFunctionScope extends boolean,
   Result extends Array<BaseNode<any>>,
-> = ParseStatementHelper<TokenList, InFunctionScope> extends infer G
-  ? G extends Array<any>
-    ? ParseBlockStatement<
-        G[1],
+> = ParseStatementHelper<TokenList, InFunctionScope> extends ParseResult<
+  infer Node,
+  infer TokenList,
+  infer Error
+>
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : ParseBlockStatement<
+        TokenList,
         LineNumber,
         InFunctionScope,
-        Push<Result, G[0]>,
+        Push<Result, Node>,
         true
       >
-    : G
   : never;
 
 type ParseTopLevelHelper<
   TokenList extends Array<Token<any>>,
   Result extends Array<BaseNode<any>>,
-> = ParseStatementHelper<TokenList, false> extends infer G
-  ? G extends Array<any>
-    ? ParseTopLevel<G[1], Push<Result, G[0]>, G[2]>
-    : G
+> = ParseStatementHelper<TokenList, false> extends ParseResult<
+  infer Node,
+  infer TokenList,
+  infer Error,
+  infer Data
+>
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : Data extends boolean
+    ? ParseTopLevel<TokenList, Push<Result, Node>, Data>
+    : never
   : never;
 
 type ParseIfStatement<
