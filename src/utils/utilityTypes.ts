@@ -18,11 +18,13 @@ export type ParseResult<
   Node extends BaseNode<any>,
   TokenList extends Array<Token<any>>,
   Error extends ParsingError<any, any> | null = null,
+  Data extends any = {},
 > = {
   type: 'ParseResult';
   node: Node;
   tokenList: TokenList;
   error: Error;
+  data: Data;
 };
 
 export type ParseError<Error extends ParsingError<any, any>> = ParseResult<
