@@ -288,7 +288,7 @@ type ParseCallExpressionArguments<
   NeedComma extends boolean = false,
   Result extends Array<BaseNode<any>> = [],
 > = TokenList[0] extends GenericToken<ClosingString, any>
-  ? [Result, Tail<TokenList>, TokenList[0]]
+  ? ParseResult<any, Tail<TokenList>, null, [Result, TokenList[0]]>
   : TokenList extends []
   ? ParseError<ParsingError<`'${ClosingString}' expected.`, ParenLineNumber>>
   : NeedComma extends true
@@ -314,17 +314,21 @@ type ParseCallExpressionArgumentsHelper<
   ParenLineNumber extends number,
   ClosingString extends string,
   Result extends Array<BaseNode<any>> = [],
-> = ParseExpression<TokenList> extends infer G
-  ? G extends Array<any>
-    ? ParseCallExpressionArguments<
-        G[1],
+> = ParseExpression<TokenList> extends ParseResult<
+  infer Node,
+  infer TokenList,
+  infer Error
+>
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : ParseCallExpressionArguments<
+        TokenList,
         ParenLineNumber,
         ClosingString,
         true,
-        Push<Result, G[0]>
+        Push<Result, Node>
       >
-    : G
-  : never;
+  : null;
 
 type CheckExpression<
   Node extends BaseNode<any>,
