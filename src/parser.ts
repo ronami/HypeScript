@@ -388,14 +388,17 @@ type ParseObject<
   Result extends Array<ObjectProperty<any, any, any>> = [],
   NeedComma extends boolean = false,
 > = TokenList[0] extends GenericToken<'}', TokenData<any, infer L>>
-  ? [ObjectExpression<Result, NodeData<InitialLineNumber, L>>, Tail<TokenList>]
+  ? ParseResult<
+      ObjectExpression<Result, NodeData<InitialLineNumber, L>>,
+      Tail<TokenList>
+    >
   : TokenList extends []
-  ? ParsingError<"'}' expected.", InitialLineNumber>
+  ? ParseError<ParsingError<"'}' expected.", InitialLineNumber>>
   : NeedComma extends true
   ? TokenList[0] extends GenericToken<',', any>
     ? ParseObjectItem<Tail<TokenList>, InitialLineNumber, Result>
     : TokenList[0] extends Token<TokenData<any, infer L>>
-    ? ParsingError<"',' expected.", L>
+    ? ParseError<ParsingError<"',' expected.", L>>
     : never
   : ParseObjectItem<TokenList, InitialLineNumber, Result>;
 
@@ -408,31 +411,33 @@ type ParseObjectItem<
   TokenData<any, infer NameLineNumber>
 >
   ? TokenList[1] extends GenericToken<':', any>
-    ? ParseExpression<TailBy<TokenList, 2>> extends infer G
-      ? G extends Array<any>
-        ? G[0] extends BaseNode<NodeData<any, infer ValueLineNumber>>
-          ? ParseObject<
-              G[1],
-              InitialLineNumber,
-              Push<
-                Result,
-                ObjectProperty<
-                  Identifier<
-                    Name,
-                    null,
-                    NodeData<NameLineNumber, NameLineNumber>
-                  >,
-                  G[0],
-                  NodeData<NameLineNumber, ValueLineNumber>
-                >
-              >,
-              true
-            >
-          : never
-        : G extends ParsingError<any, any>
-        ? G
-        : ParsingError<'Expression expected.', InitialLineNumber>
-      : never
+    ? ParseExpression<TailBy<TokenList, 2>> extends ParseResult<
+        infer Node,
+        infer TokenList,
+        infer Error
+      >
+      ? Error extends ParsingError<any, any>
+        ? ParseError<Error>
+        : Node extends BaseNode<NodeData<any, infer ValueLineNumber>>
+        ? ParseObject<
+            TokenList,
+            InitialLineNumber,
+            Push<
+              Result,
+              ObjectProperty<
+                Identifier<
+                  Name,
+                  null,
+                  NodeData<NameLineNumber, NameLineNumber>
+                >,
+                Node,
+                NodeData<NameLineNumber, ValueLineNumber>
+              >
+            >,
+            true
+          >
+        : never
+      : ParsingError<'Expression expected.', InitialLineNumber>
     : ParsingError<"'}' expected.", InitialLineNumber>
   : ParsingError<"'}' expected.", InitialLineNumber>;
 
