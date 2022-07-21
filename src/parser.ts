@@ -37,6 +37,7 @@ import type {
 } from './tokens';
 import type { Push, Tail, TailBy } from './utils/arrayUtils';
 import type {
+  ParseArrayResult,
   ParseError,
   ParseErrorResult,
   ParseResult,
@@ -283,21 +284,20 @@ type ParseCallExpression<
       Tail<TokenList>,
       ParenLineNumber,
       ')'
-    > extends ParseResult<any, infer TokenList, infer Error, infer Data>
+    > extends ParseArrayResult<infer NodeList, infer TokenList, infer Error>
     ? Error extends ParsingError<any, any>
       ? ParseError<Error>
-      : Data extends Array<any>
-      ? Data[1] extends Token<TokenData<any, infer L>>
-        ? ParseResult<
-            CallExpression<
-              Node,
-              Data[0],
-              NodeData<Node['data']['startLineNumber'], L>
-            >,
-            TokenList
-          >
-        : never
-      : never
+      : ParseResult<
+          CallExpression<
+            Node,
+            NodeList,
+            NodeData<
+              Node['data']['startLineNumber'],
+              TokenList[0]['data']['lineNumber']
+            >
+          >,
+          Tail<TokenList>
+        >
     : null
   : null;
 
@@ -308,7 +308,7 @@ type ParseCallExpressionArguments<
   NeedComma extends boolean = false,
   Result extends Array<BaseNode<any>> = [],
 > = TokenList[0] extends GenericToken<ClosingString, any>
-  ? ParseResult<any, Tail<TokenList>, null, [Result, TokenList[0]]>
+  ? ParseArrayResult<Result, TokenList>
   : TokenList extends []
   ? ParseErrorResult<`'${ClosingString}' expected.`, ParenLineNumber>
   : NeedComma extends true
@@ -474,17 +474,16 @@ type ParseArrayExpression<
   TokenList,
   StartLineNumber,
   ']'
-> extends ParseResult<any, infer TokenList, infer Error, infer Data>
+> extends ParseArrayResult<infer NodeList, infer TokenList, infer Error>
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : Data extends Array<any>
-    ? Data[1] extends Token<TokenData<any, infer EndLineNumber>>
-      ? ParseResult<
-          ArrayExpression<Data[0], NodeData<StartLineNumber, EndLineNumber>>,
-          TokenList
-        >
-      : never
-    : never
+    : ParseResult<
+        ArrayExpression<
+          NodeList,
+          NodeData<StartLineNumber, TokenList[0]['data']['lineNumber']>
+        >,
+        Tail<TokenList>
+      >
   : null;
 
 type ParseExpressionStatement<TokenList extends Array<Token<any>>> =
@@ -514,35 +513,34 @@ type ParseFunctionDeclaration<TokenList extends Array<Token<any>>> =
         ? ParseFunctionParams<
             TailBy<TokenList, 3>,
             ParenLineNumber
-          > extends ParseResult<any, infer TokenList, infer Error, infer Data>
+          > extends ParseArrayResult<
+            infer NodeList,
+            infer TokenList,
+            infer Error
+          >
           ? Error extends ParsingError<any, any>
             ? ParseError<Error>
-            : Data extends Array<any>
-            ? ParseBlockStatement<TokenList, Data[1], true> extends ParseResult<
-                infer Node,
-                infer TokenList,
-                infer Error
-              >
-              ? Error extends ParsingError<any, any>
-                ? ParseError<Error>
-                : ParseResult<
-                    FunctionDeclaration<
-                      Identifier<
-                        Name,
-                        null,
-                        NodeData<FunctionNameLineNumber, FunctionNameLineNumber>
-                      >,
-                      Data[0],
-                      Node,
-                      NodeData<
-                        FunctionLineNumber,
-                        Node['data']['endLineNumber']
-                      >
+            : ParseBlockStatement<
+                Tail<TokenList>,
+                TokenList[0]['data']['lineNumber'],
+                true
+              > extends ParseResult<infer Node, infer TokenList, infer Error>
+            ? Error extends ParsingError<any, any>
+              ? ParseError<Error>
+              : ParseResult<
+                  FunctionDeclaration<
+                    Identifier<
+                      Name,
+                      null,
+                      NodeData<FunctionNameLineNumber, FunctionNameLineNumber>
                     >,
-                    TokenList
-                  >
-              : never
-            : null
+                    NodeList,
+                    Node,
+                    NodeData<FunctionLineNumber, Node['data']['endLineNumber']>
+                  >,
+                  TokenList
+                >
+            : never
           : never
         : ParseErrorResult<"'(' expected.", FunctionNameLineNumber>
       : ParseErrorResult<'Identifier expected.', FunctionLineNumber>
@@ -557,11 +555,8 @@ type ParseFunctionParams<
   ')',
   TokenData<any, infer ParenLineNumber>
 >
-  ? TokenList[1] extends GenericToken<
-      '{',
-      TokenData<any, infer CurlyLineNumber>
-    >
-    ? ParseResult<any, TailBy<TokenList, 2>, null, [Result, CurlyLineNumber]>
+  ? TokenList[1] extends GenericToken<'{', any>
+    ? ParseArrayResult<Result, Tail<TokenList>>
     : ParseErrorResult<"'{' expected.", ParenLineNumber>
   : TokenList extends []
   ? ParseErrorResult<"')' expected.", InitialLineNumber>
@@ -630,7 +625,7 @@ type ParseTopLevel<
   Result extends Array<BaseNode<any>> = [],
   NeedSemicolon extends boolean = false,
 > = TokenList extends []
-  ? ParseResult<any, TokenList, null, Result>
+  ? ParseArrayResult<Result, TokenList>
   : TokenList[0] extends GenericToken<';', any>
   ? ParseTopLevel<Tail<TokenList>, Result, false>
   : NeedSemicolon extends false
@@ -836,13 +831,12 @@ type ParseStatementHelper<
   : ParseErrorResult<'Declaration or statement expected.', 1>;
 
 export type Parse<TokenList extends Array<Token<any>>> =
-  ParseTopLevel<TokenList> extends ParseResult<
-    any,
+  ParseTopLevel<TokenList> extends ParseArrayResult<
+    infer NodeList,
     infer TokenList,
-    infer Error,
-    infer Data
+    infer Error
   >
     ? Error extends ParsingError<any, any>
       ? Error
-      : Data
+      : NodeList
     : never;

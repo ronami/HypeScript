@@ -9,10 +9,8 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 
-function foo() {
-    return 1;
-};
+[111, 222]
 
 `>;
 type P = Parse<T>;
-type C = Check<P>;
+// type C = Check<P>;
