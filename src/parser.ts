@@ -218,7 +218,7 @@ type ParseMemberExpression<
         infer Name,
         TokenData<any, infer IdentifierLineNumber>
       >
-      ? [
+      ? ParseResult<
           MemberExpression<
             Node,
             Identifier<
@@ -229,26 +229,29 @@ type ParseMemberExpression<
             false,
             NodeData<NodeLineNumber, IdentifierLineNumber>
           >,
-          TailBy<TokenList, 2>,
-        ]
-      : ParsingError<'Identifier expected.', DotLineNumber>
+          TailBy<TokenList, 2>
+        >
+      : ParseError<ParsingError<'Identifier expected.', DotLineNumber>>
     : TokenList[0] extends GenericToken<
         '[',
         TokenData<any, infer BracketLineNumber>
       >
-    ? ParseExpression<Tail<TokenList>> extends infer G
-      ? G extends [infer Q, infer W]
-        ? Q extends BaseNode<NodeData<infer S, any>>
-          ? W extends Array<Token<any>>
-            ? W[0] extends GenericToken<']', any>
-              ? [MemberExpression<Node, Q, true, NodeData<1, 1>>, Tail<W>]
-              : ParsingError<"']' expected.", S>
-            : never
-          : never
-        : G extends null
-        ? ParsingError<'Expression expected.', BracketLineNumber>
-        : G
-      : never
+    ? ParseExpression<Tail<TokenList>> extends ParseResult<
+        infer ExpressionNode,
+        infer ExpressionTokenList,
+        infer ExpressionError
+      >
+      ? ExpressionError extends ParsingError<any, any>
+        ? ParseError<ExpressionError>
+        : ExpressionNode extends BaseNode<NodeData<infer S, any>>
+        ? ExpressionTokenList[0] extends GenericToken<']', any>
+          ? ParseResult<
+              MemberExpression<Node, ExpressionNode, true, NodeData<1, 1>>,
+              Tail<ExpressionTokenList>
+            >
+          : ParseError<ParsingError<"']' expected.", S>>
+        : never
+      : ParseError<ParsingError<'Expression expected.', BracketLineNumber>>
     : null
   : never;
 
