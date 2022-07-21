@@ -101,7 +101,7 @@ export type FunctionDeclaration<
 
 export type Identifier<
   Name extends string,
-  Annotation extends TypeAnnotation<any, any> | null,
+  Annotation extends BaseNode<any> | null,
   Data extends NodeData<any, any>,
 > = {
   type: 'Identifier';
