@@ -89,7 +89,7 @@ export type VariableDeclarator<
 export type FunctionDeclaration<
   Id extends Identifier<any, any, any>,
   Params extends Array<BaseNode<any>>,
-  Body extends BlockStatement<any, any>,
+  Body extends BaseNode<any>,
   Data extends NodeData<any, any>,
 > = {
   type: 'FunctionDeclaration';
