@@ -50,36 +50,38 @@ type ParseIdentifier<
         ':',
         TokenData<any, infer ColonLineNumber>
       >
-      ? ParseTypeAnnotation<TailBy<TokenList, 2>> extends infer J
-        ? J extends Array<any>
-          ? [
+      ? ParseTypeAnnotation<TailBy<TokenList, 2>> extends ParseResult<
+          infer Node,
+          infer TokenList,
+          infer Error
+        >
+        ? Error extends ParsingError<any, any>
+          ? ParseError<Error>
+          : ParseResult<
               Identifier<
                 Name,
-                J[0],
+                Node,
                 NodeData<IdentifierLineNumber, IdentifierLineNumber>
               >,
-              J[1],
-            ]
-          : J extends ParsingError<any, any>
-          ? J
-          : ParsingError<'Type expected.', ColonLineNumber>
-        : never
-      : [
+              TokenList
+            >
+        : ParseError<ParsingError<'Type expected.', ColonLineNumber>>
+      : ParseResult<
           Identifier<
             Name,
             null,
             NodeData<IdentifierLineNumber, IdentifierLineNumber>
           >,
-          Tail<TokenList>,
-        ]
-    : [
+          Tail<TokenList>
+        >
+    : ParseResult<
         Identifier<
           Name,
           null,
           NodeData<IdentifierLineNumber, IdentifierLineNumber>
         >,
-        Tail<TokenList>,
-      ]
+        Tail<TokenList>
+      >
   : null;
 
 type ParseVariableDeclarationHelper<
@@ -113,62 +115,62 @@ type ParseVariableDeclarationHelper<
 
 type ParseTypeAnnotation<TokenList extends Array<Token<any>>> =
   TokenList[0] extends SymbolToken<'string', TokenData<any, infer LineNumber>>
-    ? [
+    ? ParseResult<
         TypeAnnotation<
           StringTypeAnnotation<NodeData<LineNumber, LineNumber>>,
           NodeData<LineNumber, LineNumber>
         >,
-        Tail<TokenList>,
-      ]
+        Tail<TokenList>
+      >
     : TokenList[0] extends SymbolToken<
         'boolean',
         TokenData<any, infer LineNumber>
       >
-    ? [
+    ? ParseResult<
         TypeAnnotation<
           BooleanTypeAnnotation<NodeData<LineNumber, LineNumber>>,
           NodeData<LineNumber, LineNumber>
         >,
-        Tail<TokenList>,
-      ]
+        Tail<TokenList>
+      >
     : TokenList[0] extends SymbolToken<'null', TokenData<any, infer LineNumber>>
-    ? [
+    ? ParseResult<
         TypeAnnotation<
           NullLiteralTypeAnnotation<NodeData<LineNumber, LineNumber>>,
           NodeData<LineNumber, LineNumber>
         >,
-        Tail<TokenList>,
-      ]
+        Tail<TokenList>
+      >
     : TokenList[0] extends SymbolToken<
         'number',
         TokenData<any, infer LineNumber>
       >
-    ? [
+    ? ParseResult<
         TypeAnnotation<
           NumberTypeAnnotation<NodeData<LineNumber, LineNumber>>,
           NodeData<LineNumber, LineNumber>
         >,
-        Tail<TokenList>,
-      ]
+        Tail<TokenList>
+      >
     : TokenList[0] extends SymbolToken<'any', TokenData<any, infer LineNumber>>
-    ? [
+    ? ParseResult<
         TypeAnnotation<
           AnyTypeAnnotation<NodeData<LineNumber, LineNumber>>,
           NodeData<LineNumber, LineNumber>
         >,
-        Tail<TokenList>,
-      ]
+        Tail<TokenList>
+      >
     : TokenList[0] extends SymbolToken<
         infer E,
         TokenData<any, infer LineNumber>
       >
-    ? [
+    ? ParseResult<
         TypeAnnotation<
           GenericTypeAnnotation<E, NodeData<LineNumber, LineNumber>>,
           NodeData<LineNumber, LineNumber>
         >,
-        Tail<TokenList>,
-      ]
+        Tail<TokenList>
+      >
     : null;
 
 type ParseVariableDeclaration<TokenList extends Array<Token<any>>> =
