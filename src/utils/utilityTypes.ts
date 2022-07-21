@@ -33,4 +33,9 @@ export type ParseError<Error extends ParsingError<any, any>> = ParseResult<
   Error
 >;
 
+export type ParseErrorResult<
+  Message extends string,
+  LineNumber extends number,
+> = ParseError<ParsingError<Message, LineNumber>>;
+
 export type StateType = Record<string, StaticType>;
