@@ -607,7 +607,7 @@ type ParseBlockStatement<
     >
   ? PrecedingLinebreak extends true
     ? ParseBlockStatementHelper<TokenList, LineNumber, InFunctionScope, Result>
-    : ParseError<ParsingError<"';' expected.", LineNumber>>
+    : ParseError<ParsingError<"aaa';' expected.", LineNumber>>
   : never;
 
 type ParseTopLevel<
@@ -715,10 +715,10 @@ type ParseReturnStatementHelper<
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
     : Node extends BaseNode<NodeData<any, infer EndLineNumber>>
-    ? [
+    ? ParseResult<
         ReturnStatement<Node, NodeData<StartLineNumber, EndLineNumber>>,
-        TokenList,
-      ]
+        TokenList
+      >
     : null
   : never;
 

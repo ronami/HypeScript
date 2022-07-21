@@ -15,4 +15,4 @@ function foo() {
 
 `>;
 type P = Parse<T>;
-// type C = Check<P>;
+type C = Check<P>;

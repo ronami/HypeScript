@@ -445,7 +445,7 @@ type MatchTypeArrays<
 
 type InferVariableDeclaration<
   Name extends string,
-  Annotation extends TypeAnnotation<any, any> | null,
+  Annotation extends BaseNode<any> | null,
   Init extends BaseNode<any>,
   State extends StateType,
   StartLine extends number,
