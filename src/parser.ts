@@ -243,9 +243,20 @@ type ParseMemberExpression<
     >
     ? ExpressionError extends ParsingError<any, any>
       ? ParseError<ExpressionError>
-      : ExpressionTokenList[0] extends GenericToken<']', any>
+      : ExpressionTokenList[0] extends GenericToken<
+          ']',
+          TokenData<any, infer ClosingBracketLineNumber>
+        >
       ? ParseResult<
-          MemberExpression<Node, ExpressionNode, true, NodeData<1, 1>>,
+          MemberExpression<
+            Node,
+            ExpressionNode,
+            true,
+            NodeData<
+              ExpressionNode['data']['startLineNumber'],
+              ClosingBracketLineNumber
+            >
+          >,
           Tail<ExpressionTokenList>
         >
       : ParseError<

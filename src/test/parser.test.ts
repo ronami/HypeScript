@@ -2733,7 +2733,7 @@ expectType<ParseAst<`function\n foo\n(\na: null, \nb: boolean)\n {\n}`>>([
   },
 ]);
 
-expectType<ParseAst<`hello[world]`>>([
+expectType<ParseAst<`\n\nhello[world]`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -2743,8 +2743,8 @@ expectType<ParseAst<`hello[world]`>>([
         name: 'hello',
         typeAnnotation: null,
         data: {
-          startLineNumber: 1,
-          endLineNumber: 1,
+          startLineNumber: 3,
+          endLineNumber: 3,
         },
       },
       property: {
@@ -2752,19 +2752,19 @@ expectType<ParseAst<`hello[world]`>>([
         name: 'world',
         typeAnnotation: null,
         data: {
-          startLineNumber: 1,
-          endLineNumber: 1,
+          startLineNumber: 3,
+          endLineNumber: 3,
         },
       },
       computed: true,
       data: {
-        startLineNumber: 1,
-        endLineNumber: 1,
+        startLineNumber: 3,
+        endLineNumber: 3,
       },
     },
     data: {
-      startLineNumber: 1,
-      endLineNumber: 1,
+      startLineNumber: 3,
+      endLineNumber: 3,
     },
   },
 ]);
