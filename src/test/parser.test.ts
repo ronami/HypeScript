@@ -124,6 +124,12 @@ expectType<ParseAst<`hello "world"`>>({
   lineNumber: 1,
 });
 
+expectType<ParseAst<`function foo () { hello "world" }`>>({
+  type: 'ParsingError',
+  message: "';' expected.",
+  lineNumber: 1,
+});
+
 expectType<ParseAst<`hello\n "world"`>>([
   {
     type: 'ExpressionStatement',
