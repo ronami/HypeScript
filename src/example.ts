@@ -9,17 +9,7 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 
-function a (a: number) {
-    return '1';
-}
-
-function b () {
-    return 1;
-}
-
-const c = [a, 'b'];
-
-const d: number = c[0](1);
+hello.bar;
 
 `>;
 type P = Parse<T>;

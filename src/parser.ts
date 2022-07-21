@@ -86,32 +86,34 @@ type ParseIdentifier<
 
 type ParseVariableDeclarationHelper<
   TokenList extends Array<Token<any>>,
-  Id extends Identifier<any, any, any>,
+  Id extends BaseNode<any>,
   KindLineNumber extends number,
   IdentifierLineNumber extends number,
   EqualsLineNumber extends number,
-> = ParseExpression<Tail<TokenList>> extends infer G
-  ? G extends Array<any>
-    ? G[0] extends BaseNode<NodeData<infer InitLineNumber, any>>
-      ? [
-          VariableDeclaration<
-            [
-              VariableDeclarator<
-                Id,
-                G[0],
-                NodeData<IdentifierLineNumber, InitLineNumber>
-              >,
-            ],
-            'const',
-            NodeData<KindLineNumber, InitLineNumber>
-          >,
-          G[1],
-        ]
-      : never
-    : G extends null
-    ? ParsingError<'Expression expected.', EqualsLineNumber>
-    : G
-  : never;
+> = ParseExpression<Tail<TokenList>> extends ParseResult<
+  infer Node,
+  infer TokenList,
+  infer Error
+>
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : Node extends BaseNode<NodeData<infer InitLineNumber, any>>
+    ? ParseResult<
+        VariableDeclaration<
+          [
+            VariableDeclarator<
+              Id,
+              Node,
+              NodeData<IdentifierLineNumber, InitLineNumber>
+            >,
+          ],
+          'const',
+          NodeData<KindLineNumber, InitLineNumber>
+        >,
+        TokenList
+      >
+    : never
+  : ParseError<ParsingError<'Expression expected.', EqualsLineNumber>>;
 
 type ParseTypeAnnotation<TokenList extends Array<Token<any>>> =
   TokenList[0] extends SymbolToken<'string', TokenData<any, infer LineNumber>>
@@ -178,35 +180,34 @@ type ParseVariableDeclaration<TokenList extends Array<Token<any>>> =
     'const',
     TokenData<any, infer KindLineNumber>
   >
-    ? ParseIdentifier<Tail<TokenList>, true> extends infer N
-      ? N extends [
-          Identifier<any, any, NodeData<infer IdentifierLineNumber, any>>,
-          infer R,
-        ]
-        ? R extends Array<any>
-          ? R[0] extends GenericToken<
-              '=',
-              TokenData<any, infer EqualsLineNumber>
-            >
-            ? ParseVariableDeclarationHelper<
-                R,
-                N[0],
-                KindLineNumber,
-                IdentifierLineNumber,
-                EqualsLineNumber
-              >
-            : ParsingError<
-                "'const' declarations must be initialized.",
-                IdentifierLineNumber
-              >
-          : never
-        : N extends null
-        ? ParsingError<
+    ? ParseIdentifier<Tail<TokenList>, true> extends ParseResult<
+        infer Node,
+        infer TokenList,
+        infer Error
+      >
+      ? Error extends ParsingError<any, any>
+        ? ParseError<Error>
+        : TokenList[0] extends GenericToken<
+            '=',
+            TokenData<any, infer EqualsLineNumber>
+          >
+        ? ParseVariableDeclarationHelper<
+            TokenList,
+            Node,
+            KindLineNumber,
+            Node['data']['startLineNumber'],
+            EqualsLineNumber
+          >
+        : ParsingError<
+            "'const' declarations must be initialized.",
+            Node['data']['startLineNumber']
+          >
+      : ParseError<
+          ParsingError<
             'Variable declaration list cannot be empty.',
             KindLineNumber
           >
-        : N
-      : never
+        >
     : null;
 
 type ParseMemberExpression<
