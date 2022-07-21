@@ -618,7 +618,7 @@ type ParseBlockStatement<
     >
   ? PrecedingLinebreak extends true
     ? ParseBlockStatementHelper<TokenList, LineNumber, InFunctionScope, Result>
-    : ParseError<ParsingError<"aaa';' expected.", LineNumber>>
+    : ParseError<ParsingError<"';' expected.", LineNumber>>
   : never;
 
 type ParseTopLevel<
