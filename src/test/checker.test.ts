@@ -991,7 +991,7 @@ const d: number = c[0](1);
     type: 'TypeError',
     message:
       "This expression is not callable. Not all constituents of type '(a: number) => string | string' are callable.",
-    lineNumber: 1,
+    lineNumber: 13,
   },
 ]);
 
@@ -1039,7 +1039,7 @@ const d: number = c[0]();
   {
     type: 'TypeError',
     message: 'Expected 1 arguments, but got 0.',
-    lineNumber: 1,
+    lineNumber: 13,
   },
   {
     type: 'TypeError',
@@ -1069,7 +1069,7 @@ const d: number = c[0](1);
     type: 'TypeError',
     message:
       "Argument of type 'number' is not assignable to parameter of type 'never'.",
-    lineNumber: 1,
+    lineNumber: 13,
   },
   {
     type: 'TypeError',
