@@ -97,22 +97,20 @@ type ParseVariableDeclarationHelper<
 >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : Node extends BaseNode<NodeData<infer InitLineNumber, any>>
-    ? ParseResult<
+    : ParseResult<
         VariableDeclaration<
           [
             VariableDeclarator<
               Id,
               Node,
-              NodeData<IdentifierLineNumber, InitLineNumber>
+              NodeData<IdentifierLineNumber, Node['data']['startLineNumber']>
             >,
           ],
           'const',
-          NodeData<KindLineNumber, InitLineNumber>
+          NodeData<KindLineNumber, Node['data']['startLineNumber']>
         >,
         TokenList
       >
-    : never
   : ParseError<ParsingError<'Expression expected.', EqualsLineNumber>>;
 
 type ParseTypeAnnotation<TokenList extends Array<Token<any>>> =
@@ -213,53 +211,54 @@ type ParseVariableDeclaration<TokenList extends Array<Token<any>>> =
     : null;
 
 type ParseMemberExpression<
-  Node extends BaseNode<any>,
+  Node extends BaseNode<NodeData<number, number>>,
   TokenList extends Array<Token<any>>,
-> = Node extends BaseNode<NodeData<infer NodeLineNumber, any>>
-  ? TokenList[0] extends GenericToken<'.', TokenData<any, infer DotLineNumber>>
-    ? TokenList[1] extends SymbolToken<
-        infer Name,
-        TokenData<any, infer IdentifierLineNumber>
-      >
-      ? ParseResult<
-          MemberExpression<
-            Node,
-            Identifier<
-              Name,
-              null,
-              NodeData<IdentifierLineNumber, IdentifierLineNumber>
-            >,
-            false,
-            NodeData<NodeLineNumber, IdentifierLineNumber>
+> = TokenList[0] extends GenericToken<'.', TokenData<any, infer DotLineNumber>>
+  ? TokenList[1] extends SymbolToken<
+      infer Name,
+      TokenData<any, infer IdentifierLineNumber>
+    >
+    ? ParseResult<
+        MemberExpression<
+          Node,
+          Identifier<
+            Name,
+            null,
+            NodeData<IdentifierLineNumber, IdentifierLineNumber>
           >,
-          TailBy<TokenList, 2>
+          false,
+          NodeData<Node['data']['startLineNumber'], IdentifierLineNumber>
+        >,
+        TailBy<TokenList, 2>
+      >
+    : ParseError<ParsingError<'Identifier expected.', DotLineNumber>>
+  : TokenList[0] extends GenericToken<
+      '[',
+      TokenData<any, infer BracketLineNumber>
+    >
+  ? ParseExpression<Tail<TokenList>> extends ParseResult<
+      infer ExpressionNode,
+      infer ExpressionTokenList,
+      infer ExpressionError
+    >
+    ? ExpressionError extends ParsingError<any, any>
+      ? ParseError<ExpressionError>
+      : ExpressionTokenList[0] extends GenericToken<']', any>
+      ? ParseResult<
+          MemberExpression<Node, ExpressionNode, true, NodeData<1, 1>>,
+          Tail<ExpressionTokenList>
         >
-      : ParseError<ParsingError<'Identifier expected.', DotLineNumber>>
-    : TokenList[0] extends GenericToken<
-        '[',
-        TokenData<any, infer BracketLineNumber>
-      >
-    ? ParseExpression<Tail<TokenList>> extends ParseResult<
-        infer ExpressionNode,
-        infer ExpressionTokenList,
-        infer ExpressionError
-      >
-      ? ExpressionError extends ParsingError<any, any>
-        ? ParseError<ExpressionError>
-        : ExpressionNode extends BaseNode<NodeData<infer S, any>>
-        ? ExpressionTokenList[0] extends GenericToken<']', any>
-          ? ParseResult<
-              MemberExpression<Node, ExpressionNode, true, NodeData<1, 1>>,
-              Tail<ExpressionTokenList>
-            >
-          : ParseError<ParsingError<"']' expected.", S>>
-        : never
-      : ParseError<ParsingError<'Expression expected.', BracketLineNumber>>
-    : null
-  : never;
+      : ParseError<
+          ParsingError<
+            "']' expected.",
+            ExpressionNode['data']['startLineNumber']
+          >
+        >
+    : ParseError<ParsingError<'Expression expected.', BracketLineNumber>>
+  : null;
 
 type ParseCallExpression<
-  Node extends BaseNode<any>,
+  Node extends BaseNode<NodeData<number, number>>,
   TokenList extends Array<Token<any>>,
 > = TokenList[0] extends GenericToken<
   '(',
@@ -273,13 +272,15 @@ type ParseCallExpression<
     ? Error extends ParsingError<any, any>
       ? ParseError<Error>
       : Data extends Array<any>
-      ? Node extends BaseNode<NodeData<infer NodeStartLine, any>>
-        ? Data[1] extends Token<TokenData<any, infer L>>
-          ? ParseResult<
-              CallExpression<Node, Data[0], NodeData<NodeStartLine, L>>,
-              TokenList
-            >
-          : never
+      ? Data[1] extends Token<TokenData<any, infer L>>
+        ? ParseResult<
+            CallExpression<
+              Node,
+              Data[0],
+              NodeData<Node['data']['startLineNumber'], L>
+            >,
+            TokenList
+          >
         : never
       : never
     : null
@@ -430,8 +431,7 @@ type ParseObjectItem<
       >
       ? Error extends ParsingError<any, any>
         ? ParseError<Error>
-        : Node extends BaseNode<NodeData<any, infer ValueLineNumber>>
-        ? ParseObject<
+        : ParseObject<
             TokenList,
             InitialLineNumber,
             Push<
@@ -443,12 +443,11 @@ type ParseObjectItem<
                   NodeData<NameLineNumber, NameLineNumber>
                 >,
                 Node,
-                NodeData<NameLineNumber, ValueLineNumber>
+                NodeData<NameLineNumber, Node['data']['endLineNumber']>
               >
             >,
             true
           >
-        : never
       : ParseError<ParsingError<'Expression expected.', InitialLineNumber>>
     : ParseError<ParsingError<"'}' expected.", InitialLineNumber>>
   : ParseError<ParsingError<"'}' expected.", InitialLineNumber>>;
@@ -511,8 +510,7 @@ type ParseFunctionDeclaration<TokenList extends Array<Token<any>>> =
               >
               ? Error extends ParsingError<any, any>
                 ? ParseError<Error>
-                : Node extends BaseNode<NodeData<any, infer BodyLineNumber>>
-                ? ParseResult<
+                : ParseResult<
                     FunctionDeclaration<
                       Identifier<
                         Name,
@@ -521,11 +519,13 @@ type ParseFunctionDeclaration<TokenList extends Array<Token<any>>> =
                       >,
                       Data[0],
                       Node,
-                      NodeData<FunctionLineNumber, BodyLineNumber>
+                      NodeData<
+                        FunctionLineNumber,
+                        Node['data']['endLineNumber']
+                      >
                     >,
                     TokenList
                   >
-                : never
               : never
             : null
           : never
@@ -536,7 +536,7 @@ type ParseFunctionDeclaration<TokenList extends Array<Token<any>>> =
 type ParseFunctionParams<
   TokenList extends Array<Token<any>>,
   InitialLineNumber extends number,
-  Result extends Array<BaseNode<any>> = [],
+  Result extends Array<BaseNode<NodeData<number, number>>> = [],
   NeedSemicolon extends boolean = false,
 > = TokenList[0] extends GenericToken<
   ')',
@@ -553,9 +553,9 @@ type ParseFunctionParams<
   : NeedSemicolon extends true
   ? TokenList[0] extends GenericToken<',', any>
     ? ParseFunctionParamsHelper<Tail<TokenList>, InitialLineNumber, Result>
-    : Result[0] extends BaseNode<NodeData<any, infer LineNumber>>
-    ? ParseError<ParsingError<"',' expected.", LineNumber>>
-    : never
+    : ParseError<
+        ParsingError<"',' expected.", Result[0]['data']['endLineNumber']>
+      >
   : ParseFunctionParamsHelper<TokenList, InitialLineNumber, Result>;
 
 type ParseFunctionParamsHelper<
@@ -683,15 +683,13 @@ type ParseIfStatement<
       >
       ? Error extends ParsingError<any, any>
         ? ParseError<Error>
-        : Node extends BaseNode<NodeData<any, infer IfExpressionLineNumber>>
-        ? ParseIfStatementHelper<
+        : ParseIfStatementHelper<
             Node,
             TokenList,
             IfLineNumber,
             InFunctionScope,
-            IfExpressionLineNumber
+            Node['data']['endLineNumber']
           >
-        : never
       : ParseError<ParsingError<'Expression expected.', ParenLineNumber>>
     : ParseError<ParsingError<"'(' expected.", IfLineNumber>>
   : null;
@@ -714,12 +712,13 @@ type ParseReturnStatementHelper<
     >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : Node extends BaseNode<NodeData<any, infer EndLineNumber>>
-    ? ParseResult<
-        ReturnStatement<Node, NodeData<StartLineNumber, EndLineNumber>>,
+    : ParseResult<
+        ReturnStatement<
+          Node,
+          NodeData<StartLineNumber, Node['data']['endLineNumber']>
+        >,
         TokenList
       >
-    : null
   : never;
 
 type ParseReturnStatement<
@@ -764,16 +763,14 @@ type ParseIfStatementHelper<
       > extends ParseResult<infer BlockNode, infer TokenList, infer Error>
       ? Error extends ParsingError<any, any>
         ? ParseError<Error>
-        : BlockNode extends BaseNode<NodeData<any, infer EndLineNumber>>
-        ? ParseResult<
+        : ParseResult<
             IfStatement<
               Node,
               BlockNode,
-              NodeData<StartLineNumber, EndLineNumber>
+              NodeData<StartLineNumber, BlockNode['data']['endLineNumber']>
             >,
             TokenList
           >
-        : never
       : never
     : ParseError<ParsingError<"'{' expected.", ClosingParenLineNumber>>
   : ParseError<ParsingError<"')' expected.", IfExpressionLineNumber>>;
