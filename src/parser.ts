@@ -267,18 +267,20 @@ type ParseCallExpression<
       Tail<TokenList>,
       ParenLineNumber,
       ')'
-    > extends infer G
-    ? G extends Array<any>
+    > extends ParseResult<any, infer TokenList, infer Error, infer Data>
+    ? Error extends ParsingError<any, any>
+      ? ParseError<Error>
+      : Data extends Array<any>
       ? Node extends BaseNode<NodeData<infer NodeStartLine, any>>
-        ? G[2] extends Token<TokenData<any, infer L>>
+        ? Data[1] extends Token<TokenData<any, infer L>>
           ? ParseResult<
-              CallExpression<Node, G[0], NodeData<NodeStartLine, L>>,
-              G[1]
+              CallExpression<Node, Data[0], NodeData<NodeStartLine, L>>,
+              TokenList
             >
           : never
         : never
-      : G
-    : never
+      : never
+    : null
   : null;
 
 type ParseCallExpressionArguments<
