@@ -3,14 +3,14 @@ export type NodeData<StartLine extends number, EndLine extends number> = {
   endLineNumber: EndLine;
 };
 
-export type NullLiteral<Data extends NodeData<any, any>> = {
+export type NullLiteral<Data extends NodeData<number, number>> = {
   type: 'NullLiteral';
   data: Data;
 };
 
 export type NumericLiteral<
   Value extends string,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'NumericLiteral';
   value: Value;
@@ -19,7 +19,7 @@ export type NumericLiteral<
 
 export type BooleanLiteral<
   Value extends boolean,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'BooleanLiteral';
   value: Value;
@@ -28,7 +28,7 @@ export type BooleanLiteral<
 
 export type StringLiteral<
   Value extends string,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'StringLiteral';
   value: Value;
@@ -37,7 +37,7 @@ export type StringLiteral<
 
 export type ArrayExpression<
   Elements extends Array<BaseNode<any>>,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'ArrayExpression';
   elements: Elements;
@@ -46,7 +46,7 @@ export type ArrayExpression<
 
 export type ObjectExpression<
   Properties extends Array<ObjectProperty<any, any, any>>,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'ObjectExpression';
   properties: Properties;
@@ -56,7 +56,7 @@ export type ObjectExpression<
 export type ObjectProperty<
   Key extends Identifier<any, any, any>,
   Value extends BaseNode<any>,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'ObjectProperty';
   key: Key;
@@ -67,7 +67,7 @@ export type ObjectProperty<
 export type VariableDeclaration<
   Declarations extends Array<VariableDeclarator<any, any, any>>,
   Kind extends 'const' | 'let',
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'VariableDeclaration';
   declarations: Declarations;
@@ -78,7 +78,7 @@ export type VariableDeclaration<
 export type VariableDeclarator<
   Id extends BaseNode<any>,
   Init extends BaseNode<any>,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'VariableDeclarator';
   id: Id;
@@ -90,7 +90,7 @@ export type FunctionDeclaration<
   Id extends Identifier<any, any, any>,
   Params extends Array<BaseNode<any>>,
   Body extends BaseNode<any>,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'FunctionDeclaration';
   id: Id;
@@ -102,7 +102,7 @@ export type FunctionDeclaration<
 export type Identifier<
   Name extends string,
   Annotation extends BaseNode<any> | null,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'Identifier';
   name: Name;
@@ -112,7 +112,7 @@ export type Identifier<
 
 export type ExpressionStatement<
   Expression extends BaseNode<any>,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'ExpressionStatement';
   expression: Expression;
@@ -122,7 +122,7 @@ export type ExpressionStatement<
 export type CallExpression<
   Callee extends BaseNode<any>,
   Arguments extends Array<BaseNode<any>>,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'CallExpression';
   callee: Callee;
@@ -134,7 +134,7 @@ export type MemberExpression<
   Object extends BaseNode<any>,
   Property extends BaseNode<any>,
   Computed extends boolean,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'MemberExpression';
   object: Object;
@@ -146,7 +146,7 @@ export type MemberExpression<
 export type IfStatement<
   Test extends BaseNode<any>,
   Consequent extends BaseNode<any>,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'IfStatement';
   test: Test;
@@ -157,7 +157,7 @@ export type IfStatement<
 
 export type ReturnStatement<
   Argument extends BaseNode<any> | null,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'ReturnStatement';
   argument: Argument;
@@ -166,7 +166,7 @@ export type ReturnStatement<
 
 export type BlockStatement<
   Body extends Array<BaseNode<any>>,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'BlockStatement';
   body: Body;
@@ -175,45 +175,45 @@ export type BlockStatement<
 
 export type TypeAnnotation<
   Annotation extends BaseNode<any>,
-  Data extends NodeData<any, any>,
+  Data extends NodeData<number, number>,
 > = {
   type: 'TypeAnnotation';
   typeAnnotation: Annotation;
   data: Data;
 };
 
-export type StringTypeAnnotation<Data extends NodeData<any, any>> = {
+export type StringTypeAnnotation<Data extends NodeData<number, number>> = {
   type: 'StringTypeAnnotation';
   data: Data;
 };
 
-export type NumberTypeAnnotation<Data extends NodeData<any, any>> = {
+export type NumberTypeAnnotation<Data extends NodeData<number, number>> = {
   type: 'NumberTypeAnnotation';
   data: Data;
 };
 
-export type NullLiteralTypeAnnotation<Data extends NodeData<any, any>> = {
+export type NullLiteralTypeAnnotation<Data extends NodeData<number, number>> = {
   type: 'NullLiteralTypeAnnotation';
   data: Data;
 };
 
-export type BooleanTypeAnnotation<Data extends NodeData<any, any>> = {
+export type BooleanTypeAnnotation<Data extends NodeData<number, number>> = {
   type: 'BooleanTypeAnnotation';
   data: Data;
 };
 
-export type GenericTypeAnnotation<I, Data extends NodeData<any, any>> = {
+export type GenericTypeAnnotation<I, Data extends NodeData<number, number>> = {
   type: 'GenericTypeAnnotation';
   id: I;
   data: Data;
 };
 
-export type AnyTypeAnnotation<Data extends NodeData<any, any>> = {
+export type AnyTypeAnnotation<Data extends NodeData<number, number>> = {
   type: 'AnyTypeAnnotation';
   data: Data;
 };
 
-export type BaseNode<Data extends NodeData<any, any>> =
+export type BaseNode<Data extends NodeData<number, number>> =
   | NumericLiteral<any, Data>
   | BooleanLiteral<any, Data>
   | StringLiteral<any, Data>
