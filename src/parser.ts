@@ -458,16 +458,18 @@ type ParseArrayExpression<
   TokenList,
   StartLineNumber,
   ']'
-> extends infer A
-  ? A extends Array<any>
-    ? A[2] extends Token<TokenData<any, infer EndLineNumber>>
+> extends ParseResult<any, infer TokenList, infer Error, infer Data>
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : Data extends Array<any>
+    ? Data[1] extends Token<TokenData<any, infer EndLineNumber>>
       ? ParseResult<
-          ArrayExpression<A[0], NodeData<StartLineNumber, EndLineNumber>>,
-          A[1]
+          ArrayExpression<Data[0], NodeData<StartLineNumber, EndLineNumber>>,
+          TokenList
         >
       : never
-    : A
-  : never;
+    : never
+  : null;
 
 type ParseExpressionStatement<TokenList extends Array<Token<any>>> =
   ParseExpression<TokenList> extends ParseResult<
