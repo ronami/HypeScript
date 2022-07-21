@@ -498,9 +498,11 @@ type ParseFunctionDeclaration<TokenList extends Array<Token<any>>> =
         ? ParseFunctionParams<
             TailBy<TokenList, 3>,
             ParenLineNumber
-          > extends infer G
-          ? G extends Array<any>
-            ? ParseBlockStatement<G[1], G[2], true> extends ParseResult<
+          > extends ParseResult<any, infer TokenList, infer Error, infer Data>
+          ? Error extends ParsingError<any, any>
+            ? ParseError<Error>
+            : Data extends Array<any>
+            ? ParseBlockStatement<TokenList, Data[1], true> extends ParseResult<
                 infer Node,
                 infer TokenList,
                 infer Error
@@ -515,15 +517,15 @@ type ParseFunctionDeclaration<TokenList extends Array<Token<any>>> =
                         null,
                         NodeData<FunctionNameLineNumber, FunctionNameLineNumber>
                       >,
-                      G[0],
+                      Data[0],
                       Node,
                       NodeData<FunctionLineNumber, BodyLineNumber>
                     >,
                     TokenList
                   >
                 : never
-              : null
-            : G
+              : never
+            : null
           : never
         : ParsingError<"'(' expected.", FunctionNameLineNumber>
       : ParsingError<'Identifier expected.', FunctionLineNumber>
