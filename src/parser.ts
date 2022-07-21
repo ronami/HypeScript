@@ -458,13 +458,15 @@ type ParseArrayExpression<
   : never;
 
 type ParseExpressionStatement<TokenList extends Array<Token<any>>> =
-  ParseExpression<TokenList> extends infer G
-    ? G extends Array<any>
-      ? G[0] extends BaseNode<infer Data>
-        ? [ExpressionStatement<G[0], Data>, G[1]]
-        : never
-      : G
-    : never;
+  ParseExpression<TokenList> extends ParseResult<
+    infer Node,
+    infer TokenList,
+    infer Error
+  >
+    ? Error extends ParsingError<any, any>
+      ? ParseError<Error>
+      : ParseResult<ExpressionStatement<Node, Node['data']>, TokenList>
+    : null;
 
 type ParseFunctionDeclaration<TokenList extends Array<Token<any>>> =
   TokenList[0] extends SymbolToken<
