@@ -602,17 +602,20 @@ type ParseBlockStatementHelper<
 > = ParseStatementHelper<TokenList, InFunctionScope> extends ParseResult<
   infer Node,
   infer TokenList,
-  infer Error
+  infer Error,
+  infer Data
 >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : ParseBlockStatement<
+    : Data extends boolean
+    ? ParseBlockStatement<
         TokenList,
         LineNumber,
         InFunctionScope,
         Push<Result, Node>,
-        true
+        Data
       >
+    : never
   : never;
 
 type ParseTopLevelHelper<
