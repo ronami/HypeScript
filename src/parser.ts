@@ -500,28 +500,29 @@ type ParseFunctionDeclaration<TokenList extends Array<Token<any>>> =
             ParenLineNumber
           > extends infer G
           ? G extends Array<any>
-            ? ParseBlockStatement<G[1], G[2], true> extends infer H
-              ? H extends Array<any>
-                ? H[0] extends BaseNode<NodeData<any, infer BodyLineNumber>>
-                  ? ParseResult<
-                      FunctionDeclaration<
-                        Identifier<
-                          Name,
-                          null,
-                          NodeData<
-                            FunctionNameLineNumber,
-                            FunctionNameLineNumber
-                          >
-                        >,
-                        G[0],
-                        H[0],
-                        NodeData<FunctionLineNumber, BodyLineNumber>
+            ? ParseBlockStatement<G[1], G[2], true> extends ParseResult<
+                infer Node,
+                infer TokenList,
+                infer Error
+              >
+              ? Error extends ParsingError<any, any>
+                ? ParseError<Error>
+                : Node extends BaseNode<NodeData<any, infer BodyLineNumber>>
+                ? ParseResult<
+                    FunctionDeclaration<
+                      Identifier<
+                        Name,
+                        null,
+                        NodeData<FunctionNameLineNumber, FunctionNameLineNumber>
                       >,
-                      H[1]
-                    >
-                  : never
-                : H
-              : never
+                      G[0],
+                      Node,
+                      NodeData<FunctionLineNumber, BodyLineNumber>
+                    >,
+                    TokenList
+                  >
+                : never
+              : null
             : G
           : never
         : ParsingError<"'(' expected.", FunctionNameLineNumber>
