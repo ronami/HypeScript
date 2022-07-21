@@ -36,6 +36,7 @@ import type {
   TokenData,
 } from './tokens';
 import type { Push, Tail, TailBy } from './utils/arrayUtils';
+import type { ParseError, ParseResult } from './utils/utilityTypes';
 
 type ParseIdentifier<
   TokenList extends Array<Token<any>>,
@@ -319,34 +320,34 @@ type ParseCallExpressionArgumentsHelper<
 type CheckExpression<
   Node extends BaseNode<any>,
   TokenList extends Array<Token<any>>,
-> = ParseMemberExpression<Node, TokenList> extends infer G
-  ? G extends [infer O, infer T]
-    ? O extends BaseNode<any>
-      ? T extends Array<Token<any>>
-        ? CheckExpression<O, T>
-        : never
-      : never
-    : G extends ParsingError<any, any>
-    ? G
-    : ParseCallExpression<Node, TokenList> extends infer G
-    ? G extends [infer O, infer T]
-      ? O extends BaseNode<any>
-        ? T extends Array<Token<any>>
-          ? CheckExpression<O, T>
-          : never
-        : never
-      : G extends ParsingError<any, any>
-      ? G
-      : [Node, TokenList]
-    : never
-  : never;
+> = ParseMemberExpression<Node, TokenList> extends ParseResult<
+  infer Node,
+  infer TokenList,
+  infer Error
+>
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : CheckExpression<Node, TokenList>
+  : ParseCallExpression<Node, TokenList> extends ParseResult<
+      infer Node,
+      infer TokenList,
+      infer Error
+    >
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : CheckExpression<Node, TokenList>
+  : ParseResult<Node, TokenList>;
 
 type ParseExpression<TokenList extends Array<Token<any>>> =
-  ParseExpressionHelper<TokenList, Tail<TokenList>> extends infer P
-    ? P extends Array<any>
-      ? CheckExpression<P[0], P[1]>
-      : P
-    : never;
+  ParseExpressionHelper<TokenList, Tail<TokenList>> extends ParseResult<
+    infer Node,
+    infer TokenList,
+    infer Error
+  >
+    ? Error extends ParsingError<any, any>
+      ? ParseError<Error>
+      : CheckExpression<Node, TokenList>
+    : null;
 
 type TokenToNodeData<InputToken extends Token<any>> = InputToken extends Token<
   TokenData<any, infer LineNumber>
@@ -359,17 +360,17 @@ type ParseExpressionHelper<
   TokenTail extends Array<Token<any>> = Tail<TokenList>,
   Data extends NodeData<any, any> = TokenToNodeData<TokenList[0]>,
 > = TokenList[0] extends SymbolToken<'true', any>
-  ? [BooleanLiteral<true, Data>, TokenTail]
+  ? ParseResult<BooleanLiteral<true, Data>, TokenTail>
   : TokenList[0] extends SymbolToken<'false', any>
-  ? [BooleanLiteral<false, Data>, TokenTail]
+  ? ParseResult<BooleanLiteral<false, Data>, TokenTail>
   : TokenList[0] extends SymbolToken<'null', any>
-  ? [NullLiteral<Data>, TokenTail]
+  ? ParseResult<NullLiteral<Data>, TokenTail>
   : TokenList[0] extends NumberToken<infer Value, any>
-  ? [NumericLiteral<Value, Data>, TokenTail]
+  ? ParseResult<NumericLiteral<Value, Data>, TokenTail>
   : TokenList[0] extends StringToken<infer Value, any>
-  ? [StringLiteral<Value, Data>, TokenTail]
+  ? ParseResult<StringLiteral<Value, Data>, TokenTail>
   : TokenList[0] extends SymbolToken<infer Value, any>
-  ? [Identifier<Value, null, Data>, TokenTail]
+  ? ParseResult<Identifier<Value, null, Data>, TokenTail>
   : TokenList[0] extends GenericToken<'[', TokenData<any, infer LineNumber>>
   ? ParseArrayExpression<Tail<TokenList>, LineNumber>
   : TokenList[0] extends GenericToken<'{', TokenData<any, infer LineNumber>>
