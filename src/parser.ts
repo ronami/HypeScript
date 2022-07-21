@@ -642,21 +642,24 @@ type ParseIfStatement<
       '(',
       TokenData<any, infer ParenLineNumber>
     >
-    ? ParseExpression<TailBy<TokenList, 2>> extends infer G
-      ? G extends Array<any>
-        ? G[0] extends BaseNode<NodeData<any, infer IfExpressionLineNumber>>
-          ? ParseIfStatementHelper<
-              G,
-              IfLineNumber,
-              InFunctionScope,
-              IfExpressionLineNumber
-            >
-          : G extends ParsingError<any, any>
-          ? G
-          : never
-        : ParsingError<'Expression expected.', ParenLineNumber>
-      : never
-    : ParsingError<"'(' expected.", IfLineNumber>
+    ? ParseExpression<TailBy<TokenList, 2>> extends ParseResult<
+        infer Node,
+        infer TokenList,
+        infer Error
+      >
+      ? Error extends ParsingError<any, any>
+        ? ParseError<Error>
+        : Node extends BaseNode<NodeData<any, infer IfExpressionLineNumber>>
+        ? ParseIfStatementHelper<
+            Node,
+            TokenList,
+            IfLineNumber,
+            InFunctionScope,
+            IfExpressionLineNumber
+          >
+        : never
+      : ParseError<ParsingError<'Expression expected.', ParenLineNumber>>
+    : ParseError<ParsingError<"'(' expected.", IfLineNumber>>
   : null;
 
 type ParseReturnStatementHelper<
@@ -666,16 +669,23 @@ type ParseReturnStatementHelper<
   ';',
   TokenData<any, infer SemicolonLineNumber>
 >
-  ? [
+  ? ParseResult<
       ReturnStatement<null, NodeData<StartLineNumber, SemicolonLineNumber>>,
-      Tail<TokenList>,
-    ]
-  : ParseExpression<TokenList> extends infer G
-  ? G extends Array<any>
-    ? G[0] extends BaseNode<NodeData<any, infer EndLineNumber>>
-      ? [ReturnStatement<G[0], NodeData<StartLineNumber, EndLineNumber>>, G[1]]
-      : G
-    : never
+      Tail<TokenList>
+    >
+  : ParseExpression<TokenList> extends ParseResult<
+      infer Node,
+      infer TokenList,
+      infer Error
+    >
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : Node extends BaseNode<NodeData<any, infer EndLineNumber>>
+    ? [
+        ReturnStatement<Node, NodeData<StartLineNumber, EndLineNumber>>,
+        TokenList,
+      ]
+    : null
   : never;
 
 type ParseReturnStatement<
@@ -686,49 +696,53 @@ type ParseReturnStatement<
     ? TokenList[1] extends Token<TokenData<infer PrecedingLinebreak, any>, any>
       ? PrecedingLinebreak extends false
         ? ParseReturnStatementHelper<Tail<TokenList>, LineNumber>
-        : [
+        : ParseResult<
             ReturnStatement<null, NodeData<LineNumber, LineNumber>>,
-            Tail<TokenList>,
-          ]
-      : [ReturnStatement<null, NodeData<LineNumber, LineNumber>>, []]
-    : ParsingError<
-        "A 'return' statement can only be used within a function body.",
-        LineNumber
+            Tail<TokenList>
+          >
+      : ParseResult<ReturnStatement<null, NodeData<LineNumber, LineNumber>>, []>
+    : ParseError<
+        ParsingError<
+          "A 'return' statement can only be used within a function body.",
+          LineNumber
+        >
       >
   : null;
 
 type ParseIfStatementHelper<
-  G extends Array<any>,
+  Node extends BaseNode<any>,
+  TokenList extends Array<Token<any>>,
   StartLineNumber extends number,
   InFunctionScope extends boolean,
   IfExpressionLineNumber extends number,
-> = G[1] extends Array<any>
-  ? G[1][0] extends GenericToken<
-      ')',
-      TokenData<any, infer ClosingParenLineNumber>
+> = TokenList[0] extends GenericToken<
+  ')',
+  TokenData<any, infer ClosingParenLineNumber>
+>
+  ? TokenList[1] extends GenericToken<
+      '{',
+      TokenData<any, infer CurlyLineNumber>
     >
-    ? G[1][1] extends GenericToken<'{', TokenData<any, infer CurlyLineNumber>>
-      ? ParseBlockStatement<
-          TailBy<G[1], 2>,
-          CurlyLineNumber,
-          InFunctionScope
-        > extends infer B
-        ? B extends Array<any>
-          ? B[0] extends BaseNode<NodeData<any, infer EndLineNumber>>
-            ? [
-                IfStatement<
-                  G[0],
-                  B[0],
-                  NodeData<StartLineNumber, EndLineNumber>
-                >,
-                B[1],
-              ]
-            : never
-          : B
+    ? ParseBlockStatement<
+        TailBy<TokenList, 2>,
+        CurlyLineNumber,
+        InFunctionScope
+      > extends ParseResult<infer BlockNode, infer TokenList, infer Error>
+      ? Error extends ParsingError<any, any>
+        ? ParseError<Error>
+        : BlockNode extends BaseNode<NodeData<any, infer EndLineNumber>>
+        ? ParseResult<
+            IfStatement<
+              Node,
+              BlockNode,
+              NodeData<StartLineNumber, EndLineNumber>
+            >,
+            TokenList
+          >
         : never
-      : ParsingError<"'{' expected.", ClosingParenLineNumber>
-    : ParsingError<"')' expected.", IfExpressionLineNumber>
-  : never;
+      : never
+    : ParseError<ParsingError<"'{' expected.", ClosingParenLineNumber>>
+  : ParseError<ParsingError<"')' expected.", IfExpressionLineNumber>>;
 
 type ParseStatementHelper<
   TokenList extends Array<Token<any>>,
