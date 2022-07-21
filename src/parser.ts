@@ -271,7 +271,10 @@ type ParseCallExpression<
     ? G extends Array<any>
       ? Node extends BaseNode<NodeData<infer NodeStartLine, any>>
         ? G[2] extends Token<TokenData<any, infer L>>
-          ? [CallExpression<Node, G[0], NodeData<NodeStartLine, L>>, G[1]]
+          ? ParseResult<
+              CallExpression<Node, G[0], NodeData<NodeStartLine, L>>,
+              G[1]
+            >
           : never
         : never
       : G
@@ -452,7 +455,10 @@ type ParseArrayExpression<
 > extends infer A
   ? A extends Array<any>
     ? A[2] extends Token<TokenData<any, infer EndLineNumber>>
-      ? [ArrayExpression<A[0], NodeData<StartLineNumber, EndLineNumber>>, A[1]]
+      ? ParseResult<
+          ArrayExpression<A[0], NodeData<StartLineNumber, EndLineNumber>>,
+          A[1]
+        >
       : never
     : A
   : never;
@@ -489,7 +495,7 @@ type ParseFunctionDeclaration<TokenList extends Array<Token<any>>> =
             ? ParseBlockStatement<G[1], G[2], true> extends infer H
               ? H extends Array<any>
                 ? H[0] extends BaseNode<NodeData<any, infer BodyLineNumber>>
-                  ? [
+                  ? ParseResult<
                       FunctionDeclaration<
                         Identifier<
                           Name,
@@ -503,8 +509,8 @@ type ParseFunctionDeclaration<TokenList extends Array<Token<any>>> =
                         H[0],
                         NodeData<FunctionLineNumber, BodyLineNumber>
                       >,
-                      H[1],
-                    ]
+                      H[1]
+                    >
                   : never
                 : H
               : never
@@ -559,13 +565,13 @@ type ParseBlockStatement<
   NeedSemicolon extends boolean = false,
 > = TokenList extends []
   ? Result[0] extends BaseNode<NodeData<any, infer LineNumber>>
-    ? ParsingError<"'}' expected.", LineNumber>
-    : ParsingError<"'}' expected.", InitialLineNumber>
+    ? ParseError<ParsingError<"'}' expected.", LineNumber>>
+    : ParseError<ParsingError<"'}' expected.", InitialLineNumber>>
   : TokenList[0] extends GenericToken<'}', TokenData<any, infer LineNumber>>
-  ? [
+  ? ParseResult<
       BlockStatement<Result, NodeData<InitialLineNumber, LineNumber>>,
-      Tail<TokenList>,
-    ]
+      Tail<TokenList>
+    >
   : TokenList[0] extends GenericToken<';', any>
   ? ParseBlockStatement<
       Tail<TokenList>,
@@ -586,7 +592,7 @@ type ParseBlockStatement<
     >
   ? PrecedingLinebreak extends true
     ? ParseBlockStatementHelper<TokenList, LineNumber, InFunctionScope, Result>
-    : ParsingError<"';' expected.", LineNumber>
+    : ParseError<ParsingError<"';' expected.", LineNumber>>
   : never;
 
 type ParseTopLevel<
