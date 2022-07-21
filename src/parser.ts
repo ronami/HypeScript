@@ -541,15 +541,15 @@ type ParseFunctionParams<
       '{',
       TokenData<any, infer CurlyLineNumber>
     >
-    ? [Result, TailBy<TokenList, 2>, CurlyLineNumber]
-    : ParsingError<"'{' expected.", ParenLineNumber>
+    ? ParseResult<any, TailBy<TokenList, 2>, null, [Result, CurlyLineNumber]>
+    : ParseError<ParsingError<"'{' expected.", ParenLineNumber>>
   : TokenList extends []
-  ? ParsingError<"')' expected.", InitialLineNumber>
+  ? ParseError<ParsingError<"')' expected.", InitialLineNumber>>
   : NeedSemicolon extends true
   ? TokenList[0] extends GenericToken<',', any>
     ? ParseFunctionParamsHelper<Tail<TokenList>, InitialLineNumber, Result>
     : Result[0] extends BaseNode<NodeData<any, infer LineNumber>>
-    ? ParsingError<"',' expected.", LineNumber>
+    ? ParseError<ParsingError<"',' expected.", LineNumber>>
     : never
   : ParseFunctionParamsHelper<TokenList, InitialLineNumber, Result>;
 
@@ -557,13 +557,15 @@ type ParseFunctionParamsHelper<
   TokenList extends Array<Token<any>>,
   LineNumber extends number,
   Result extends Array<BaseNode<any>>,
-> = ParseIdentifier<TokenList, true> extends infer G
-  ? G extends Array<any>
-    ? ParseFunctionParams<G[1], LineNumber, Push<Result, G[0]>, true>
-    : G extends ParsingError<any, any>
-    ? G
-    : ParsingError<'Identifier expected.', LineNumber>
-  : never;
+> = ParseIdentifier<TokenList, true> extends ParseResult<
+  infer Node,
+  infer TokenList,
+  infer Error
+>
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : ParseFunctionParams<TokenList, LineNumber, Push<Result, Node>, true>
+  : ParsingError<'Identifier expected.', LineNumber>;
 
 type ParseBlockStatement<
   TokenList extends Array<Token<any>>,
