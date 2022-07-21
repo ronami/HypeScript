@@ -1,6 +1,6 @@
 import type { StaticType } from '../types';
 import type { ParsingError, TypeError } from '../errors';
-import type { BaseNode } from '../ast';
+import type { BaseNode, NodeData } from '../ast';
 import type { Token } from '../tokens';
 
 export type TypeResult<
@@ -15,7 +15,7 @@ export type TypeResult<
 };
 
 export type ParseResult<
-  Node extends BaseNode<any>,
+  Node extends BaseNode<NodeData<number, number>>,
   TokenList extends Array<Token<any>>,
   Error extends ParsingError<any, any> | null = null,
   Data extends any = {},
