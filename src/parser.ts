@@ -719,37 +719,47 @@ type ParseIfStatementHelper<
 type ParseStatementHelper<
   TokenList extends Array<Token<any>>,
   InFunctionScope extends boolean,
-> = ParseFunctionDeclaration<TokenList> extends infer P
-  ? P extends Array<any>
-    ? [...P, false]
-    : P extends ParsingError<any, any>
-    ? P
-    : ParseVariableDeclaration<TokenList> extends infer P
-    ? P extends Array<any>
-      ? [...P, true]
-      : P extends ParsingError<any, any>
-      ? P
-      : ParseIfStatement<TokenList, InFunctionScope> extends infer P
-      ? P extends Array<any>
-        ? [...P, false]
-        : P extends ParsingError<any, any>
-        ? P
-        : ParseReturnStatement<TokenList, InFunctionScope> extends infer P
-        ? P extends Array<any>
-          ? [...P, true]
-          : P extends ParsingError<any, any>
-          ? P
-          : ParseExpressionStatement<TokenList> extends infer P
-          ? P extends Array<any>
-            ? [...P, true]
-            : P extends ParsingError<any, any>
-            ? P
-            : ParsingError<'Declaration or statement expected.', 1>
-          : never
-        : never
-      : never
-    : never
-  : never;
+> = ParseFunctionDeclaration<TokenList> extends ParseResult<
+  infer Node,
+  infer TokenList,
+  infer Error
+>
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : ParseResult<Node, TokenList, null, false>
+  : ParseVariableDeclaration<TokenList> extends ParseResult<
+      infer Node,
+      infer TokenList,
+      infer Error
+    >
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : ParseResult<Node, TokenList, null, true>
+  : ParseIfStatement<TokenList, InFunctionScope> extends ParseResult<
+      infer Node,
+      infer TokenList,
+      infer Error
+    >
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : ParseResult<Node, TokenList, null, false>
+  : ParseReturnStatement<TokenList, InFunctionScope> extends ParseResult<
+      infer Node,
+      infer TokenList,
+      infer Error
+    >
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : ParseResult<Node, TokenList, null, true>
+  : ParseExpressionStatement<TokenList> extends ParseResult<
+      infer Node,
+      infer TokenList,
+      infer Error
+    >
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : ParseResult<Node, TokenList, null, true>
+  : ParseError<ParsingError<'Declaration or statement expected.', 1>>;
 
 export type Parse<TokenList extends Array<Token<any>>> =
   ParseTopLevel<TokenList>;
