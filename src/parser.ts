@@ -91,47 +91,6 @@ type ParseIdentifier<
       >
   : null;
 
-type ParseVariableDeclarationHelper<
-  TokenList extends Array<Token<any>>,
-  Scope extends ScopeType,
-  Id extends BaseNode<any>,
-  KindLineNumber extends number,
-  IdentifierLineNumber extends number,
-  EqualsLineNumber extends number,
-  Kind extends string,
-> = ParseExpression<Tail<TokenList>> extends ParseResult<
-  infer Node,
-  infer TokenList,
-  infer Error
->
-  ? Error extends ParsingError<any, any>
-    ? ParseError<Error>
-    : Id extends Identifier<infer Name, any, any>
-    ? Name extends keyof Scope
-      ? ParseError<
-          ParsingError<`Cannot redeclare block-scoped variable '${Name}'.`, 1>
-        >
-      : ParseResult<
-          VariableDeclaration<
-            [
-              VariableDeclarator<
-                Id,
-                Node,
-                NodeData<IdentifierLineNumber, Node['data']['startLineNumber']>
-              >,
-            ],
-            Kind,
-            NodeData<KindLineNumber, Node['data']['startLineNumber']>
-          >,
-          TokenList,
-          null,
-          Kind extends 'const'
-            ? MergeWithOverride<Scope, { [a in Name]: true }>
-            : Scope
-        >
-    : never
-  : ParseErrorResult<'Expression expected.', EqualsLineNumber>;
-
 type ParseTypeAnnotation<TokenList extends Array<Token<any>>> =
   TokenList[0] extends SymbolToken<'string', TokenData<any, infer LineNumber>>
     ? ParseResult<
@@ -192,6 +151,121 @@ type ParseTypeAnnotation<TokenList extends Array<Token<any>>> =
       >
     : null;
 
+type ParseConstVariableDeclaration<
+  TokenList extends Array<Token<any>>,
+  Scope extends ScopeType,
+  Id extends BaseNode<NodeData<number, number>>,
+  KindLineNumber extends number,
+> = TokenList[0] extends GenericToken<
+  '=',
+  TokenData<any, infer EqualsLineNumber>
+>
+  ? ParseExpression<Tail<TokenList>> extends ParseResult<
+      infer Node,
+      infer TokenList,
+      infer Error
+    >
+    ? Error extends ParsingError<any, any>
+      ? ParseError<Error>
+      : Id extends Identifier<infer Name, any, NodeData<number, number>>
+      ? Name extends keyof Scope
+        ? ParseError<
+            ParsingError<`Cannot redeclare block-scoped variable '${Name}'.`, 1>
+          >
+        : ParseResult<
+            VariableDeclaration<
+              [
+                VariableDeclarator<
+                  Id,
+                  Node,
+                  NodeData<
+                    Id['data']['startLineNumber'],
+                    Node['data']['startLineNumber']
+                  >
+                >,
+              ],
+              'const',
+              NodeData<KindLineNumber, Node['data']['startLineNumber']>
+            >,
+            TokenList,
+            null,
+            MergeWithOverride<Scope, { [a in Name]: true }>
+          >
+      : never
+    : ParseErrorResult<'Expression expected.', EqualsLineNumber>
+  : ParseError<
+      ParsingError<
+        "'const' declarations must be initialized.",
+        Id['data']['startLineNumber']
+      >
+    >;
+
+type ParseLetVariableDeclaration<
+  TokenList extends Array<Token<any>>,
+  Scope extends ScopeType,
+  Id extends BaseNode<NodeData<number, number>>,
+  KindLineNumber extends number,
+> = Id extends Identifier<infer Name, any, NodeData<number, number>>
+  ? TokenList[0] extends GenericToken<
+      '=',
+      TokenData<any, infer EqualsLineNumber>
+    >
+    ? ParseExpression<Tail<TokenList>> extends ParseResult<
+        infer Node,
+        infer TokenList,
+        infer Error
+      >
+      ? Error extends ParsingError<any, any>
+        ? ParseError<Error>
+        : Name extends keyof Scope
+        ? ParseError<
+            ParsingError<`Cannot redeclare block-scoped variable '${Name}'.`, 1>
+          >
+        : ParseResult<
+            VariableDeclaration<
+              [
+                VariableDeclarator<
+                  Id,
+                  Node,
+                  NodeData<
+                    Id['data']['startLineNumber'],
+                    Node['data']['startLineNumber']
+                  >
+                >,
+              ],
+              'let',
+              NodeData<KindLineNumber, Node['data']['startLineNumber']>
+            >,
+            TokenList,
+            null,
+            MergeWithOverride<Scope, { [a in Name]: true }>
+          >
+      : ParseErrorResult<'Expression expected.', EqualsLineNumber>
+    : Name extends keyof Scope
+    ? ParseError<
+        ParsingError<`Cannot redeclare block-scoped variable '${Name}'.`, 1>
+      >
+    : ParseResult<
+        VariableDeclaration<
+          [
+            VariableDeclarator<
+              Id,
+              null,
+              NodeData<
+                Id['data']['startLineNumber'],
+                Id['data']['endLineNumber']
+              >
+            >,
+          ],
+          'let',
+          NodeData<KindLineNumber, Id['data']['startLineNumber']>
+        >,
+        TokenList,
+        null,
+        MergeWithOverride<Scope, { [a in Name]: true }>
+      >
+  : never;
+
 type ParseVariableDeclaration<
   TokenList extends Array<Token<any>>,
   Scope extends ScopeType,
@@ -207,25 +281,9 @@ type ParseVariableDeclaration<
       >
       ? Error extends ParsingError<any, any>
         ? ParseError<Error>
-        : TokenList[0] extends GenericToken<
-            '=',
-            TokenData<any, infer EqualsLineNumber>
-          >
-        ? ParseVariableDeclarationHelper<
-            TokenList,
-            Scope,
-            Node,
-            KindLineNumber,
-            Node['data']['startLineNumber'],
-            EqualsLineNumber,
-            Kind
-          >
-        : ParseError<
-            ParsingError<
-              "'const' declarations must be initialized.",
-              Node['data']['startLineNumber']
-            >
-          >
+        : Kind extends 'const'
+        ? ParseConstVariableDeclaration<TokenList, Scope, Node, KindLineNumber>
+        : ParseLetVariableDeclaration<TokenList, Scope, Node, KindLineNumber>
       : ParseError<
           ParsingError<
             'Variable declaration list cannot be empty.',
