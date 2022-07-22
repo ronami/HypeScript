@@ -66,7 +66,7 @@ export type ObjectProperty<
 
 export type VariableDeclaration<
   Declarations extends Array<VariableDeclarator<any, any, any>>,
-  Kind extends 'const' | 'let',
+  Kind extends string,
   Data extends NodeData<number, number>,
 > = {
   type: 'VariableDeclaration';
