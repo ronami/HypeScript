@@ -71,6 +71,19 @@ type TokenizeSymbol<
     >
   : [SymbolToken<Result, PrecedingLinebreak>, Input];
 
+type TokenizeHelper<
+  TokenizeResult,
+  Result extends Array<any>,
+  LineNumber extends number,
+> = TokenizeResult extends Array<any>
+  ? Tokenize<
+      TokenizeResult[1],
+      Push<Result, TokenizeResult[0]>,
+      LineNumber,
+      false
+    >
+  : TokenizeResult;
+
 export type Tokenize<
   Input extends string,
   Result extends Array<Token<any>> = [],
@@ -93,16 +106,3 @@ export type Tokenize<
     > extends infer TokenizeResult
   ? TokenizeHelper<TokenizeResult, Result, LineNumber>
   : never;
-
-type TokenizeHelper<
-  TokenizeResult,
-  Result extends Array<any>,
-  LineNumber extends number,
-> = TokenizeResult extends Array<any>
-  ? Tokenize<
-      TokenizeResult[1],
-      Push<Result, TokenizeResult[0]>,
-      LineNumber,
-      false
-    >
-  : TokenizeResult;
