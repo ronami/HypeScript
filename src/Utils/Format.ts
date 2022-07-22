@@ -1,7 +1,7 @@
 import type { Push, Tail, Error } from '.';
 
 export type Format<
-  Errors extends Array<Error<any, any>>,
+  Errors extends Array<Error<string, number>>,
   Result extends Array<string> = [],
 > = Errors extends []
   ? Result
