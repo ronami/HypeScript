@@ -1,5 +1,5 @@
 import type { Tokenize } from '.';
-import { expectType } from '../test-utils';
+import { expectType } from '../TestUtils';
 
 expectType<Tokenize<`hello`>>([
   {
