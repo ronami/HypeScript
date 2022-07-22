@@ -7,7 +7,7 @@ import type {
   BooleanLiteralType,
   BooleanType,
 } from '.';
-import type { TypeError } from '../Utils';
+import type { Tail, TypeError } from '../Utils';
 
 export type StateType = Record<string, StaticType>;
 
@@ -30,3 +30,14 @@ export type MapLiteralToType<Type extends StaticType> =
     : Type extends BooleanLiteralType<any>
     ? BooleanType
     : Type;
+
+export type GetObjectValueByKey<
+  ObjectProperties extends Array<[string, StaticType]>,
+  Key extends string,
+> = ObjectProperties extends []
+  ? null
+  : ObjectProperties[0] extends [infer PropertyName, infer PropertyValue]
+  ? PropertyName extends Key
+    ? PropertyValue
+    : GetObjectValueByKey<Tail<ObjectProperties>, Key>
+  : never;

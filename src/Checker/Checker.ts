@@ -21,6 +21,7 @@ import type {
   TypeResult,
   MapLiteralToType,
   MatchType,
+  GetObjectValueByKey,
 } from '.';
 import type {
   AnyTypeAnnotation,
@@ -697,17 +698,6 @@ type InferMemberExpression<
           >
       : never
     : never
-  : never;
-
-type GetObjectValueByKey<
-  ObjectProperties extends Array<[string, StaticType]>,
-  Key extends string,
-> = ObjectProperties extends []
-  ? null
-  : ObjectProperties[0] extends [infer PropertyName, infer PropertyValue]
-  ? PropertyName extends Key
-    ? PropertyValue
-    : GetObjectValueByKey<Tail<ObjectProperties>, Key>
   : never;
 
 type InferMemberExpressionHelper<
