@@ -168,29 +168,15 @@ type ParseConstVariableDeclaration<
     ? Error extends ParsingError<any, any>
       ? ParseError<Error>
       : Id extends Identifier<infer Name, any, NodeData<number, number>>
-      ? Name extends keyof Scope
-        ? ParseError<
-            ParsingError<`Cannot redeclare block-scoped variable '${Name}'.`, 1>
-          >
-        : ParseResult<
-            VariableDeclaration<
-              [
-                VariableDeclarator<
-                  Id,
-                  Node,
-                  NodeData<
-                    Id['data']['startLineNumber'],
-                    Node['data']['startLineNumber']
-                  >
-                >,
-              ],
-              'const',
-              NodeData<KindLineNumber, Node['data']['startLineNumber']>
-            >,
-            TokenList,
-            null,
-            MergeWithOverride<Scope, { [a in Name]: true }>
-          >
+      ? ParseVariableDeclarationHelper<
+          TokenList,
+          Name,
+          Scope,
+          Id,
+          Node,
+          KindLineNumber,
+          'const'
+        >
       : never
     : ParseErrorResult<'Expression expected.', EqualsLineNumber>
   : ParseError<
@@ -217,54 +203,65 @@ type ParseLetVariableDeclaration<
       >
       ? Error extends ParsingError<any, any>
         ? ParseError<Error>
-        : Name extends keyof Scope
-        ? ParseError<
-            ParsingError<`Cannot redeclare block-scoped variable '${Name}'.`, 1>
-          >
-        : ParseResult<
-            VariableDeclaration<
-              [
-                VariableDeclarator<
-                  Id,
-                  Node,
-                  NodeData<
-                    Id['data']['startLineNumber'],
-                    Node['data']['startLineNumber']
-                  >
-                >,
-              ],
-              'let',
-              NodeData<KindLineNumber, Node['data']['startLineNumber']>
-            >,
+        : ParseVariableDeclarationHelper<
             TokenList,
-            null,
-            MergeWithOverride<Scope, { [a in Name]: true }>
+            Name,
+            Scope,
+            Id,
+            Node,
+            KindLineNumber,
+            'let'
           >
       : ParseErrorResult<'Expression expected.', EqualsLineNumber>
-    : Name extends keyof Scope
-    ? ParseError<
-        ParsingError<`Cannot redeclare block-scoped variable '${Name}'.`, 1>
-      >
-    : ParseResult<
-        VariableDeclaration<
-          [
-            VariableDeclarator<
-              Id,
-              null,
-              NodeData<
-                Id['data']['startLineNumber'],
-                Id['data']['endLineNumber']
-              >
-            >,
-          ],
-          'let',
-          NodeData<KindLineNumber, Id['data']['startLineNumber']>
-        >,
+    : ParseVariableDeclarationHelper<
         TokenList,
+        Name,
+        Scope,
+        Id,
         null,
-        MergeWithOverride<Scope, { [a in Name]: true }>
+        KindLineNumber,
+        'let'
       >
   : never;
+
+type ParseVariableDeclarationHelper<
+  TokenList extends Array<Token<any>>,
+  Name extends string,
+  Scope extends ScopeType,
+  Id extends BaseNode<NodeData<number, number>>,
+  Init extends BaseNode<NodeData<number, number>> | null,
+  KindLineNumber extends number,
+  Kind extends string,
+> = Name extends keyof Scope
+  ? ParseError<
+      ParsingError<`Cannot redeclare block-scoped variable '${Name}'.`, 1>
+    >
+  : ParseResult<
+      VariableDeclaration<
+        [
+          VariableDeclarator<
+            Id,
+            Init,
+            NodeData<
+              Id['data']['startLineNumber'],
+              Init extends BaseNode<any>
+                ? Init['data']['endLineNumber']
+                : Id['data']['endLineNumber']
+            >
+          >,
+        ],
+        Kind,
+        NodeData<
+          KindLineNumber,
+          Init extends BaseNode<any>
+            ? Init['data']['endLineNumber']
+            : Id['data']['endLineNumber']
+        >
+      >,
+      TokenList,
+      null,
+      MergeWithOverride<Scope, { [a in Name]: true }>
+    >;
 
 type ParseVariableDeclaration<
   TokenList extends Array<Token<any>>,
