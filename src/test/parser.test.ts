@@ -352,6 +352,135 @@ expectType<ParseAst<`const hello: `>>({
   lineNumber: 1,
 });
 
+expectType<ParseAst<`let hello = "world"`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'let',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        init: {
+          type: 'StringLiteral',
+          value: 'world',
+          data: { startLineNumber: 1, endLineNumber: 1 },
+        },
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: null,
+          data: { startLineNumber: 1, endLineNumber: 1 },
+        },
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+    ],
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseAst<`\nlet \nhello\n = \n123;`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'let',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        init: {
+          type: 'NumericLiteral',
+          value: '123',
+          data: { startLineNumber: 5, endLineNumber: 5 },
+        },
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: null,
+          data: { startLineNumber: 3, endLineNumber: 3 },
+        },
+        data: { startLineNumber: 3, endLineNumber: 5 },
+      },
+    ],
+    data: { startLineNumber: 2, endLineNumber: 5 },
+  },
+]);
+
+expectType<ParseAst<`let`>>({
+  type: 'ParsingError',
+  message: 'Variable declaration list cannot be empty.',
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`let hello`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'let',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: null,
+          data: { startLineNumber: 1, endLineNumber: 1 },
+        },
+        init: null,
+        data: { startLineNumber: 1, endLineNumber: 1 },
+      },
+    ],
+    data: { startLineNumber: 1, endLineNumber: 1 },
+  },
+]);
+
+expectType<ParseAst<`let hello: number`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'let',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: {
+            type: 'TypeAnnotation',
+            typeAnnotation: {
+              type: 'NumberTypeAnnotation',
+              data: { startLineNumber: 1, endLineNumber: 1 },
+            },
+            data: { startLineNumber: 1, endLineNumber: 1 },
+          },
+          data: { startLineNumber: 1, endLineNumber: 1 },
+        },
+        init: null,
+        data: { startLineNumber: 1, endLineNumber: 1 },
+      },
+    ],
+    data: { startLineNumber: 1, endLineNumber: 1 },
+  },
+]);
+
+expectType<ParseAst<`let hello =`>>({
+  type: 'ParsingError',
+  message: 'Expression expected.',
+  lineNumber: 1,
+});
+
+expectType<ParseAst<`let hello \n = ;`>>({
+  type: 'ParsingError',
+  message: 'Expression expected.',
+  lineNumber: 2,
+});
+
+expectType<ParseAst<`let hello: `>>({
+  type: 'ParsingError',
+  message: 'Type expected.',
+  lineNumber: 1,
+});
+
 expectType<ParseAst<`hello.`>>({
   type: 'ParsingError',
   message: 'Identifier expected.',
