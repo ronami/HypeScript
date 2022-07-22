@@ -446,48 +446,60 @@ type MatchTypeArrays<
 type InferVariableDeclaration<
   Name extends string,
   Annotation extends BaseNode<any> | null,
-  Init extends BaseNode<any>,
+  Init extends BaseNode<any> | null,
   State extends StateType,
   StartLine extends number,
-> = InferExpression<Init, State> extends TypeResult<
-  infer InitExpressionValue,
-  infer InitExpressionState,
-  infer InitExpressionErrors
->
-  ? Annotation extends TypeAnnotation<infer AnnotationValue, any>
-    ? MapAnnotationToType<AnnotationValue> extends infer ExpectedType
-      ? ExpectedType extends StaticType
-        ? MatchType<ExpectedType, InitExpressionValue> extends true
-          ? TypeResult<
-              UndefinedType,
-              MergeWithOverride<
-                InitExpressionState,
-                { [a in Name]: ExpectedType }
-              >,
-              InitExpressionErrors
-            >
-          : TypeResult<
-              UndefinedType,
-              MergeWithOverride<
-                InitExpressionState,
-                { [a in Name]: ExpectedType }
-              >,
-              Push<
-                InitExpressionErrors,
-                TypeError<
-                  `Type '${Serialize<InitExpressionValue>}' is not assignable to type '${Serialize<ExpectedType>}'.`,
-                  StartLine
+> = Init extends BaseNode<any>
+  ? InferExpression<Init, State> extends TypeResult<
+      infer InitExpressionValue,
+      infer InitExpressionState,
+      infer InitExpressionErrors
+    >
+    ? Annotation extends TypeAnnotation<infer AnnotationValue, any>
+      ? MapAnnotationToType<AnnotationValue> extends infer ExpectedType
+        ? ExpectedType extends StaticType
+          ? MatchType<ExpectedType, InitExpressionValue> extends true
+            ? TypeResult<
+                UndefinedType,
+                MergeWithOverride<
+                  InitExpressionState,
+                  { [a in Name]: ExpectedType }
+                >,
+                InitExpressionErrors
+              >
+            : TypeResult<
+                UndefinedType,
+                MergeWithOverride<
+                  InitExpressionState,
+                  { [a in Name]: ExpectedType }
+                >,
+                Push<
+                  InitExpressionErrors,
+                  TypeError<
+                    `Type '${Serialize<InitExpressionValue>}' is not assignable to type '${Serialize<ExpectedType>}'.`,
+                    StartLine
+                  >
                 >
               >
-            >
+          : never
         : never
-      : never
-    : TypeResult<
+      : TypeResult<
+          UndefinedType,
+          MergeWithOverride<State, { [a in Name]: InitExpressionValue }>,
+          InitExpressionErrors
+        >
+    : never
+  : Annotation extends TypeAnnotation<infer AnnotationValue, any>
+  ? MapAnnotationToType<AnnotationValue> extends infer ExpectedType
+    ? TypeResult<
         UndefinedType,
-        MergeWithOverride<State, { [a in Name]: InitExpressionValue }>,
-        InitExpressionErrors
+        MergeWithOverride<State, { [a in Name]: ExpectedType }>
       >
-  : never;
+    : never
+  : TypeResult<
+      UndefinedType,
+      MergeWithOverride<State, { [a in Name]: AnyType }>
+    >;
 
 type InferExpression<
   Node extends BaseNode<any>,
