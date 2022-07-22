@@ -20,6 +20,7 @@ import type {
   MatchType,
   GetObjectValueByKey,
   MapAnnotationToType,
+  MergeTypes,
 } from '.';
 import type {
   ArrayExpression,
@@ -107,29 +108,6 @@ type MergeFunctionParams<
       Tail<ParamsB>,
       Push<Return, [ParamsA[0][0], NeverType]>
     >;
-
-type MergeTypes<
-  TypeA extends StaticType,
-  TypeB extends StaticType,
-> = TypeA extends NeverType
-  ? TypeB
-  : TypeB extends NeverType
-  ? TypeA
-  : TypeA extends AnyType
-  ? AnyType
-  : TypeB extends AnyType
-  ? AnyType
-  : MatchType<TypeA, TypeB> extends true
-  ? TypeA
-  : MatchType<TypeB, TypeA> extends true
-  ? TypeB
-  : TypeA extends UnionType<infer UnionTypesA>
-  ? TypeB extends UnionType<infer UnionTypesB>
-    ? UnionType<[...UnionTypesA, ...UnionTypesB]>
-    : UnionType<[...UnionTypesA, TypeB]>
-  : TypeB extends UnionType<infer UnionTypesB>
-  ? UnionType<[...UnionTypesB, TypeA]>
-  : UnionType<[TypeA, TypeB]>;
 
 type InferBlockStatement<
   NodeList extends Array<BaseNode<any>>,
