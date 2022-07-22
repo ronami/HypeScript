@@ -1,20 +1,21 @@
 import type { Check } from '.';
-import type { Tokenize } from '../Tokenizer';
-import type { Parse } from '../Parser';
+import type { Tokenize, Token } from '../Tokenizer';
+import type { Parse, BaseNode } from '../Parser';
 import { expectType } from '../TestUtils';
 
-type TypeCheck<T extends string> = Tokenize<T> extends infer G
-  ? G extends Array<any>
-    ? Parse<G> extends infer J
-      ? J extends Array<any>
-        ? Check<J>
+type CheckWrapper<Input extends string> =
+  Tokenize<Input> extends infer TokenList
+    ? TokenList extends Array<Token<any>>
+      ? Parse<TokenList> extends infer NodeList
+        ? NodeList extends Array<BaseNode<any>>
+          ? Check<NodeList>
+          : never
         : never
       : never
-    : never
-  : never;
+    : never;
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 hello
 
@@ -28,7 +29,7 @@ hello
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 world;
 
@@ -42,7 +43,7 @@ world;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 "string"
 
@@ -50,7 +51,7 @@ expectType<
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 123;
 
@@ -58,7 +59,7 @@ expectType<
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const a = null
 
@@ -66,7 +67,7 @@ const a = null
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const b = "world";
 
@@ -74,7 +75,7 @@ const b = "world";
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const hello = 1;
 hello;
@@ -83,7 +84,7 @@ hello;
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 let a = null
 
@@ -91,7 +92,7 @@ let a = null
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 let b = "world";
 
@@ -99,7 +100,7 @@ let b = "world";
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 let hello = 1;
 hello;
@@ -108,7 +109,7 @@ hello;
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 let hello;
 let world: number = hello;
@@ -117,7 +118,7 @@ let world: number = hello;
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 let hello = 'world';
 let world: number = hello;
@@ -132,7 +133,7 @@ let world: number = hello;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const hello = { foo: "bar" };
 hello.world
@@ -147,7 +148,7 @@ hello.world
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const hello = { foo: "bar" };
 hello.foo;
@@ -156,7 +157,7 @@ hello.foo;
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const hello = {
   foo: {
@@ -170,7 +171,7 @@ hello.foo.bar;
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const hello = {
   foo: {
@@ -192,7 +193,7 @@ hello
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const hello = "world";
 
@@ -208,7 +209,7 @@ hello.foo
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const hello = "world";
 const foo = hello;
@@ -217,7 +218,7 @@ const foo = hello;
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const hello = "world";
 const foo = hello;
@@ -228,7 +229,7 @@ foo;
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const hello: string = "hello";
 
@@ -236,7 +237,7 @@ const hello: string = "hello";
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const hello: number = 123;
 
@@ -244,7 +245,7 @@ const hello: number = 123;
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const hello: number = "hello";
 
@@ -258,7 +259,7 @@ const hello: number = "hello";
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const hello: string = 123;
 
@@ -272,7 +273,7 @@ const hello: string = 123;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const hello = "world";
 const foo: number = hello;
@@ -287,7 +288,7 @@ const foo: number = hello;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const hello = "world";
 
@@ -297,7 +298,7 @@ const foo: string = hello;
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
   
 const hello = {hey: "world"};
 
@@ -313,7 +314,7 @@ const foo: number = hello;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
   
 const hello = {hey: "world"};
 
@@ -329,7 +330,7 @@ const foo: number = hello.hey;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const hello = {hey: "world"};
 
@@ -339,7 +340,7 @@ const foo: string = hello.hey;
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const o = {};
 
@@ -355,7 +356,7 @@ o["hey"];
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const o = {hey: "ho"};
 
@@ -365,7 +366,7 @@ o["hey"];
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const o = {};
 const k = "hey";
@@ -383,7 +384,7 @@ o
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const o = {hey: "ho"};
 const k = "hey";
@@ -394,7 +395,7 @@ o[k];
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
   
 const o = {
   hey: {
@@ -410,7 +411,7 @@ o[k]["ho"];
 >([]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const o = {
   hey: {
@@ -432,7 +433,7 @@ o[k]["hi"];
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const o = {
   hey: {
@@ -454,7 +455,7 @@ o[k][{}];
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const o = {
   hey: "ho:"
@@ -472,7 +473,7 @@ o[true];
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const a = [1,2,3];
 
@@ -488,7 +489,7 @@ const b: string = a;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const a = [1,2,'3'];
 
@@ -504,7 +505,7 @@ const b: string = a;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const c: any = 1;
 
@@ -521,7 +522,7 @@ const b: string = a;
   },
 ]);
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const a = [1,2,'3'][0];
 
@@ -537,7 +538,7 @@ const b: string = a;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const a = [[1, 2]];
 
@@ -553,7 +554,7 @@ const b: string = a;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 hello
 
@@ -574,7 +575,7 @@ world
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const a: number = hello
 
@@ -590,7 +591,7 @@ const b: number = a
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const a: string = hello
 
@@ -611,7 +612,7 @@ const b: number = a
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const a: string = hello()
 
@@ -632,7 +633,7 @@ const b: number = a
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const a: string = hello(foo, bar)
 
@@ -663,7 +664,7 @@ const b: number = a
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function foo(a: string, b: number) {}
 
@@ -680,7 +681,7 @@ foo(1, 'a')
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function foo(a: number) {
   return 5
@@ -715,7 +716,7 @@ const b: string = a;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function foo(a: number, b: boolean) {
   return 5
@@ -734,7 +735,7 @@ const b: string = foo;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function foo(a: number, b: boolean) {
   return 5
@@ -753,7 +754,7 @@ const b: string = { hello: true, world: foo, hey: [1, {}] };
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function bar() {
   if (a) {
@@ -780,7 +781,7 @@ const b: number = bar;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function bar() {
   if (a) {
@@ -807,7 +808,7 @@ const b: number = bar;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function bar() {
   return {
@@ -828,7 +829,7 @@ const b: number = bar;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const a = [1, 'a'];
 const b = [true, null];
@@ -847,7 +848,7 @@ const num: number = c;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function bar() {
   if (a) {
@@ -889,7 +890,7 @@ const b: string = bar().hello;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function bar() {
   if (a) {
@@ -926,7 +927,7 @@ const b: string = bar().hello;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function bar() {
   if (a) {
@@ -968,7 +969,7 @@ const b: string = bar().hello;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 const c: any = 1
 
@@ -986,7 +987,7 @@ const b: string = a;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function foo(bar, hello) {
   hey()
@@ -1020,7 +1021,7 @@ const a: number = foo;
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function a (a: number) {
   return '1';
@@ -1045,7 +1046,7 @@ const d: number = c[0](1);
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function a (a: number) {
   return '1';
@@ -1069,7 +1070,7 @@ const d: number = c[0](1);
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function a (a: number) {
   return '1';
@@ -1098,7 +1099,7 @@ const d: number = c[0]();
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function a (a: number) {
   return '1';
@@ -1128,7 +1129,7 @@ const d: number = c[0](1);
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function a (a: number) {
   return '1';
@@ -1152,7 +1153,7 @@ const d: number = c[0](1);
 ]);
 
 expectType<
-  TypeCheck<`
+  CheckWrapper<`
 
 function a (a: number, c: boolean) {
   return '1';
