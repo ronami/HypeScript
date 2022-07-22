@@ -1,4 +1,4 @@
-export type { Tokenize } from './tokenizer';
-export * from './tokens';
-export * from './math';
-export * from './inputs';
+export type { Tokenize } from './Tokenizer';
+export * from './Tokens';
+export * from './Math';
+export * from './Inputs';
