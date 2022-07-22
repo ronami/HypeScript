@@ -6,7 +6,18 @@ import type {
   StringType,
   BooleanLiteralType,
   BooleanType,
+  NullType,
+  AnyType,
+  UnknownType,
 } from '.';
+import type {
+  AnyTypeAnnotation,
+  BaseNode,
+  BooleanTypeAnnotation,
+  NullLiteralTypeAnnotation,
+  NumberTypeAnnotation,
+  StringTypeAnnotation,
+} from '../Parser';
 import type { Tail, TypeError } from '../Utils';
 
 export type StateType = Record<string, StaticType>;
@@ -41,3 +52,16 @@ export type GetObjectValueByKey<
     ? PropertyValue
     : GetObjectValueByKey<Tail<ObjectProperties>, Key>
   : never;
+
+export type MapAnnotationToType<AnnotationValue extends BaseNode<any>> =
+  AnnotationValue extends StringTypeAnnotation<any>
+    ? StringType
+    : AnnotationValue extends NumberTypeAnnotation<any>
+    ? NumberType
+    : AnnotationValue extends BooleanTypeAnnotation<any>
+    ? BooleanType
+    : AnnotationValue extends NullLiteralTypeAnnotation<any>
+    ? NullType
+    : AnnotationValue extends AnyTypeAnnotation<any>
+    ? AnyType
+    : UnknownType;

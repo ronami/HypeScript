@@ -2,17 +2,14 @@ import type {
   AnyType,
   ArrayType,
   BooleanLiteralType,
-  BooleanType,
   CallArgumentsType,
   FunctionType,
   NeverType,
   NullType,
   NumberLiteralType,
-  NumberType,
   ObjectType,
   StaticType,
   StringLiteralType,
-  StringType,
   UndefinedType,
   UnionType,
   UnknownType,
@@ -22,13 +19,12 @@ import type {
   MapLiteralToType,
   MatchType,
   GetObjectValueByKey,
+  MapAnnotationToType,
 } from '.';
 import type {
-  AnyTypeAnnotation,
   ArrayExpression,
   BlockStatement,
   BooleanLiteral,
-  BooleanTypeAnnotation,
   CallExpression,
   ExpressionStatement,
   FunctionDeclaration,
@@ -37,14 +33,11 @@ import type {
   BaseNode,
   NodeData,
   NullLiteral,
-  NullLiteralTypeAnnotation,
-  NumberTypeAnnotation,
   NumericLiteral,
   ObjectExpression,
   ObjectProperty,
   ReturnStatement,
   StringLiteral,
-  StringTypeAnnotation,
   TypeAnnotation,
   VariableDeclaration,
   VariableDeclarator,
@@ -268,19 +261,6 @@ type InferReturnStatement<
       >
     : never
   : TypeResult<UndefinedType, State>;
-
-type MapAnnotationToType<AnnotationValue extends BaseNode<any>> =
-  AnnotationValue extends StringTypeAnnotation<any>
-    ? StringType
-    : AnnotationValue extends NumberTypeAnnotation<any>
-    ? NumberType
-    : AnnotationValue extends BooleanTypeAnnotation<any>
-    ? BooleanType
-    : AnnotationValue extends NullLiteralTypeAnnotation<any>
-    ? NullType
-    : AnnotationValue extends AnyTypeAnnotation<any>
-    ? AnyType
-    : UnknownType;
 
 type InferFunctionParams<
   Params extends Array<BaseNode<any>>,
