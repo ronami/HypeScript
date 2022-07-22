@@ -1,11 +1,5 @@
 import type { Push } from '../Utils';
 import type {
-  EatFirstChar,
-  GetFirstChar,
-  ConcatStrings,
-  StringContains,
-} from './stringUtils';
-import type {
   Token,
   NumberToken,
   SymbolToken,
@@ -16,6 +10,10 @@ import type {
   Punctuation,
   Numbers,
   Symbols,
+  EatFirstChar,
+  GetFirstChar,
+  ConcatStrings,
+  StringContains,
 } from '.';
 import type { SyntaxError } from '../errors';
 
