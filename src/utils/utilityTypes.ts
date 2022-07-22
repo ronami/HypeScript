@@ -18,22 +18,26 @@ export type ParseResult<
   Node extends BaseNode<NodeData<number, number>>,
   TokenList extends Array<Token<any>>,
   Error extends ParsingError<any, any> | null = null,
+  Scope extends ScopeType = {},
 > = {
   type: 'ParseResult';
   node: Node;
   tokenList: TokenList;
   error: Error;
+  scope: Scope;
 };
 
 export type ParseArrayResult<
   NodeList extends Array<BaseNode<NodeData<number, number>>>,
   TokenList extends Array<Token<TokenData<boolean, number>>>,
   Error extends ParsingError<any, any> | null = null,
+  Scope extends ScopeType = {},
 > = {
   type: 'ParseResult';
   node: NodeList;
   tokenList: TokenList;
   error: Error;
+  scope: Scope;
 };
 
 export type ParseError<Error extends ParsingError<any, any>> = ParseResult<
@@ -48,3 +52,5 @@ export type ParseErrorResult<
 > = ParseError<ParsingError<Message, LineNumber>>;
 
 export type StateType = Record<string, StaticType>;
+
+export type ScopeType = Record<string, boolean>;

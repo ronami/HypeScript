@@ -36,11 +36,13 @@ import type {
   TokenData,
 } from './tokens';
 import type { Push, Tail, TailBy } from './utils/arrayUtils';
+import type { MergeWithOverride } from './utils/generalUtils';
 import type {
   ParseArrayResult,
   ParseError,
   ParseErrorResult,
   ParseResult,
+  ScopeType,
 } from './utils/utilityTypes';
 
 type ParseIdentifier<
@@ -91,10 +93,12 @@ type ParseIdentifier<
 
 type ParseVariableDeclarationHelper<
   TokenList extends Array<Token<any>>,
+  Scope extends ScopeType,
   Id extends BaseNode<any>,
   KindLineNumber extends number,
   IdentifierLineNumber extends number,
   EqualsLineNumber extends number,
+  Kind extends string,
 > = ParseExpression<Tail<TokenList>> extends ParseResult<
   infer Node,
   infer TokenList,
@@ -102,20 +106,30 @@ type ParseVariableDeclarationHelper<
 >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : ParseResult<
-        VariableDeclaration<
-          [
-            VariableDeclarator<
-              Id,
-              Node,
-              NodeData<IdentifierLineNumber, Node['data']['startLineNumber']>
-            >,
-          ],
-          'const',
-          NodeData<KindLineNumber, Node['data']['startLineNumber']>
-        >,
-        TokenList
-      >
+    : Id extends Identifier<infer Name, any, any>
+    ? Name extends keyof Scope
+      ? ParseError<
+          ParsingError<`Cannot redeclare block-scoped variable '${Name}'.`, 1>
+        >
+      : ParseResult<
+          VariableDeclaration<
+            [
+              VariableDeclarator<
+                Id,
+                Node,
+                NodeData<IdentifierLineNumber, Node['data']['startLineNumber']>
+              >,
+            ],
+            Kind,
+            NodeData<KindLineNumber, Node['data']['startLineNumber']>
+          >,
+          TokenList,
+          null,
+          Kind extends 'const'
+            ? MergeWithOverride<Scope, { [a in Name]: true }>
+            : Scope
+        >
+    : never
   : ParseErrorResult<'Expression expected.', EqualsLineNumber>;
 
 type ParseTypeAnnotation<TokenList extends Array<Token<any>>> =
@@ -178,11 +192,14 @@ type ParseTypeAnnotation<TokenList extends Array<Token<any>>> =
       >
     : null;
 
-type ParseVariableDeclaration<TokenList extends Array<Token<any>>> =
-  TokenList[0] extends SymbolToken<
-    'const',
-    TokenData<any, infer KindLineNumber>
-  >
+type ParseVariableDeclaration<
+  TokenList extends Array<Token<any>>,
+  Scope extends ScopeType,
+> = TokenList[0] extends SymbolToken<
+  infer Kind,
+  TokenData<any, infer KindLineNumber>
+>
+  ? Kind extends 'const' | 'let'
     ? ParseIdentifier<Tail<TokenList>, true> extends ParseResult<
         infer Node,
         infer TokenList,
@@ -196,10 +213,12 @@ type ParseVariableDeclaration<TokenList extends Array<Token<any>>> =
           >
         ? ParseVariableDeclarationHelper<
             TokenList,
+            Scope,
             Node,
             KindLineNumber,
             Node['data']['startLineNumber'],
-            EqualsLineNumber
+            EqualsLineNumber,
+            Kind
           >
         : ParseError<
             ParsingError<
@@ -213,7 +232,8 @@ type ParseVariableDeclaration<TokenList extends Array<Token<any>>> =
             KindLineNumber
           >
         >
-    : null;
+    : null
+  : null;
 
 type ParseMemberExpression<
   Node extends BaseNode<NodeData<number, number>>,
@@ -522,6 +542,7 @@ type ParseFunctionDeclaration<TokenList extends Array<Token<any>>> =
             ? ParseError<Error>
             : ParseBlockStatement<
                 Tail<TokenList>,
+                {},
                 TokenList[0]['data']['lineNumber'],
                 true
               > extends ParseResult<infer Node, infer TokenList, infer Error>
@@ -584,6 +605,7 @@ type ParseFunctionParamsHelper<
 
 type ParseBlockStatement<
   TokenList extends Array<Token<any>>,
+  Scope extends ScopeType,
   InitialLineNumber extends number,
   InFunctionScope extends boolean,
   Result extends Array<BaseNode<any>> = [],
@@ -600,6 +622,7 @@ type ParseBlockStatement<
   : TokenList[0] extends GenericToken<';', any>
   ? ParseBlockStatement<
       Tail<TokenList>,
+      Scope,
       InitialLineNumber,
       InFunctionScope,
       Result,
@@ -610,31 +633,39 @@ type ParseBlockStatement<
       TokenList,
       InitialLineNumber,
       InFunctionScope,
-      Result
+      Result,
+      Scope
     >
   : TokenList[0] extends Token<
       TokenData<infer PrecedingLinebreak, infer LineNumber>
     >
   ? PrecedingLinebreak extends true
-    ? ParseBlockStatementHelper<TokenList, LineNumber, InFunctionScope, Result>
+    ? ParseBlockStatementHelper<
+        TokenList,
+        LineNumber,
+        InFunctionScope,
+        Result,
+        Scope
+      >
     : ParseErrorResult<"';' expected.", LineNumber>
   : never;
 
 type ParseTopLevel<
   TokenList extends Array<Token<any>>,
+  Scope extends ScopeType,
   Result extends Array<BaseNode<any>> = [],
   NeedSemicolon extends boolean = false,
 > = TokenList extends []
   ? ParseArrayResult<Result, TokenList>
   : TokenList[0] extends GenericToken<';', any>
-  ? ParseTopLevel<Tail<TokenList>, Result, false>
+  ? ParseTopLevel<Tail<TokenList>, Scope, Result, false>
   : NeedSemicolon extends false
-  ? ParseTopLevelHelper<TokenList, Result>
+  ? ParseTopLevelHelper<TokenList, Result, Scope>
   : TokenList[0] extends Token<
       TokenData<infer PrecedingLinebreak, infer LineNumber>
     >
   ? PrecedingLinebreak extends true
-    ? ParseTopLevelHelper<TokenList, Result>
+    ? ParseTopLevelHelper<TokenList, Result, Scope>
     : ParseErrorResult<"';' expected.", LineNumber>
   : never;
 
@@ -653,15 +684,18 @@ type ParseBlockStatementHelper<
   LineNumber extends number,
   InFunctionScope extends boolean,
   Result extends Array<BaseNode<any>>,
-> = ParseStatementHelper<TokenList, InFunctionScope> extends ParseResult<
+  Scope extends ScopeType,
+> = ParseStatementHelper<TokenList, InFunctionScope, Scope> extends ParseResult<
   infer Node,
   infer TokenList,
-  infer Error
+  infer Error,
+  infer Scope
 >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
     : ParseBlockStatement<
         TokenList,
+        Scope,
         LineNumber,
         InFunctionScope,
         Push<Result, Node>,
@@ -672,14 +706,21 @@ type ParseBlockStatementHelper<
 type ParseTopLevelHelper<
   TokenList extends Array<Token<any>>,
   Result extends Array<BaseNode<any>>,
-> = ParseStatementHelper<TokenList, false> extends ParseResult<
+  Scope extends ScopeType,
+> = ParseStatementHelper<TokenList, false, Scope> extends ParseResult<
   infer Node,
   infer TokenList,
-  infer Error
+  infer Error,
+  infer Scope
 >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : ParseTopLevel<TokenList, Push<Result, Node>, ShouldNeedSemicolon<Node>>
+    : ParseTopLevel<
+        TokenList,
+        Scope,
+        Push<Result, Node>,
+        ShouldNeedSemicolon<Node>
+      >
   : never;
 
 type ParseIfStatement<
@@ -772,6 +813,7 @@ type ParseIfStatementHelper<
     >
     ? ParseBlockStatement<
         TailBy<TokenList, 2>,
+        {},
         CurlyLineNumber,
         InFunctionScope
       > extends ParseResult<infer BlockNode, infer TokenList, infer Error>
@@ -792,6 +834,7 @@ type ParseIfStatementHelper<
 type ParseStatementHelper<
   TokenList extends Array<Token<any>>,
   InFunctionScope extends boolean,
+  Scope extends ScopeType,
 > = ParseFunctionDeclaration<TokenList> extends ParseResult<
   infer Node,
   infer TokenList,
@@ -799,15 +842,16 @@ type ParseStatementHelper<
 >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : ParseResult<Node, TokenList>
-  : ParseVariableDeclaration<TokenList> extends ParseResult<
+    : ParseResult<Node, TokenList, null, Scope>
+  : ParseVariableDeclaration<TokenList, Scope> extends ParseResult<
       infer Node,
       infer TokenList,
-      infer Error
+      infer Error,
+      infer Scope
     >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : ParseResult<Node, TokenList>
+    : ParseResult<Node, TokenList, null, Scope>
   : ParseIfStatement<TokenList, InFunctionScope> extends ParseResult<
       infer Node,
       infer TokenList,
@@ -815,7 +859,7 @@ type ParseStatementHelper<
     >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : ParseResult<Node, TokenList>
+    : ParseResult<Node, TokenList, null, Scope>
   : ParseReturnStatement<TokenList, InFunctionScope> extends ParseResult<
       infer Node,
       infer TokenList,
@@ -823,7 +867,7 @@ type ParseStatementHelper<
     >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : ParseResult<Node, TokenList>
+    : ParseResult<Node, TokenList, null, Scope>
   : ParseExpressionStatement<TokenList> extends ParseResult<
       infer Node,
       infer TokenList,
@@ -831,16 +875,14 @@ type ParseStatementHelper<
     >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : ParseResult<Node, TokenList>
+    : ParseResult<Node, TokenList, null, Scope>
   : ParseErrorResult<'Declaration or statement expected.', 1>;
 
-export type Parse<TokenList extends Array<Token<any>>> =
-  ParseTopLevel<TokenList> extends ParseArrayResult<
-    infer NodeList,
-    infer TokenList,
-    infer Error
-  >
-    ? Error extends ParsingError<any, any>
-      ? Error
-      : NodeList
-    : never;
+export type Parse<TokenList extends Array<Token<any>>> = ParseTopLevel<
+  TokenList,
+  {}
+> extends ParseArrayResult<infer NodeList, infer TokenList, infer Error>
+  ? Error extends ParsingError<any, any>
+    ? Error
+    : NodeList
+  : never;
