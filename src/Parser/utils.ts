@@ -1,5 +1,5 @@
-import type { ParsingError, TypeError } from '../errors';
-import type { BaseNode, NodeData } from '../Parser';
+import type { BaseNode, NodeData } from '.';
+import type { ParsingError } from '../Utils';
 import type { Token, TokenData } from '../Tokenizer';
 
 export type ParseResult<

@@ -1,4 +1,26 @@
 import type {
+  AnyType,
+  ArrayType,
+  BooleanLiteralType,
+  BooleanType,
+  CallArgumentsType,
+  FunctionType,
+  NeverType,
+  NullType,
+  NumberLiteralType,
+  NumberType,
+  ObjectType,
+  StaticType,
+  StringLiteralType,
+  StringType,
+  UndefinedType,
+  UnionType,
+  UnknownType,
+  VoidType,
+  StateType,
+  TypeResult,
+} from '.';
+import type {
   AnyTypeAnnotation,
   ArrayExpression,
   BlockStatement,
@@ -25,31 +47,15 @@ import type {
   VariableDeclarator,
   IfStatement,
 } from '../Parser';
-import type { TypeError } from '../errors';
 import type { Serialize } from '../serializer';
 import type {
-  AnyType,
-  ArrayType,
-  BooleanLiteralType,
-  BooleanType,
-  CallArgumentsType,
-  FunctionType,
-  NeverType,
-  NullType,
-  NumberLiteralType,
-  NumberType,
-  ObjectType,
-  StaticType,
-  StringLiteralType,
-  StringType,
-  UndefinedType,
-  UnionType,
-  UnknownType,
-  VoidType,
-  StateType,
-  TypeResult,
-} from '.';
-import type { Concat, Push, Tail, Unshift, ObjectMerge } from '../Utils';
+  Concat,
+  Push,
+  Tail,
+  Unshift,
+  ObjectMerge,
+  TypeError,
+} from '../Utils';
 
 export type Check<NodeList extends Array<BaseNode<any>>> = InferBlockStatement<
   NodeList,

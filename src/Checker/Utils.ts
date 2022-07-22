@@ -1,5 +1,5 @@
-import type { StaticType } from '../Checker';
-import type { TypeError } from '../errors';
+import type { StaticType } from '.';
+import type { TypeError } from '../Utils';
 
 export type StateType = Record<string, StaticType>;
 

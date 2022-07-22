@@ -31,7 +31,6 @@ import type {
   ParseResult,
   ScopeType,
 } from '.';
-import type { ParsingError } from '../errors';
 import type {
   GenericToken,
   NumberToken,
@@ -40,7 +39,7 @@ import type {
   Token,
   TokenData,
 } from '../Tokenizer';
-import type { Push, Tail, TailBy, ObjectMerge } from '../Utils';
+import type { Push, Tail, TailBy, ObjectMerge, ParsingError } from '../Utils';
 
 type ParseIdentifier<
   TokenList extends Array<Token<any>>,

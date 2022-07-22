@@ -1,8 +1,7 @@
 import type { Tokenize, Token } from './Tokenizer';
 import type { Parse, BaseNode } from './Parser';
 import type { Check } from './Checker';
-import type { Format } from './formatter';
-import type { Error } from './errors';
+import type { Format, Error } from './Utils';
 
 export type TypeCheck<Input extends string> =
   Tokenize<Input> extends infer TokenList
