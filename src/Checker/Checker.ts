@@ -373,14 +373,18 @@ type InferFunctionDeclaration<
     : never
   : never;
 
-type MatchTypeArrays<
+type MatchCallExpressionArguments<
   ParamsType extends Array<[string, StaticType]>,
   ArgumentsType extends Array<StaticType>,
   StartLine extends number,
 > = ParamsType extends []
   ? true
   : MatchType<ParamsType[0][1], ArgumentsType[0]> extends true
-  ? MatchTypeArrays<Tail<ParamsType>, Tail<ArgumentsType>, StartLine>
+  ? MatchCallExpressionArguments<
+      Tail<ParamsType>,
+      Tail<ArgumentsType>,
+      StartLine
+    >
   : TypeError<
       `Argument of type '${Serialize<
         ArgumentsType[0]
@@ -510,10 +514,11 @@ type InferCallExpressionHelper<
   StartLine extends number,
 > = CalleeValue extends FunctionType<infer ParamsType, infer ReturnType>
   ? ParamsType['length'] extends ArgumentsType['length']
-    ? MatchTypeArrays<ParamsType, ArgumentsType, StartLine> extends TypeError<
-        infer Message,
-        infer StartLine
-      >
+    ? MatchCallExpressionArguments<
+        ParamsType,
+        ArgumentsType,
+        StartLine
+      > extends TypeError<infer Message, infer StartLine>
       ? TypeResult<
           ReturnType,
           State,
