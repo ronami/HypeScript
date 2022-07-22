@@ -349,7 +349,10 @@ type ParseMemberExpression<
 type ParseAssignmentExpression<
   Left extends BaseNode<NodeData<number, number>>,
   TokenList extends Array<Token<any>>,
-> = TokenList[0] extends GenericToken<'=', any>
+> = TokenList[0] extends GenericToken<
+  '=',
+  TokenData<any, infer EqualsLineNumber>
+>
   ? ParseExpression<Tail<TokenList>> extends ParseResult<
       infer RightNode,
       infer RightTokenList,
@@ -366,9 +369,9 @@ type ParseAssignmentExpression<
         >
       : ParseErrorResult<
           'The left-hand side of an assignment expression must be a variable or a property access.',
-          1
+          EqualsLineNumber
         >
-    : 2
+    : ParseErrorResult<'Expression expected.', EqualsLineNumber>
   : null;
 
 type ParseCallExpression<
