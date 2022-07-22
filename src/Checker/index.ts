@@ -1,3 +1,3 @@
-export type { Check } from './checker';
-export * from './types';
-export * from './utils';
+export type { Check } from './Checker';
+export * from './Types';
+export * from './Utils';
