@@ -435,6 +435,86 @@ expectType<ParseAst<`let hello`>>([
   },
 ]);
 
+expectType<ParseAst<`let hello; \n\nlet hello;`>>({
+  type: 'ParsingError',
+  message: "Cannot redeclare block-scoped variable 'hello'.",
+  lineNumber: 3,
+});
+
+expectType<ParseAst<`const hello = 1; \n\nconst hello = 2;`>>({
+  type: 'ParsingError',
+  message: "Cannot redeclare block-scoped variable 'hello'.",
+  lineNumber: 3,
+});
+
+expectType<ParseAst<`let hello; \n\nconst hello = 1;`>>({
+  type: 'ParsingError',
+  message: "Cannot redeclare block-scoped variable 'hello'.",
+  lineNumber: 3,
+});
+
+expectType<ParseAst<`let hello: number; if(a) { let hello; }`>>([
+  {
+    type: 'VariableDeclaration',
+    kind: 'let',
+    declarations: [
+      {
+        type: 'VariableDeclarator',
+        id: {
+          type: 'Identifier',
+          name: 'hello',
+          typeAnnotation: {
+            type: 'TypeAnnotation',
+            typeAnnotation: {
+              type: 'NumberTypeAnnotation',
+              data: { startLineNumber: 1, endLineNumber: 1 },
+            },
+            data: { startLineNumber: 1, endLineNumber: 1 },
+          },
+          data: { startLineNumber: 1, endLineNumber: 1 },
+        },
+        init: null,
+        data: { startLineNumber: 1, endLineNumber: 1 },
+      },
+    ],
+    data: { startLineNumber: 1, endLineNumber: 1 },
+  },
+  {
+    type: 'IfStatement',
+    test: {
+      type: 'Identifier',
+      name: 'a',
+      typeAnnotation: null,
+      data: { startLineNumber: 1, endLineNumber: 1 },
+    },
+    consequent: {
+      type: 'BlockStatement',
+      body: [
+        {
+          type: 'VariableDeclaration',
+          kind: 'let',
+          declarations: [
+            {
+              type: 'VariableDeclarator',
+              id: {
+                type: 'Identifier',
+                name: 'hello',
+                typeAnnotation: null,
+                data: { startLineNumber: 1, endLineNumber: 1 },
+              },
+              init: null,
+              data: { startLineNumber: 1, endLineNumber: 1 },
+            },
+          ],
+          data: { startLineNumber: 1, endLineNumber: 1 },
+        },
+      ],
+      data: { startLineNumber: 1, endLineNumber: 1 },
+    },
+    data: { startLineNumber: 1, endLineNumber: 1 },
+  },
+]);
+
 expectType<ParseAst<`let hello: number`>>([
   {
     type: 'VariableDeclaration',
