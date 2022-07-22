@@ -638,6 +638,16 @@ type ParseTopLevel<
     : ParseErrorResult<"';' expected.", LineNumber>
   : never;
 
+type ShouldNeedSemicolon<Node extends BaseNode<any>> = Node extends IfStatement<
+  any,
+  any,
+  any
+>
+  ? false
+  : Node extends FunctionDeclaration<any, any, any, any>
+  ? false
+  : true;
+
 type ParseBlockStatementHelper<
   TokenList extends Array<Token<any>>,
   LineNumber extends number,
@@ -646,20 +656,17 @@ type ParseBlockStatementHelper<
 > = ParseStatementHelper<TokenList, InFunctionScope> extends ParseResult<
   infer Node,
   infer TokenList,
-  infer Error,
-  infer Data
+  infer Error
 >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : Data extends boolean
-    ? ParseBlockStatement<
+    : ParseBlockStatement<
         TokenList,
         LineNumber,
         InFunctionScope,
         Push<Result, Node>,
-        Data
+        ShouldNeedSemicolon<Node>
       >
-    : never
   : never;
 
 type ParseTopLevelHelper<
@@ -668,14 +675,11 @@ type ParseTopLevelHelper<
 > = ParseStatementHelper<TokenList, false> extends ParseResult<
   infer Node,
   infer TokenList,
-  infer Error,
-  infer Data
+  infer Error
 >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : Data extends boolean
-    ? ParseTopLevel<TokenList, Push<Result, Node>, Data>
-    : never
+    : ParseTopLevel<TokenList, Push<Result, Node>, ShouldNeedSemicolon<Node>>
   : never;
 
 type ParseIfStatement<
@@ -795,7 +799,7 @@ type ParseStatementHelper<
 >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : ParseResult<Node, TokenList, null, false>
+    : ParseResult<Node, TokenList>
   : ParseVariableDeclaration<TokenList> extends ParseResult<
       infer Node,
       infer TokenList,
@@ -803,7 +807,7 @@ type ParseStatementHelper<
     >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : ParseResult<Node, TokenList, null, true>
+    : ParseResult<Node, TokenList>
   : ParseIfStatement<TokenList, InFunctionScope> extends ParseResult<
       infer Node,
       infer TokenList,
@@ -811,7 +815,7 @@ type ParseStatementHelper<
     >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : ParseResult<Node, TokenList, null, false>
+    : ParseResult<Node, TokenList>
   : ParseReturnStatement<TokenList, InFunctionScope> extends ParseResult<
       infer Node,
       infer TokenList,
@@ -819,7 +823,7 @@ type ParseStatementHelper<
     >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : ParseResult<Node, TokenList, null, true>
+    : ParseResult<Node, TokenList>
   : ParseExpressionStatement<TokenList> extends ParseResult<
       infer Node,
       infer TokenList,
@@ -827,7 +831,7 @@ type ParseStatementHelper<
     >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
-    : ParseResult<Node, TokenList, null, true>
+    : ParseResult<Node, TokenList>
   : ParseErrorResult<'Declaration or statement expected.', 1>;
 
 export type Parse<TokenList extends Array<Token<any>>> =
