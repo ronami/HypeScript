@@ -9,9 +9,9 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 
-const a = 1;
+let a;
 
-let a = 1;
+let ab;
 
 `>;
 type P = Parse<T>;
