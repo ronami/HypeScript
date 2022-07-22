@@ -1,7 +1,7 @@
+import type { Check } from '.';
 import type { Tokenize } from '../Tokenizer';
 import type { Parse } from '../Parser';
-import type { Check } from '.';
-import { expectType } from '../test-utils';
+import { expectType } from '../TestUtils';
 
 type TypeCheck<T extends string> = Tokenize<T> extends infer G
   ? G extends Array<any>
