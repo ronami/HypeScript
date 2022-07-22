@@ -9,7 +9,9 @@ import type { Check } from './checker';
 
 type T = Tokenize<`
 
-[111, 222]
+const a = 1;
+
+let a = 1;
 
 `>;
 type P = Parse<T>;
