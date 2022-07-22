@@ -9,11 +9,6 @@ export type Push<T extends Array<any>, E> = [...T, E];
 
 export type Unshift<T extends Array<any>, E> = [E, ...T];
 
-export type Reverse<
-  T extends Array<any>,
-  R extends Array<any> = [],
-> = T extends [] ? R : Reverse<Tail<T>, Unshift<R, T[0]>>;
-
 export type Concat<T1 extends Array<any>, T2 extends Array<any>> = [
   ...T1,
   ...T2,

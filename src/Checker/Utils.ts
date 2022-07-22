@@ -21,7 +21,7 @@ import type {
   NumberTypeAnnotation,
   StringTypeAnnotation,
 } from '../Parser';
-import type { Tail, TypeError } from '../Utils';
+import type { Concat, Push, Tail, TypeError } from '../Utils';
 
 export type StateType = Record<string, StaticType>;
 
@@ -86,8 +86,8 @@ export type MergeTypes<
   ? TypeB
   : TypeA extends UnionType<infer UnionTypesA>
   ? TypeB extends UnionType<infer UnionTypesB>
-    ? UnionType<[...UnionTypesA, ...UnionTypesB]>
-    : UnionType<[...UnionTypesA, TypeB]>
+    ? UnionType<Concat<UnionTypesA, UnionTypesB>>
+    : UnionType<Push<UnionTypesA, TypeB>>
   : TypeB extends UnionType<infer UnionTypesB>
-  ? UnionType<[...UnionTypesB, TypeA]>
+  ? UnionType<Push<UnionTypesB, TypeA>>
   : UnionType<[TypeA, TypeB]>;
