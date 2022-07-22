@@ -19,6 +19,7 @@ import type {
   VoidType,
   StateType,
   TypeResult,
+  MapLiteralToType,
 } from '.';
 import type {
   AnyTypeAnnotation,
@@ -691,23 +692,6 @@ type InferArrayElements<
       : never
     : never
   : never;
-
-type MapLiteralToType<Type extends StaticType> =
-  Type extends NumberLiteralType<any>
-    ? NumberType
-    : Type extends StringLiteralType<any>
-    ? StringType
-    : Type extends BooleanLiteralType<any>
-    ? BooleanType
-    : Type extends ObjectType<infer Properties>
-    ? ObjectType<{
-        [P in keyof Properties]: Properties[P] extends [infer Key, infer Value]
-          ? Value extends StaticType
-            ? [Key, MapLiteralToType<Value>]
-            : never
-          : never;
-      }>
-    : Type;
 
 type InferMemberExpression<
   Object extends BaseNode<any>,
