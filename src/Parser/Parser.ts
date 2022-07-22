@@ -15,6 +15,7 @@ import type {
   MemberExpression,
   IfStatement,
   ReturnStatement,
+  AssignmentExpression,
   BlockStatement,
   TypeAnnotation,
   GenericTypeAnnotation,
@@ -345,6 +346,31 @@ type ParseMemberExpression<
     : ParseErrorResult<'Expression expected.', BracketLineNumber>
   : null;
 
+type ParseAssignmentExpression<
+  Left extends BaseNode<NodeData<number, number>>,
+  TokenList extends Array<Token<any>>,
+> = TokenList[0] extends GenericToken<'=', any>
+  ? ParseExpression<Tail<TokenList>> extends ParseResult<
+      infer RightNode,
+      infer RightTokenList,
+      infer RightError
+    >
+    ? RightError extends ParsingError<any, any>
+      ? ParseError<RightError>
+      : Left extends
+          | Identifier<any, any, any>
+          | MemberExpression<any, any, any, any>
+      ? ParseResult<
+          AssignmentExpression<Left, RightNode, '=', NodeData<1, 1>>,
+          RightTokenList
+        >
+      : ParseErrorResult<
+          'The left-hand side of an assignment expression must be a variable or a property access.',
+          1
+        >
+    : 2
+  : null;
+
 type ParseCallExpression<
   Node extends BaseNode<NodeData<number, number>>,
   TokenList extends Array<Token<any>>,
@@ -430,6 +456,14 @@ type CheckExpression<
   infer TokenList,
   infer Error
 >
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : CheckExpression<Node, TokenList>
+  : ParseAssignmentExpression<Node, TokenList> extends ParseResult<
+      infer Node,
+      infer TokenList,
+      infer Error
+    >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
     : CheckExpression<Node, TokenList>

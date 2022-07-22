@@ -4,8 +4,8 @@ import type { Check } from './Checker';
 
 type T = Tokenize<`
 
-let a: number = 1;
+a.b = 1;
 
 `>;
 type P = Parse<T>;
-type C = Check<P>;
+// type C = Check<P>;
