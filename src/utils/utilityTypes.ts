@@ -18,26 +18,22 @@ export type ParseResult<
   Node extends BaseNode<NodeData<number, number>>,
   TokenList extends Array<Token<any>>,
   Error extends ParsingError<any, any> | null = null,
-  Data extends any = null,
 > = {
   type: 'ParseResult';
   node: Node;
   tokenList: TokenList;
   error: Error;
-  data: Data;
 };
 
 export type ParseArrayResult<
   NodeList extends Array<BaseNode<NodeData<number, number>>>,
   TokenList extends Array<Token<TokenData<boolean, number>>>,
   Error extends ParsingError<any, any> | null = null,
-  Data extends any = null,
 > = {
   type: 'ParseResult';
   node: NodeList;
   tokenList: TokenList;
   error: Error;
-  data: Data;
 };
 
 export type ParseError<Error extends ParsingError<any, any>> = ParseResult<
