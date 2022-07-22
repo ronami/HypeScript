@@ -16,8 +16,8 @@ import type {
   UnionType,
   UnknownType,
   VoidType,
-} from './Checker';
-import type { Tail } from './Utils';
+} from '../Checker';
+import type { Tail } from '../Utils';
 
 export type Serialize<Type extends StaticType> =
   MapLiteralToType<Type> extends infer MappedType
