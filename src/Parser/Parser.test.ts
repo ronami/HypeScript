@@ -1,14 +1,15 @@
 import type { Parse } from '.';
-import type { Tokenize } from '../Tokenizer';
+import type { Tokenize, Token } from '../Tokenizer';
 import { expectType } from '../TestUtils';
 
-type ParseAst<T extends string> = Tokenize<T> extends infer G
-  ? G extends Array<any>
-    ? Parse<G>
-    : never
-  : never;
+type ParseWrapper<Input extends string> =
+  Tokenize<Input> extends infer TokenList
+    ? TokenList extends Array<Token<any>>
+      ? Parse<TokenList>
+      : never
+    : never;
 
-expectType<ParseAst<`hello`>>([
+expectType<ParseWrapper<`hello`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -24,7 +25,7 @@ expectType<ParseAst<`hello`>>([
   },
 ]);
 
-expectType<ParseAst<`"hello"`>>([
+expectType<ParseWrapper<`"hello"`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -39,7 +40,7 @@ expectType<ParseAst<`"hello"`>>([
   },
 ]);
 
-expectType<ParseAst<`123`>>([
+expectType<ParseWrapper<`123`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -54,7 +55,7 @@ expectType<ParseAst<`123`>>([
   },
 ]);
 
-expectType<ParseAst<`true`>>([
+expectType<ParseWrapper<`true`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -69,7 +70,7 @@ expectType<ParseAst<`true`>>([
   },
 ]);
 
-expectType<ParseAst<`\nfalse`>>([
+expectType<ParseWrapper<`\nfalse`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -84,7 +85,7 @@ expectType<ParseAst<`\nfalse`>>([
   },
 ]);
 
-expectType<ParseAst<`null`>>([
+expectType<ParseWrapper<`null`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -98,7 +99,7 @@ expectType<ParseAst<`null`>>([
   },
 ]);
 
-expectType<ParseAst<`\n\nnull`>>([
+expectType<ParseWrapper<`\n\nnull`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -112,25 +113,25 @@ expectType<ParseAst<`\n\nnull`>>([
   },
 ]);
 
-expectType<ParseAst<`hello world`>>({
+expectType<ParseWrapper<`hello world`>>({
   type: 'ParsingError',
   message: "';' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`hello "world"`>>({
+expectType<ParseWrapper<`hello "world"`>>({
   type: 'ParsingError',
   message: "';' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`function foo () { hello "world" }`>>({
+expectType<ParseWrapper<`function foo () { hello "world" }`>>({
   type: 'ParsingError',
   message: "';' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`hello\n "world"`>>([
+expectType<ParseWrapper<`hello\n "world"`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -164,7 +165,7 @@ expectType<ParseAst<`hello\n "world"`>>([
   },
 ]);
 
-expectType<ParseAst<`hello; "world"`>>([
+expectType<ParseWrapper<`hello; "world"`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -198,7 +199,7 @@ expectType<ParseAst<`hello; "world"`>>([
   },
 ]);
 
-expectType<ParseAst<`hello;;;"world"`>>([
+expectType<ParseWrapper<`hello;;;"world"`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -232,7 +233,7 @@ expectType<ParseAst<`hello;;;"world"`>>([
   },
 ]);
 
-expectType<ParseAst<`hello  ; "world"`>>([
+expectType<ParseWrapper<`hello  ; "world"`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -266,7 +267,7 @@ expectType<ParseAst<`hello  ; "world"`>>([
   },
 ]);
 
-expectType<ParseAst<`const hello = "world"`>>([
+expectType<ParseWrapper<`const hello = "world"`>>([
   {
     type: 'VariableDeclaration',
     kind: 'const',
@@ -297,7 +298,7 @@ expectType<ParseAst<`const hello = "world"`>>([
   },
 ]);
 
-expectType<ParseAst<`\nconst \nhello\n = \n123;`>>([
+expectType<ParseWrapper<`\nconst \nhello\n = \n123;`>>([
   {
     type: 'VariableDeclaration',
     kind: 'const',
@@ -322,37 +323,37 @@ expectType<ParseAst<`\nconst \nhello\n = \n123;`>>([
   },
 ]);
 
-expectType<ParseAst<`const`>>({
+expectType<ParseWrapper<`const`>>({
   type: 'ParsingError',
   message: 'Variable declaration list cannot be empty.',
   lineNumber: 1,
 });
 
-expectType<ParseAst<`const hello`>>({
+expectType<ParseWrapper<`const hello`>>({
   type: 'ParsingError',
   message: "'const' declarations must be initialized.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`const hello =`>>({
+expectType<ParseWrapper<`const hello =`>>({
   type: 'ParsingError',
   message: 'Expression expected.',
   lineNumber: 1,
 });
 
-expectType<ParseAst<`const hello \n = ;`>>({
+expectType<ParseWrapper<`const hello \n = ;`>>({
   type: 'ParsingError',
   message: 'Expression expected.',
   lineNumber: 2,
 });
 
-expectType<ParseAst<`const hello: `>>({
+expectType<ParseWrapper<`const hello: `>>({
   type: 'ParsingError',
   message: 'Type expected.',
   lineNumber: 1,
 });
 
-expectType<ParseAst<`let hello = "world"`>>([
+expectType<ParseWrapper<`let hello = "world"`>>([
   {
     type: 'VariableDeclaration',
     kind: 'let',
@@ -383,7 +384,7 @@ expectType<ParseAst<`let hello = "world"`>>([
   },
 ]);
 
-expectType<ParseAst<`\nlet \nhello\n = \n123;`>>([
+expectType<ParseWrapper<`\nlet \nhello\n = \n123;`>>([
   {
     type: 'VariableDeclaration',
     kind: 'let',
@@ -408,13 +409,13 @@ expectType<ParseAst<`\nlet \nhello\n = \n123;`>>([
   },
 ]);
 
-expectType<ParseAst<`let`>>({
+expectType<ParseWrapper<`let`>>({
   type: 'ParsingError',
   message: 'Variable declaration list cannot be empty.',
   lineNumber: 1,
 });
 
-expectType<ParseAst<`let hello`>>([
+expectType<ParseWrapper<`let hello`>>([
   {
     type: 'VariableDeclaration',
     kind: 'let',
@@ -435,25 +436,25 @@ expectType<ParseAst<`let hello`>>([
   },
 ]);
 
-expectType<ParseAst<`let hello; \n\nlet hello;`>>({
+expectType<ParseWrapper<`let hello; \n\nlet hello;`>>({
   type: 'ParsingError',
   message: "Cannot redeclare block-scoped variable 'hello'.",
   lineNumber: 3,
 });
 
-expectType<ParseAst<`const hello = 1; \n\nconst hello = 2;`>>({
+expectType<ParseWrapper<`const hello = 1; \n\nconst hello = 2;`>>({
   type: 'ParsingError',
   message: "Cannot redeclare block-scoped variable 'hello'.",
   lineNumber: 3,
 });
 
-expectType<ParseAst<`let hello; \n\nconst hello = 1;`>>({
+expectType<ParseWrapper<`let hello; \n\nconst hello = 1;`>>({
   type: 'ParsingError',
   message: "Cannot redeclare block-scoped variable 'hello'.",
   lineNumber: 3,
 });
 
-expectType<ParseAst<`let hello: number; if(a) { let hello; }`>>([
+expectType<ParseWrapper<`let hello: number; if(a) { let hello; }`>>([
   {
     type: 'VariableDeclaration',
     kind: 'let',
@@ -515,7 +516,7 @@ expectType<ParseAst<`let hello: number; if(a) { let hello; }`>>([
   },
 ]);
 
-expectType<ParseAst<`let hello: number`>>([
+expectType<ParseWrapper<`let hello: number`>>([
   {
     type: 'VariableDeclaration',
     kind: 'let',
@@ -543,43 +544,43 @@ expectType<ParseAst<`let hello: number`>>([
   },
 ]);
 
-expectType<ParseAst<`let hello =`>>({
+expectType<ParseWrapper<`let hello =`>>({
   type: 'ParsingError',
   message: 'Expression expected.',
   lineNumber: 1,
 });
 
-expectType<ParseAst<`let hello \n = ;`>>({
+expectType<ParseWrapper<`let hello \n = ;`>>({
   type: 'ParsingError',
   message: 'Expression expected.',
   lineNumber: 2,
 });
 
-expectType<ParseAst<`let hello: `>>({
+expectType<ParseWrapper<`let hello: `>>({
   type: 'ParsingError',
   message: 'Type expected.',
   lineNumber: 1,
 });
 
-expectType<ParseAst<`hello.`>>({
+expectType<ParseWrapper<`hello.`>>({
   type: 'ParsingError',
   message: 'Identifier expected.',
   lineNumber: 1,
 });
 
-expectType<ParseAst<`hello..world`>>({
+expectType<ParseWrapper<`hello..world`>>({
   type: 'ParsingError',
   message: 'Identifier expected.',
   lineNumber: 1,
 });
 
-expectType<ParseAst<`\nhello."world"`>>({
+expectType<ParseWrapper<`\nhello."world"`>>({
   type: 'ParsingError',
   message: 'Identifier expected.',
   lineNumber: 2,
 });
 
-expectType<ParseAst<`hello.world`>>([
+expectType<ParseWrapper<`hello.world`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -615,7 +616,7 @@ expectType<ParseAst<`hello.world`>>([
   },
 ]);
 
-expectType<ParseAst<`hello.world.foo`>>([
+expectType<ParseWrapper<`hello.world.foo`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -668,7 +669,7 @@ expectType<ParseAst<`hello.world.foo`>>([
   },
 ]);
 
-expectType<ParseAst<`hello.\nworld.\nfoo`>>([
+expectType<ParseWrapper<`hello.\nworld.\nfoo`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -721,19 +722,19 @@ expectType<ParseAst<`hello.\nworld.\nfoo`>>([
   },
 ]);
 
-expectType<ParseAst<`hello.\nworld..foo`>>({
+expectType<ParseWrapper<`hello.\nworld..foo`>>({
   type: 'ParsingError',
   message: 'Identifier expected.',
   lineNumber: 2,
 });
 
-expectType<ParseAst<`hello.\nworld.`>>({
+expectType<ParseWrapper<`hello.\nworld.`>>({
   type: 'ParsingError',
   message: 'Identifier expected.',
   lineNumber: 2,
 });
 
-expectType<ParseAst<`const hello = foo.bar;`>>([
+expectType<ParseWrapper<`const hello = foo.bar;`>>([
   {
     type: 'VariableDeclaration',
     declarations: [
@@ -788,7 +789,7 @@ expectType<ParseAst<`const hello = foo.bar;`>>([
   },
 ]);
 
-expectType<ParseAst<`hello()`>>([
+expectType<ParseWrapper<`hello()`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -812,7 +813,7 @@ expectType<ParseAst<`hello()`>>([
   },
 ]);
 
-expectType<ParseAst<`\n\nhello(\n)`>>([
+expectType<ParseWrapper<`\n\nhello(\n)`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -836,7 +837,7 @@ expectType<ParseAst<`\n\nhello(\n)`>>([
   },
 ]);
 
-expectType<ParseAst<`hello(1)`>>([
+expectType<ParseWrapper<`hello(1)`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -869,7 +870,7 @@ expectType<ParseAst<`hello(1)`>>([
   },
 ]);
 
-expectType<ParseAst<`hello(1, "2")`>>([
+expectType<ParseWrapper<`hello(1, "2")`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -910,7 +911,7 @@ expectType<ParseAst<`hello(1, "2")`>>([
   },
 ]);
 
-expectType<ParseAst<`hello(1,\n null\n, true)`>>([
+expectType<ParseWrapper<`hello(1,\n null\n, true)`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -958,7 +959,7 @@ expectType<ParseAst<`hello(1,\n null\n, true)`>>([
   },
 ]);
 
-expectType<ParseAst<`hello.world(1)`>>([
+expectType<ParseWrapper<`hello.world(1)`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -1008,7 +1009,7 @@ expectType<ParseAst<`hello.world(1)`>>([
   },
 ]);
 
-expectType<ParseAst<`hello.world(foo(1))`>>([
+expectType<ParseWrapper<`hello.world(foo(1))`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -1076,42 +1077,42 @@ expectType<ParseAst<`hello.world(foo(1))`>>([
   },
 ]);
 
-expectType<ParseAst<`foo(`>>({
+expectType<ParseWrapper<`foo(`>>({
   type: 'ParsingError',
   message: "')' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`foo(1 2`>>({
+expectType<ParseWrapper<`foo(1 2`>>({
   type: 'ParsingError',
   message: "',' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`[\n1 2`>>({
+expectType<ParseWrapper<`[\n1 2`>>({
   type: 'ParsingError',
   message: "',' expected.",
   lineNumber: 2,
 });
-expectType<ParseAst<`[`>>({
+expectType<ParseWrapper<`[`>>({
   type: 'ParsingError',
   message: "']' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`[1 2`>>({
+expectType<ParseWrapper<`[1 2`>>({
   type: 'ParsingError',
   message: "',' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`[\n1 2`>>({
+expectType<ParseWrapper<`[\n1 2`>>({
   type: 'ParsingError',
   message: "',' expected.",
   lineNumber: 2,
 });
 
-expectType<ParseAst<`[]`>>([
+expectType<ParseWrapper<`[]`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -1126,7 +1127,7 @@ expectType<ParseAst<`[]`>>([
   },
 ]);
 
-expectType<ParseAst<`[1]`>>([
+expectType<ParseWrapper<`[1]`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -1150,7 +1151,7 @@ expectType<ParseAst<`[1]`>>([
   },
 ]);
 
-expectType<ParseAst<`[\n1]`>>([
+expectType<ParseWrapper<`[\n1]`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -1174,7 +1175,7 @@ expectType<ParseAst<`[\n1]`>>([
   },
 ]);
 
-expectType<ParseAst<`[1, "hello"]`>>([
+expectType<ParseWrapper<`[1, "hello"]`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -1206,7 +1207,7 @@ expectType<ParseAst<`[1, "hello"]`>>([
   },
 ]);
 
-expectType<ParseAst<`[1, [2]]`>>([
+expectType<ParseWrapper<`[1, [2]]`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -1247,7 +1248,7 @@ expectType<ParseAst<`[1, [2]]`>>([
   },
 ]);
 
-expectType<ParseAst<`const array = [1]`>>([
+expectType<ParseWrapper<`const array = [1]`>>([
   {
     type: 'VariableDeclaration',
     declarations: [
@@ -1290,31 +1291,31 @@ expectType<ParseAst<`const array = [1]`>>([
   },
 ]);
 
-expectType<ParseAst<`{`>>({
+expectType<ParseWrapper<`{`>>({
   type: 'ParsingError',
   message: "'}' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`{ hello`>>({
+expectType<ParseWrapper<`{ hello`>>({
   type: 'ParsingError',
   message: "'}' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`{hello world`>>({
+expectType<ParseWrapper<`{hello world`>>({
   type: 'ParsingError',
   message: "'}' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`{\n1 2`>>({
+expectType<ParseWrapper<`{\n1 2`>>({
   type: 'ParsingError',
   message: "'}' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`{}`>>([
+expectType<ParseWrapper<`{}`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -1329,7 +1330,7 @@ expectType<ParseAst<`{}`>>([
   },
 ]);
 
-expectType<ParseAst<`{hello: "world"}`>>([
+expectType<ParseWrapper<`{hello: "world"}`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -1369,7 +1370,7 @@ expectType<ParseAst<`{hello: "world"}`>>([
   },
 ]);
 
-expectType<ParseAst<`{hello\n:\n"world"\n}`>>([
+expectType<ParseWrapper<`{hello\n:\n"world"\n}`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -1409,7 +1410,7 @@ expectType<ParseAst<`{hello\n:\n"world"\n}`>>([
   },
 ]);
 
-expectType<ParseAst<`{hello: "hello", foo: bar()}`>>([
+expectType<ParseWrapper<`{hello: "hello", foo: bar()}`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -1482,7 +1483,7 @@ expectType<ParseAst<`{hello: "hello", foo: bar()}`>>([
   },
 ]);
 
-expectType<ParseAst<`{hello: {}}`>>([
+expectType<ParseWrapper<`{hello: {}}`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -1522,7 +1523,7 @@ expectType<ParseAst<`{hello: {}}`>>([
   },
 ]);
 
-expectType<ParseAst<`const array = {hello: "world"}`>>([
+expectType<ParseWrapper<`const array = {hello: "world"}`>>([
   {
     type: 'VariableDeclaration',
     declarations: [
@@ -1581,7 +1582,7 @@ expectType<ParseAst<`const array = {hello: "world"}`>>([
   },
 ]);
 
-expectType<ParseAst<`function foo() {}`>>([
+expectType<ParseWrapper<`function foo() {}`>>([
   {
     type: 'FunctionDeclaration',
     id: {
@@ -1609,7 +1610,7 @@ expectType<ParseAst<`function foo() {}`>>([
   },
 ]);
 
-expectType<ParseAst<`function foo(a) {}`>>([
+expectType<ParseWrapper<`function foo(a) {}`>>([
   {
     type: 'FunctionDeclaration',
     id: {
@@ -1647,7 +1648,7 @@ expectType<ParseAst<`function foo(a) {}`>>([
   },
 ]);
 
-expectType<ParseAst<`function foo(a, b) {}`>>([
+expectType<ParseWrapper<`function foo(a, b) {}`>>([
   {
     type: 'FunctionDeclaration',
     id: {
@@ -1694,7 +1695,7 @@ expectType<ParseAst<`function foo(a, b) {}`>>([
   },
 ]);
 
-expectType<ParseAst<`function foo(a, b) { foo() }`>>([
+expectType<ParseWrapper<`function foo(a, b) { foo() }`>>([
   {
     type: 'FunctionDeclaration',
     id: {
@@ -1766,7 +1767,7 @@ expectType<ParseAst<`function foo(a, b) { foo() }`>>([
   },
 ]);
 
-expectType<ParseAst<`function foo(a, b) { foo(); "bar"; }`>>([
+expectType<ParseWrapper<`function foo(a, b) { foo(); "bar"; }`>>([
   {
     type: 'FunctionDeclaration',
     id: {
@@ -1853,7 +1854,7 @@ expectType<ParseAst<`function foo(a, b) { foo(); "bar"; }`>>([
   },
 ]);
 
-expectType<ParseAst<`function foo(a, b) { function bar() {} }`>>([
+expectType<ParseWrapper<`function foo(a, b) { function bar() {} }`>>([
   {
     type: 'FunctionDeclaration',
     id: {
@@ -1926,61 +1927,61 @@ expectType<ParseAst<`function foo(a, b) { function bar() {} }`>>([
   },
 ]);
 
-expectType<ParseAst<`function`>>({
+expectType<ParseWrapper<`function`>>({
   type: 'ParsingError',
   message: 'Identifier expected.',
   lineNumber: 1,
 });
 
-expectType<ParseAst<`function foo`>>({
+expectType<ParseWrapper<`function foo`>>({
   type: 'ParsingError',
   message: "'(' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`function foo(`>>({
+expectType<ParseWrapper<`function foo(`>>({
   type: 'ParsingError',
   message: "')' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`function foo()`>>({
+expectType<ParseWrapper<`function foo()`>>({
   type: 'ParsingError',
   message: "'{' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`function foo()`>>({
+expectType<ParseWrapper<`function foo()`>>({
   type: 'ParsingError',
   message: "'{' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`function foo() {`>>({
+expectType<ParseWrapper<`function foo() {`>>({
   type: 'ParsingError',
   message: "'}' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`function foo(a, ) {}`>>({
+expectType<ParseWrapper<`function foo(a, ) {}`>>({
   type: 'ParsingError',
   message: 'Identifier expected.',
   lineNumber: 1,
 });
 
-expectType<ParseAst<`function foo(a b) {}`>>({
+expectType<ParseWrapper<`function foo(a b) {}`>>({
   type: 'ParsingError',
   message: "',' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`}`>>({
+expectType<ParseWrapper<`}`>>({
   type: 'ParsingError',
   message: 'Declaration or statement expected.',
   lineNumber: 1,
 });
 
-expectType<ParseAst<`function foo(a, b) { } foo()`>>([
+expectType<ParseWrapper<`function foo(a, b) { } foo()`>>([
   {
     type: 'FunctionDeclaration',
     id: {
@@ -2051,7 +2052,7 @@ expectType<ParseAst<`function foo(a, b) { } foo()`>>([
   },
 ]);
 
-expectType<ParseAst<`function foo(a, b) {}; foo()`>>([
+expectType<ParseWrapper<`function foo(a, b) {}; foo()`>>([
   {
     type: 'FunctionDeclaration',
     id: {
@@ -2122,7 +2123,7 @@ expectType<ParseAst<`function foo(a, b) {}; foo()`>>([
   },
 ]);
 
-expectType<ParseAst<`if (a) {}`>>([
+expectType<ParseWrapper<`if (a) {}`>>([
   {
     type: 'IfStatement',
     test: {
@@ -2149,7 +2150,7 @@ expectType<ParseAst<`if (a) {}`>>([
   },
 ]);
 
-expectType<ParseAst<`if (foo()) {}`>>([
+expectType<ParseWrapper<`if (foo()) {}`>>([
   {
     type: 'IfStatement',
     test: {
@@ -2184,7 +2185,7 @@ expectType<ParseAst<`if (foo()) {}`>>([
   },
 ]);
 
-expectType<ParseAst<`if (foo()) { bar(); }`>>([
+expectType<ParseWrapper<`if (foo()) { bar(); }`>>([
   {
     type: 'IfStatement',
     test: {
@@ -2244,7 +2245,7 @@ expectType<ParseAst<`if (foo()) { bar(); }`>>([
   },
 ]);
 
-expectType<ParseAst<`if (foo()) { bar(); } bazz()`>>([
+expectType<ParseWrapper<`if (foo()) { bar(); } bazz()`>>([
   {
     type: 'IfStatement',
     test: {
@@ -2328,61 +2329,61 @@ expectType<ParseAst<`if (foo()) { bar(); } bazz()`>>([
   },
 ]);
 
-expectType<ParseAst<`if`>>({
+expectType<ParseWrapper<`if`>>({
   type: 'ParsingError',
   message: "'(' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`if (`>>({
+expectType<ParseWrapper<`if (`>>({
   type: 'ParsingError',
   message: 'Expression expected.',
   lineNumber: 1,
 });
 
-expectType<ParseAst<`if ("foo"`>>({
+expectType<ParseWrapper<`if ("foo"`>>({
   type: 'ParsingError',
   message: "')' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`if (123)`>>({
+expectType<ParseWrapper<`if (123)`>>({
   type: 'ParsingError',
   message: "'{' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`if (true) {`>>({
+expectType<ParseWrapper<`if (true) {`>>({
   type: 'ParsingError',
   message: "'}' expected.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`if () {`>>({
+expectType<ParseWrapper<`if () {`>>({
   type: 'ParsingError',
   message: 'Expression expected.',
   lineNumber: 1,
 });
 
-expectType<ParseAst<`return 123`>>({
+expectType<ParseWrapper<`return 123`>>({
   type: 'ParsingError',
   message: "A 'return' statement can only be used within a function body.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`if (a) { return 123 }`>>({
+expectType<ParseWrapper<`if (a) { return 123 }`>>({
   type: 'ParsingError',
   message: "A 'return' statement can only be used within a function body.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`return;`>>({
+expectType<ParseWrapper<`return;`>>({
   type: 'ParsingError',
   message: "A 'return' statement can only be used within a function body.",
   lineNumber: 1,
 });
 
-expectType<ParseAst<`function foo() { return 1 }`>>([
+expectType<ParseWrapper<`function foo() { return 1 }`>>([
   {
     type: 'FunctionDeclaration',
     id: {
@@ -2426,7 +2427,7 @@ expectType<ParseAst<`function foo() { return 1 }`>>([
   },
 ]);
 
-expectType<ParseAst<`function foo() { return 1; }`>>([
+expectType<ParseWrapper<`function foo() { return 1; }`>>([
   {
     type: 'FunctionDeclaration',
     id: {
@@ -2470,7 +2471,7 @@ expectType<ParseAst<`function foo() { return 1; }`>>([
   },
 ]);
 
-expectType<ParseAst<`function foo() { return; }`>>([
+expectType<ParseWrapper<`function foo() { return; }`>>([
   {
     type: 'FunctionDeclaration',
     id: {
@@ -2507,7 +2508,7 @@ expectType<ParseAst<`function foo() { return; }`>>([
   },
 ]);
 
-expectType<ParseAst<`function foo() { \nreturn\n }`>>([
+expectType<ParseWrapper<`function foo() { \nreturn\n }`>>([
   {
     type: 'FunctionDeclaration',
     id: {
@@ -2544,7 +2545,7 @@ expectType<ParseAst<`function foo() { \nreturn\n }`>>([
   },
 ]);
 
-expectType<ParseAst<`const hello: string = "world"`>>([
+expectType<ParseWrapper<`const hello: string = "world"`>>([
   {
     type: 'VariableDeclaration',
     kind: 'const',
@@ -2582,7 +2583,7 @@ expectType<ParseAst<`const hello: string = "world"`>>([
   },
 ]);
 
-expectType<ParseAst<`const \nhello: \nnumber = \n"world"`>>([
+expectType<ParseWrapper<`const \nhello: \nnumber = \n"world"`>>([
   {
     type: 'VariableDeclaration',
     kind: 'const',
@@ -2620,7 +2621,7 @@ expectType<ParseAst<`const \nhello: \nnumber = \n"world"`>>([
   },
 ]);
 
-expectType<ParseAst<`const \nhello: \nnull = \n"world"`>>([
+expectType<ParseWrapper<`const \nhello: \nnull = \n"world"`>>([
   {
     type: 'VariableDeclaration',
     kind: 'const',
@@ -2658,7 +2659,7 @@ expectType<ParseAst<`const \nhello: \nnull = \n"world"`>>([
   },
 ]);
 
-expectType<ParseAst<`const \nhello: \nboolean = \n"world"`>>([
+expectType<ParseWrapper<`const \nhello: \nboolean = \n"world"`>>([
   {
     type: 'VariableDeclaration',
     kind: 'const',
@@ -2696,7 +2697,7 @@ expectType<ParseAst<`const \nhello: \nboolean = \n"world"`>>([
   },
 ]);
 
-expectType<ParseAst<`const \nhello: \nany = \n"world"`>>([
+expectType<ParseWrapper<`const \nhello: \nany = \n"world"`>>([
   {
     type: 'VariableDeclaration',
     kind: 'const',
@@ -2734,7 +2735,7 @@ expectType<ParseAst<`const \nhello: \nany = \n"world"`>>([
   },
 ]);
 
-expectType<ParseAst<`const \nhello: \nFoo = \n"world"`>>([
+expectType<ParseWrapper<`const \nhello: \nFoo = \n"world"`>>([
   {
     type: 'VariableDeclaration',
     kind: 'const',
@@ -2773,7 +2774,7 @@ expectType<ParseAst<`const \nhello: \nFoo = \n"world"`>>([
   },
 ]);
 
-expectType<ParseAst<`function foo(a: string) {}`>>([
+expectType<ParseWrapper<`function foo(a: string) {}`>>([
   {
     type: 'FunctionDeclaration',
     id: {
@@ -2824,7 +2825,7 @@ expectType<ParseAst<`function foo(a: string) {}`>>([
   },
 ]);
 
-expectType<ParseAst<`function\n foo\n(\na: number)\n {\n}`>>([
+expectType<ParseWrapper<`function\n foo\n(\na: number)\n {\n}`>>([
   {
     type: 'FunctionDeclaration',
     id: {
@@ -2875,7 +2876,7 @@ expectType<ParseAst<`function\n foo\n(\na: number)\n {\n}`>>([
   },
 ]);
 
-expectType<ParseAst<`function\n foo\n(\na: null, \nb: boolean)\n {\n}`>>([
+expectType<ParseWrapper<`function\n foo\n(\na: null, \nb: boolean)\n {\n}`>>([
   {
     type: 'FunctionDeclaration',
     id: {
@@ -2948,7 +2949,7 @@ expectType<ParseAst<`function\n foo\n(\na: null, \nb: boolean)\n {\n}`>>([
   },
 ]);
 
-expectType<ParseAst<`\n\nhello[world]`>>([
+expectType<ParseWrapper<`\n\nhello[world]`>>([
   {
     type: 'ExpressionStatement',
     expression: {
@@ -2984,7 +2985,7 @@ expectType<ParseAst<`\n\nhello[world]`>>([
   },
 ]);
 
-expectType<ParseAst<`hello[world()]["foo"]`>>([
+expectType<ParseWrapper<`hello[world()]["foo"]`>>([
   {
     type: 'ExpressionStatement',
     expression: {
