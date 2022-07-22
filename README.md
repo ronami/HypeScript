@@ -43,12 +43,11 @@ yarn add hypescript
 
 Some [TypeScript](https://github.com/microsoft/TypeScript) syntax and features haven't been implemented and won't work. Here's a list of examples (with browser demo links) for some capabilites:
 
-- [Calling a function with insufficient arguments]()
-- [Calling a function with wrong argument types]()
-- [Trying to access a variable that haven't been defined]()
-- [Accessing a property that doesn't exist on an object]()
-- [Trying to assign a value to a variable that doesn't match its type annotation]()
-- [Trying to access a variable that haven't been defined]()
+- [Declaring variables with primitive values]()
+- [Defining and calling functions]()
+- [Instantiating arrays and accessing their members]()
+- [Creating objects and accessing their properties]()
+- [Inferring complex return value of functions]()
 
 ### Additional links
 
