@@ -1,21 +1,19 @@
 import type {
   AnyType,
   ArrayType,
-  BooleanLiteralType,
   BooleanType,
   FunctionType,
   NeverType,
   NullType,
-  NumberLiteralType,
   NumberType,
   ObjectType,
   StaticType,
-  StringLiteralType,
   StringType,
   UndefinedType,
   UnionType,
   UnknownType,
   VoidType,
+  MapLiteralToType,
 } from '../Checker';
 import type { Tail } from '../Utils';
 
@@ -80,15 +78,6 @@ type SerializeFunctionParams<
       : never
     : never
   : never;
-
-type MapLiteralToType<Type extends StaticType> =
-  Type extends NumberLiteralType<any>
-    ? NumberType
-    : Type extends StringLiteralType<any>
-    ? StringType
-    : Type extends BooleanLiteralType<any>
-    ? BooleanType
-    : Type;
 
 type ShouldUseParens<Type extends StaticType> = Type extends UnionType<any>
   ? true
