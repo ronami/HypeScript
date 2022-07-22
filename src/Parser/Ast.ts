@@ -164,6 +164,19 @@ export type ReturnStatement<
   data: Data;
 };
 
+export type AssignmentExpression<
+  Left extends BaseNode<any>,
+  Right extends BaseNode<any>,
+  Operator extends string,
+  Data extends NodeData<number, number>,
+> = {
+  type: 'AssignmentExpression';
+  left: Left;
+  right: Right;
+  operator: Operator;
+  data: Data;
+};
+
 export type BlockStatement<
   Body extends Array<BaseNode<any>>,
   Data extends NodeData<number, number>,
@@ -230,6 +243,7 @@ export type BaseNode<Data extends NodeData<number, number>> =
   | MemberExpression<any, any, any, Data>
   | IfStatement<any, any, Data>
   | ReturnStatement<any, Data>
+  | AssignmentExpression<any, any, any, any>
   | BlockStatement<any, Data>
   | TypeAnnotation<any, Data>
   | StringTypeAnnotation<Data>
