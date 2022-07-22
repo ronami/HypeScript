@@ -234,7 +234,10 @@ type ParseVariableDeclarationHelper<
   Kind extends string,
 > = Name extends keyof Scope
   ? ParseError<
-      ParsingError<`Cannot redeclare block-scoped variable '${Name}'.`, 1>
+      ParsingError<
+        `Cannot redeclare block-scoped variable '${Name}'.`,
+        KindLineNumber
+      >
     >
   : ParseResult<
       VariableDeclaration<
