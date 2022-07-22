@@ -47,7 +47,7 @@ import type {
   VariableDeclarator,
   IfStatement,
 } from '../Parser';
-import type { Serialize } from '../serializer';
+import type { Serialize } from '../Serializer';
 import type {
   Concat,
   Push,
