@@ -30,6 +30,7 @@ import type {
   ParseErrorResult,
   ParseResult,
   ScopeType,
+  NodeRequiresSemicolon,
 } from '.';
 import type {
   GenericToken,
@@ -723,16 +724,6 @@ type ParseTopLevel<
     : ParseErrorResult<"';' expected.", LineNumber>
   : never;
 
-type ShouldNeedSemicolon<Node extends BaseNode<any>> = Node extends IfStatement<
-  any,
-  any,
-  any
->
-  ? false
-  : Node extends FunctionDeclaration<any, any, any, any>
-  ? false
-  : true;
-
 type ParseBlockStatementHelper<
   TokenList extends Array<Token<any>>,
   LineNumber extends number,
@@ -753,7 +744,7 @@ type ParseBlockStatementHelper<
         LineNumber,
         InFunctionScope,
         Push<Result, Node>,
-        ShouldNeedSemicolon<Node>
+        NodeRequiresSemicolon<Node>
       >
   : never;
 
@@ -773,7 +764,7 @@ type ParseTopLevelHelper<
         TokenList,
         Scope,
         Push<Result, Node>,
-        ShouldNeedSemicolon<Node>
+        NodeRequiresSemicolon<Node>
       >
   : never;
 

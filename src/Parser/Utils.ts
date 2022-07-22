@@ -1,4 +1,4 @@
-import type { BaseNode, NodeData } from '.';
+import type { BaseNode, NodeData, IfStatement, FunctionDeclaration } from '.';
 import type { ParsingError } from '../Utils';
 import type { Token, TokenData } from '../Tokenizer';
 
@@ -40,3 +40,10 @@ export type ParseErrorResult<
 > = ParseError<ParsingError<Message, LineNumber>>;
 
 export type ScopeType = Record<string, boolean>;
+
+export type NodeRequiresSemicolon<Node extends BaseNode<any>> =
+  Node extends IfStatement<any, any, any>
+    ? false
+    : Node extends FunctionDeclaration<any, any, any, any>
+    ? false
+    : true;
