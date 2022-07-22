@@ -96,9 +96,9 @@ type MergeFunctionParams<
 > = ParamsA extends []
   ? ParamsB extends []
     ? Return
-    : [...Return, ...ParamsB]
+    : Concat<Return, ParamsB>
   : ParamsB extends []
-  ? [...Return, ...ParamsA]
+  ? Concat<Return, ParamsA>
   : MatchType<ParamsA[0][1], ParamsB[0][1]> extends true
   ? MergeFunctionParams<Tail<ParamsA>, Tail<ParamsB>, Push<Return, ParamsB[0]>>
   : MatchType<ParamsB[0][1], ParamsA[0][1]> extends true
