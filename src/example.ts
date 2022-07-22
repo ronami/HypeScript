@@ -4,7 +4,7 @@ import type { Check } from './Checker';
 
 type T = Tokenize<`
 
-let a: number;
+let a: number = 1;
 
 `>;
 type P = Parse<T>;

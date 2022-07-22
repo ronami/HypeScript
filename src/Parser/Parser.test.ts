@@ -415,28 +415,7 @@ expectType<ParseWrapper<`let`>>({
   lineNumber: 1,
 });
 
-expectType<ParseWrapper<`let hello`>>([
-  {
-    type: 'VariableDeclaration',
-    kind: 'let',
-    declarations: [
-      {
-        type: 'VariableDeclarator',
-        id: {
-          type: 'Identifier',
-          name: 'hello',
-          typeAnnotation: null,
-          data: { startLineNumber: 1, endLineNumber: 1 },
-        },
-        init: null,
-        data: { startLineNumber: 1, endLineNumber: 1 },
-      },
-    ],
-    data: { startLineNumber: 1, endLineNumber: 1 },
-  },
-]);
-
-expectType<ParseWrapper<`let hello; \n\nlet hello;`>>({
+expectType<ParseWrapper<`let hello = 1; \n\nlet hello = 2;`>>({
   type: 'ParsingError',
   message: "Cannot redeclare block-scoped variable 'hello'.",
   lineNumber: 3,
@@ -448,13 +427,13 @@ expectType<ParseWrapper<`const hello = 1; \n\nconst hello = 2;`>>({
   lineNumber: 3,
 });
 
-expectType<ParseWrapper<`let hello; \n\nconst hello = 1;`>>({
+expectType<ParseWrapper<`let hello = 1; \n\nconst hello = 1;`>>({
   type: 'ParsingError',
   message: "Cannot redeclare block-scoped variable 'hello'.",
   lineNumber: 3,
 });
 
-expectType<ParseWrapper<`let hello: number; if(a) { let hello; }`>>([
+expectType<ParseWrapper<`let hello: number = 1; if(a) { let hello = 2; }`>>([
   {
     type: 'VariableDeclaration',
     kind: 'let',
@@ -474,7 +453,11 @@ expectType<ParseWrapper<`let hello: number; if(a) { let hello; }`>>([
           },
           data: { startLineNumber: 1, endLineNumber: 1 },
         },
-        init: null,
+        init: {
+          type: 'NumericLiteral',
+          value: '1',
+          data: { startLineNumber: 1, endLineNumber: 1 },
+        },
         data: { startLineNumber: 1, endLineNumber: 1 },
       },
     ],
@@ -503,7 +486,11 @@ expectType<ParseWrapper<`let hello: number; if(a) { let hello; }`>>([
                 typeAnnotation: null,
                 data: { startLineNumber: 1, endLineNumber: 1 },
               },
-              init: null,
+              init: {
+                type: 'NumericLiteral',
+                value: '2',
+                data: { startLineNumber: 1, endLineNumber: 1 },
+              },
               data: { startLineNumber: 1, endLineNumber: 1 },
             },
           ],
@@ -516,7 +503,7 @@ expectType<ParseWrapper<`let hello: number; if(a) { let hello; }`>>([
   },
 ]);
 
-expectType<ParseWrapper<`let hello: number`>>([
+expectType<ParseWrapper<`let hello: number = 1;`>>([
   {
     type: 'VariableDeclaration',
     kind: 'let',
@@ -536,7 +523,11 @@ expectType<ParseWrapper<`let hello: number`>>([
           },
           data: { startLineNumber: 1, endLineNumber: 1 },
         },
-        init: null,
+        init: {
+          type: 'NumericLiteral',
+          value: '1',
+          data: { startLineNumber: 1, endLineNumber: 1 },
+        },
         data: { startLineNumber: 1, endLineNumber: 1 },
       },
     ],

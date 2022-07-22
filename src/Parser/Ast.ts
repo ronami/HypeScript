@@ -77,7 +77,7 @@ export type VariableDeclaration<
 
 export type VariableDeclarator<
   Id extends BaseNode<any>,
-  Init extends BaseNode<any> | null,
+  Init extends BaseNode<any>,
   Data extends NodeData<number, number>,
 > = {
   type: 'VariableDeclarator';
