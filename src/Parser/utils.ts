@@ -1,18 +1,6 @@
-import type { StaticType } from '../types';
 import type { ParsingError, TypeError } from '../errors';
-import type { BaseNode, NodeData } from '../ast';
-import type { Token, TokenData } from '../tokens';
-
-export type TypeResult<
-  Value extends StaticType,
-  State extends StateType,
-  Errors extends Array<TypeError<any, any>> = [],
-> = {
-  type: 'TypeResult';
-  value: Value;
-  state: State;
-  errors: Errors;
-};
+import type { BaseNode, NodeData } from '../Parser';
+import type { Token, TokenData } from '../Tokenizer';
 
 export type ParseResult<
   Node extends BaseNode<NodeData<number, number>>,
@@ -50,7 +38,5 @@ export type ParseErrorResult<
   Message extends string,
   LineNumber extends number,
 > = ParseError<ParsingError<Message, LineNumber>>;
-
-export type StateType = Record<string, StaticType>;
 
 export type ScopeType = Record<string, boolean>;

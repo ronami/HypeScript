@@ -1,11 +1,10 @@
-import type { Push } from './utils/arrayUtils';
+import type { Push } from '../Utils';
 import type {
   EatFirstChar,
   GetFirstChar,
   ConcatStrings,
   StringContains,
-} from './utils/stringUtils';
-import type { GenericTokens, Numbers, Symbols } from './utils/generalUtils';
+} from './stringUtils';
 import type {
   Token,
   NumberToken,
@@ -13,9 +12,12 @@ import type {
   StringToken,
   TokenData,
   GenericToken,
-} from './tokens';
-import type { SyntaxError } from './errors';
-import type { Succ } from './utils/math';
+  Succ,
+  Punctuation,
+  Numbers,
+  Symbols,
+} from '.';
+import type { SyntaxError } from '../errors';
 
 type TokenizeInput<
   Input extends string,
@@ -24,7 +26,7 @@ type TokenizeInput<
   PrecedingLinebreak extends boolean,
   LineNumber extends number,
   Data extends TokenData<any, any> = TokenData<PrecedingLinebreak, LineNumber>,
-> = FirstChar extends GenericTokens
+> = FirstChar extends Punctuation
   ? [GenericToken<FirstChar, Data>, InputTail]
   : FirstChar extends Numbers
   ? TokenizeNumber<Input, '', Data, FirstChar>

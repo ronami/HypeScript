@@ -25,8 +25,13 @@ import type {
   AnyTypeAnnotation,
   NodeData,
   BaseNode,
-} from './ast';
-import type { ParsingError } from './errors';
+  ParseArrayResult,
+  ParseError,
+  ParseErrorResult,
+  ParseResult,
+  ScopeType,
+} from '.';
+import type { ParsingError } from '../errors';
 import type {
   GenericToken,
   NumberToken,
@@ -34,16 +39,8 @@ import type {
   SymbolToken,
   Token,
   TokenData,
-} from './tokens';
-import type { Push, Tail, TailBy } from './utils/arrayUtils';
-import type { MergeWithOverride } from './utils/generalUtils';
-import type {
-  ParseArrayResult,
-  ParseError,
-  ParseErrorResult,
-  ParseResult,
-  ScopeType,
-} from './utils/utilityTypes';
+} from '../Tokenizer';
+import type { Push, Tail, TailBy, ObjectMerge } from '../Utils';
 
 type ParseIdentifier<
   TokenList extends Array<Token<any>>,
@@ -263,7 +260,7 @@ type ParseVariableDeclarationHelper<
       >,
       TokenList,
       null,
-      MergeWithOverride<Scope, { [a in Name]: true }>
+      ObjectMerge<Scope, { [a in Name]: true }>
     >;
 
 type ParseVariableDeclaration<
