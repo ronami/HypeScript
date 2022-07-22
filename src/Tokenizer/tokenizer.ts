@@ -1,4 +1,3 @@
-import type { Push } from '../Utils';
 import type {
   Token,
   NumberToken,
@@ -15,7 +14,7 @@ import type {
   ConcatStrings,
   StringContains,
 } from '.';
-import type { SyntaxError } from '../errors';
+import type { Push, SyntaxError } from '../Utils';
 
 type TokenizeInput<
   Input extends string,

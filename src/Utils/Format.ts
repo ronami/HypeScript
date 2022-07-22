@@ -1,5 +1,4 @@
-import type { Error } from './errors';
-import type { Push, Tail } from './Utils';
+import type { Push, Tail, Error } from '.';
 
 export type Format<
   Errors extends Array<Error<any, any>>,
