@@ -1,4 +1,5 @@
 import type {
+  MatchType,
   StaticType,
   NumberLiteralType,
   NumberType,
@@ -9,6 +10,8 @@ import type {
   NullType,
   AnyType,
   UnknownType,
+  NeverType,
+  UnionType,
 } from '.';
 import type {
   AnyTypeAnnotation,
@@ -65,3 +68,26 @@ export type MapAnnotationToType<AnnotationValue extends BaseNode<any>> =
     : AnnotationValue extends AnyTypeAnnotation<any>
     ? AnyType
     : UnknownType;
+
+export type MergeTypes<
+  TypeA extends StaticType,
+  TypeB extends StaticType,
+> = TypeA extends NeverType
+  ? TypeB
+  : TypeB extends NeverType
+  ? TypeA
+  : TypeA extends AnyType
+  ? AnyType
+  : TypeB extends AnyType
+  ? AnyType
+  : MatchType<TypeA, TypeB> extends true
+  ? TypeA
+  : MatchType<TypeB, TypeA> extends true
+  ? TypeB
+  : TypeA extends UnionType<infer UnionTypesA>
+  ? TypeB extends UnionType<infer UnionTypesB>
+    ? UnionType<[...UnionTypesA, ...UnionTypesB]>
+    : UnionType<[...UnionTypesA, TypeB]>
+  : TypeB extends UnionType<infer UnionTypesB>
+  ? UnionType<[...UnionTypesB, TypeA]>
+  : UnionType<[TypeA, TypeB]>;
