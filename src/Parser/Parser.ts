@@ -210,14 +210,11 @@ type ParseLetVariableDeclaration<
             'let'
           >
       : ParseErrorResult<'Expression expected.', EqualsLineNumber>
-    : ParseVariableDeclarationHelper<
-        TokenList,
-        Name,
-        Scope,
-        Id,
-        null,
-        KindLineNumber,
-        'let'
+    : ParseError<
+        ParsingError<
+          "'let' declarations must be initialized.",
+          Id['data']['startLineNumber']
+        >
       >
   : never;
 
@@ -226,7 +223,7 @@ type ParseVariableDeclarationHelper<
   Name extends string,
   Scope extends ScopeType,
   Id extends BaseNode<NodeData<number, number>>,
-  Init extends BaseNode<NodeData<number, number>> | null,
+  Init extends BaseNode<NodeData<number, number>>,
   KindLineNumber extends number,
   Kind extends string,
 > = Name extends keyof Scope

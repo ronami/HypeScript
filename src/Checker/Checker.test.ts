@@ -111,7 +111,7 @@ hello;
 expectType<
   CheckWrapper<`
 
-let hello;
+let hello = 1;
 let world: number = hello;
 
 `>
