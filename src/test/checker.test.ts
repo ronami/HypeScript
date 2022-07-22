@@ -85,6 +85,55 @@ hello;
 expectType<
   TypeCheck<`
 
+let a = null
+
+`>
+>([]);
+
+expectType<
+  TypeCheck<`
+
+let b = "world";
+
+`>
+>([]);
+
+expectType<
+  TypeCheck<`
+
+let hello = 1;
+hello;
+
+`>
+>([]);
+
+expectType<
+  TypeCheck<`
+
+let hello;
+let world: number = hello;
+
+`>
+>([]);
+
+expectType<
+  TypeCheck<`
+
+let hello = 'world';
+let world: number = hello;
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Type 'string' is not assignable to type 'number'.",
+    lineNumber: 4,
+  },
+]);
+
+expectType<
+  TypeCheck<`
+
 const hello = { foo: "bar" };
 hello.world
 
