@@ -1,6 +1,4 @@
-export type MergeWithOverride<T1, T2> = Omit<T1, keyof T2> & T2;
-
-export type GenericTokens =
+export type Punctuation =
   | ','
   | '('
   | ')'

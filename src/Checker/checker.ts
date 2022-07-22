@@ -24,9 +24,9 @@ import type {
   VariableDeclaration,
   VariableDeclarator,
   IfStatement,
-} from './ast';
-import type { TypeError } from './errors';
-import type { Serialize } from './serializer';
+} from '../Parser';
+import type { TypeError } from '../errors';
+import type { Serialize } from '../serializer';
 import type {
   AnyType,
   ArrayType,
@@ -46,10 +46,10 @@ import type {
   UnionType,
   UnknownType,
   VoidType,
-} from './types';
-import type { Concat, Push, Tail, Unshift } from './utils/arrayUtils';
-import type { MergeWithOverride } from './utils/generalUtils';
-import type { StateType, TypeResult } from './utils/utilityTypes';
+  StateType,
+  TypeResult,
+} from '.';
+import type { Concat, Push, Tail, Unshift, ObjectMerge } from '../Utils';
 
 export type Check<NodeList extends Array<BaseNode<any>>> = InferBlockStatement<
   NodeList,
@@ -320,7 +320,7 @@ type InferFunctionParamsHelper<
 > = InferFunctionParams<
   Tail<Params>,
   Push<FunctionParams, [Name, Type]>,
-  MergeWithOverride<ParamsByName, { [a in Name]: Type }>,
+  ObjectMerge<ParamsByName, { [a in Name]: Type }>,
   Errors
 >;
 
@@ -339,7 +339,7 @@ type InferFunctionDeclaration<
       ? Errors extends Array<TypeError<any, any>>
         ? InferBlockStatement<
             Body,
-            MergeWithOverride<State, ParamsByName>
+            ObjectMerge<State, ParamsByName>
           > extends TypeResult<
             infer BlockStatementReturnType,
             any,
@@ -347,7 +347,7 @@ type InferFunctionDeclaration<
           >
           ? TypeResult<
               UndefinedType,
-              MergeWithOverride<
+              ObjectMerge<
                 State,
                 {
                   [a in Name]: FunctionType<
@@ -461,18 +461,12 @@ type InferVariableDeclaration<
           ? MatchType<ExpectedType, InitExpressionValue> extends true
             ? TypeResult<
                 UndefinedType,
-                MergeWithOverride<
-                  InitExpressionState,
-                  { [a in Name]: ExpectedType }
-                >,
+                ObjectMerge<InitExpressionState, { [a in Name]: ExpectedType }>,
                 InitExpressionErrors
               >
             : TypeResult<
                 UndefinedType,
-                MergeWithOverride<
-                  InitExpressionState,
-                  { [a in Name]: ExpectedType }
-                >,
+                ObjectMerge<InitExpressionState, { [a in Name]: ExpectedType }>,
                 Push<
                   InitExpressionErrors,
                   TypeError<
@@ -485,7 +479,7 @@ type InferVariableDeclaration<
         : never
       : TypeResult<
           UndefinedType,
-          MergeWithOverride<State, { [a in Name]: InitExpressionValue }>,
+          ObjectMerge<State, { [a in Name]: InitExpressionValue }>,
           InitExpressionErrors
         >
     : never
@@ -493,13 +487,10 @@ type InferVariableDeclaration<
   ? MapAnnotationToType<AnnotationValue> extends infer ExpectedType
     ? TypeResult<
         UndefinedType,
-        MergeWithOverride<State, { [a in Name]: ExpectedType }>
+        ObjectMerge<State, { [a in Name]: ExpectedType }>
       >
     : never
-  : TypeResult<
-      UndefinedType,
-      MergeWithOverride<State, { [a in Name]: AnyType }>
-    >;
+  : TypeResult<UndefinedType, ObjectMerge<State, { [a in Name]: AnyType }>>;
 
 type InferExpression<
   Node extends BaseNode<any>,
@@ -657,7 +648,7 @@ type InferExpressionsArray<
     >
   ? InferExpressionsArray<
       Tail<NodeList>,
-      MergeWithOverride<State, ExpressionState>,
+      ObjectMerge<State, ExpressionState>,
       Push<Result, ExpressionValue>,
       Concat<Errors, ExpressionErrors>
     >
