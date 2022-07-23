@@ -12,6 +12,7 @@ import type {
   UnknownType,
   NeverType,
   UnionType,
+  FunctionType,
 } from '.';
 import type {
   AnyTypeAnnotation,
@@ -104,3 +105,51 @@ export type MergeTypes<
 export type IsKindMutable<Kind extends string> = Kind extends 'const'
   ? false
   : true;
+
+export type MergeFunctionTypesArray<
+  FunctionTypes extends Array<FunctionType<any, any>>,
+  ReturnType extends FunctionType<any, any>,
+> = FunctionTypes extends []
+  ? ReturnType
+  : FunctionTypes[0] extends FunctionType<infer Params, infer Return>
+  ? MergeFunctionTypesArray<
+      Tail<FunctionTypes>,
+      MergeFunctionTypes<Params, Return, ReturnType>
+    >
+  : never;
+
+type MergeFunctionTypes<
+  Params extends Array<[string, StaticType]>,
+  Return extends StaticType,
+  Function extends FunctionType<any, any>,
+> = Function extends FunctionType<infer OtherParams, infer OtherReturn>
+  ? MergeFunctionParams<Params, OtherParams> extends infer P
+    ? P extends Array<[string, StaticType]>
+      ? MergeTypes<Return, OtherReturn> extends infer ReturnType
+        ? ReturnType extends StaticType
+          ? FunctionType<P, ReturnType>
+          : never
+        : never
+      : never
+    : never
+  : never;
+
+type MergeFunctionParams<
+  ParamsA extends Array<[string, StaticType]>,
+  ParamsB extends Array<[string, StaticType]>,
+  Return extends Array<[string, StaticType]> = [],
+> = ParamsA extends []
+  ? ParamsB extends []
+    ? Return
+    : Concat<Return, ParamsB>
+  : ParamsB extends []
+  ? Concat<Return, ParamsA>
+  : MatchType<ParamsA[0][1], ParamsB[0][1]> extends true
+  ? MergeFunctionParams<Tail<ParamsA>, Tail<ParamsB>, Push<Return, ParamsB[0]>>
+  : MatchType<ParamsB[0][1], ParamsA[0][1]> extends true
+  ? MergeFunctionParams<Tail<ParamsA>, Tail<ParamsB>, Push<Return, ParamsA[0]>>
+  : MergeFunctionParams<
+      Tail<ParamsA>,
+      Tail<ParamsB>,
+      Push<Return, [ParamsA[0][0], NeverType]>
+    >;
