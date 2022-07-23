@@ -4,8 +4,10 @@ import type { Check } from './Checker';
 
 type T = Tokenize<`
 
-a.b = 1;
+const a = { foo: 5 };
+
+a.faoo = '4';
 
 `>;
 type P = Parse<T>;
-// type C = Check<P>;
+type C = Check<P>;

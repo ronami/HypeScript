@@ -43,6 +43,7 @@ import type {
   VariableDeclaration,
   VariableDeclarator,
   IfStatement,
+  AssignmentExpression,
 } from '../Parser';
 import type { Serialize } from '../Serializer';
 import type {
@@ -428,7 +429,33 @@ type InferExpression<
       NodeData<infer StartLine, any>
     >
   ? InferCallExpression<Callee, Arguments, State, StartLine>
+  : Node extends AssignmentExpression<infer Left, infer Right, '=', any>
+  ? InferAssignmentExpression<Left, Right, State>
   : UnknownType;
+
+type InferAssignmentExpression<
+  Left extends BaseNode<any>,
+  Right extends BaseNode<any>,
+  State extends StateType,
+> = InferExpression<Left, State> extends TypeResult<
+  infer LeftValue,
+  infer LeftState,
+  infer LeftErrors
+>
+  ? InferExpression<Right, LeftState> extends TypeResult<
+      infer RightValue,
+      infer RightState,
+      infer RightErrors
+    >
+    ? MatchType<LeftValue, RightValue> extends true
+      ? TypeResult<RightValue, RightState, Concat<LeftErrors, RightErrors>>
+      : TypeResult<
+          RightValue,
+          RightState,
+          Push<Concat<LeftErrors, RightErrors>, TypeError<'foo', 1>>
+        >
+    : never
+  : never;
 
 type InferCallExpression<
   Callee extends BaseNode<any>,
