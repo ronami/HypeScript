@@ -31,20 +31,6 @@ hello
 expectType<
   CheckWrapper<`
 
-world;
-
-`>
->([
-  {
-    type: 'TypeError',
-    message: "Cannot find name 'world'.",
-    lineNumber: 3,
-  },
-]);
-
-expectType<
-  CheckWrapper<`
-
 "string"
 
 `>
@@ -95,15 +81,6 @@ expectType<
   CheckWrapper<`
 
 let b = "world";
-
-`>
->([]);
-
-expectType<
-  CheckWrapper<`
-
-let hello = 1;
-hello;
 
 `>
 >([]);
@@ -207,16 +184,6 @@ hello.foo
     lineNumber: 5,
   },
 ]);
-
-expectType<
-  CheckWrapper<`
-
-const hello = "world";
-const foo = hello;
-
-`>
->([]);
-
 expectType<
   CheckWrapper<`
 
