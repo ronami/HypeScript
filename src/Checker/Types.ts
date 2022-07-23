@@ -73,11 +73,6 @@ export type UnionType<Types extends Array<StaticType>> = {
   types: Types;
 };
 
-// export type GenericType<T> = {
-//   type: 'GenericType';
-//   id: T;
-// };
-
 export type StaticType =
   | StringType
   | StringLiteralType<any>
@@ -95,4 +90,3 @@ export type StaticType =
   | ObjectType<any>
   | ArrayType<any>
   | UnionType<any>;
-// | GenericType<any>;
