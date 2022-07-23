@@ -1,6 +1,5 @@
 node_modules
 .vscode
 build
-tmp
 .eslintcache
 tsconfig.tsbuildinfo
