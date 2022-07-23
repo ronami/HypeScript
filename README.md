@@ -27,7 +27,7 @@ type Expected = [
 ];
 ```
 
-Or you can try a more challenging example:
+Or you can try a more challenging example (**[See the live demo]()**):
 
 ```typescript
 import type { TypeCheck } from 'hypescript';
