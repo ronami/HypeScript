@@ -611,55 +611,62 @@ type ParseExpressionStatement<TokenList extends Array<Token<any>>> =
       : ParseResult<ExpressionStatement<Node, Node['data']>, TokenList>
     : null;
 
-type ParseFunctionDeclaration<TokenList extends Array<Token<any>>> =
-  TokenList[0] extends SymbolToken<
-    'function',
-    TokenData<any, infer FunctionLineNumber>
-  >
-    ? TokenList[1] extends SymbolToken<
-        infer Name,
-        TokenData<any, infer FunctionNameLineNumber>
+type ParseFunctionDeclaration<
+  TokenList extends Array<Token<any>>,
+  Scope extends ScopeType,
+> = TokenList[0] extends SymbolToken<
+  'function',
+  TokenData<any, infer FunctionLineNumber>
+>
+  ? TokenList[1] extends SymbolToken<
+      infer Name,
+      TokenData<any, infer FunctionNameLineNumber>
+    >
+    ? TokenList[2] extends GenericToken<
+        '(',
+        TokenData<any, infer ParenLineNumber>
       >
-      ? TokenList[2] extends GenericToken<
-          '(',
-          TokenData<any, infer ParenLineNumber>
-        >
-        ? ParseFunctionParams<
-            TailBy<TokenList, 3>,
-            ParenLineNumber
-          > extends ParseArrayResult<
-            infer NodeList,
-            infer TokenList,
-            infer Error
-          >
+      ? ParseFunctionParams<
+          TailBy<TokenList, 3>,
+          ParenLineNumber
+        > extends ParseArrayResult<infer NodeList, infer TokenList, infer Error>
+        ? Error extends ParsingError<any, any>
+          ? ParseError<Error>
+          : ParseBlockStatement<
+              Tail<TokenList>,
+              {},
+              TokenList[0]['data']['lineNumber'],
+              true
+            > extends ParseResult<infer Node, infer TokenList, infer Error>
           ? Error extends ParsingError<any, any>
             ? ParseError<Error>
-            : ParseBlockStatement<
-                Tail<TokenList>,
-                {},
-                TokenList[0]['data']['lineNumber'],
-                true
-              > extends ParseResult<infer Node, infer TokenList, infer Error>
-            ? Error extends ParsingError<any, any>
-              ? ParseError<Error>
-              : ParseResult<
-                  FunctionDeclaration<
-                    Identifier<
-                      Name,
-                      null,
-                      NodeData<FunctionNameLineNumber, FunctionNameLineNumber>
-                    >,
-                    NodeList,
-                    Node,
-                    NodeData<FunctionLineNumber, Node['data']['endLineNumber']>
-                  >,
-                  TokenList
+            : Name extends keyof Scope
+            ? ParseError<
+                ParsingError<
+                  `Cannot redeclare block-scoped variable '${Name}'.`,
+                  FunctionLineNumber
                 >
-            : never
+              >
+            : ParseResult<
+                FunctionDeclaration<
+                  Identifier<
+                    Name,
+                    null,
+                    NodeData<FunctionNameLineNumber, FunctionNameLineNumber>
+                  >,
+                  NodeList,
+                  Node,
+                  NodeData<FunctionLineNumber, Node['data']['endLineNumber']>
+                >,
+                TokenList,
+                null,
+                ObjectMerge<Scope, { [a in Name]: true }>
+              >
           : never
-        : ParseErrorResult<"'(' expected.", FunctionNameLineNumber>
-      : ParseErrorResult<'Identifier expected.', FunctionLineNumber>
-    : null;
+        : never
+      : ParseErrorResult<"'(' expected.", FunctionNameLineNumber>
+    : ParseErrorResult<'Identifier expected.', FunctionLineNumber>
+  : null;
 
 type ParseFunctionParams<
   TokenList extends Array<Token<any>>,
@@ -919,10 +926,11 @@ type ParseStatementHelper<
   TokenList extends Array<Token<any>>,
   InFunctionScope extends boolean,
   Scope extends ScopeType,
-> = ParseFunctionDeclaration<TokenList> extends ParseResult<
+> = ParseFunctionDeclaration<TokenList, Scope> extends ParseResult<
   infer Node,
   infer TokenList,
-  infer Error
+  infer Error,
+  infer Scope
 >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
