@@ -73,11 +73,6 @@ export type UnionType<Types extends Array<StaticType>> = {
   types: Types;
 };
 
-export type CallArgumentsType<Arguments extends Array<StaticType>> = {
-  type: 'CallArgumentsType';
-  arguments: Arguments;
-};
-
 // export type GenericType<T> = {
 //   type: 'GenericType';
 //   id: T;
@@ -99,6 +94,5 @@ export type StaticType =
   | FunctionType<any, any>
   | ObjectType<any>
   | ArrayType<any>
-  | UnionType<any>
-  | CallArgumentsType<any>;
+  | UnionType<any>;
 // | GenericType<any>;

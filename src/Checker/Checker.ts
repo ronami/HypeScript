@@ -2,7 +2,6 @@ import type {
   AnyType,
   ArrayType,
   BooleanLiteralType,
-  CallArgumentsType,
   FunctionType,
   NeverType,
   NullType,
@@ -16,6 +15,7 @@ import type {
   VoidType,
   StateType,
   TypeResult,
+  TypeArrayResult,
   MapLiteralToType,
   MatchType,
   GetObjectValueByKey,
@@ -498,8 +498,8 @@ type InferCallExpression<
   infer CalleeState,
   infer CalleeErrors
 >
-  ? InferExpressionsArray<Arguments, CalleeState> extends TypeResult<
-      CallArgumentsType<infer ArgumentsType>,
+  ? InferExpressionsArray<Arguments, CalleeState> extends TypeArrayResult<
+      infer ArgumentsType,
       infer ArgumentsState,
       infer ArgumentsErrors
     >
@@ -599,7 +599,7 @@ type InferExpressionsArray<
   Result extends Array<StaticType> = [],
   Errors extends Array<TypeError<any, any>> = [],
 > = NodeList extends []
-  ? TypeResult<CallArgumentsType<Result>, State, Errors>
+  ? TypeArrayResult<Result, State, Errors>
   : InferExpression<NodeList[0], State> extends TypeResult<
       infer ExpressionValue,
       infer ExpressionState,
