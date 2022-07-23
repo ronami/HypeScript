@@ -21,7 +21,7 @@ import type {
   GetObjectValueByKey,
   MapAnnotationToType,
   MergeTypes,
-  ConstVariableType,
+  StateVariableType,
 } from '.';
 import type {
   ArrayExpression,
@@ -290,7 +290,7 @@ type InferFunctionParamsHelper<
 > = InferFunctionParams<
   Tail<Params>,
   Push<FunctionParams, [Name, Type]>,
-  ObjectMerge<ParamsByName, { [a in Name]: ConstVariableType<Type> }>,
+  ObjectMerge<ParamsByName, { [a in Name]: StateVariableType<Type, true> }>,
   Errors
 >;
 
@@ -320,8 +320,9 @@ type InferFunctionDeclaration<
               ObjectMerge<
                 State,
                 {
-                  [a in Name]: ConstVariableType<
-                    FunctionType<FunctionParams, BlockStatementReturnType>
+                  [a in Name]: StateVariableType<
+                    FunctionType<FunctionParams, BlockStatementReturnType>,
+                    false
                   >;
                 }
               >,
@@ -374,7 +375,7 @@ type InferVariableDeclaration<
               UndefinedType,
               ObjectMerge<
                 InitExpressionState,
-                { [a in Name]: ConstVariableType<ExpectedType> }
+                { [a in Name]: StateVariableType<ExpectedType, false> }
               >,
               InitExpressionErrors
             >
@@ -382,7 +383,7 @@ type InferVariableDeclaration<
               UndefinedType,
               ObjectMerge<
                 InitExpressionState,
-                { [a in Name]: ConstVariableType<ExpectedType> }
+                { [a in Name]: StateVariableType<ExpectedType, false> }
               >,
               Push<
                 InitExpressionErrors,
@@ -399,7 +400,7 @@ type InferVariableDeclaration<
         ObjectMerge<
           State,
           {
-            [a in Name]: ConstVariableType<InitExpressionValue>;
+            [a in Name]: StateVariableType<InitExpressionValue, false>;
           }
         >,
         InitExpressionErrors
