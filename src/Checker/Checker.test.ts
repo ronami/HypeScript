@@ -1175,3 +1175,45 @@ const d: number = c[0](1, false);
     lineNumber: 13,
   },
 ]);
+
+expectType<
+  CheckWrapper<`
+
+const a = 1;
+
+a = 2;
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Cannot assign to 'a' because it is a constant.",
+    lineNumber: 5,
+  },
+]);
+
+expectType<
+  CheckWrapper<`
+
+let a = 1;
+
+a = 2;
+
+`>
+>([]);
+
+expectType<
+  CheckWrapper<`
+
+let a = 2;
+
+a = 'foo';
+
+`>
+>([
+  {
+    type: 'TypeError',
+    message: "Type 'string' is not assignable to type 'number'.",
+    lineNumber: 5,
+  },
+]);
