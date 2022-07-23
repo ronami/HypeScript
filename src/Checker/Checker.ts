@@ -21,6 +21,7 @@ import type {
   GetObjectValueByKey,
   MapAnnotationToType,
   MergeTypes,
+  StateVariable,
 } from '.';
 import type {
   ArrayExpression,
@@ -146,13 +147,14 @@ type InferBlockStatement<
           any
         >,
       ],
-      any,
+      infer Kind,
       any
     >
   ? InferVariableDeclaration<
       Name,
       Annotation,
       Init,
+      Kind,
       State,
       StartLine
     > extends TypeResult<any, infer DeclarationState, infer DeclarationErrors>
@@ -288,7 +290,7 @@ type InferFunctionParamsHelper<
 > = InferFunctionParams<
   Tail<Params>,
   Push<FunctionParams, [Name, Type]>,
-  ObjectMerge<ParamsByName, { [a in Name]: Type }>,
+  ObjectMerge<ParamsByName, { [a in Name]: StateVariable<Type, Type> }>,
   Errors
 >;
 
@@ -318,9 +320,9 @@ type InferFunctionDeclaration<
               ObjectMerge<
                 State,
                 {
-                  [a in Name]: FunctionType<
-                    FunctionParams,
-                    BlockStatementReturnType
+                  [a in Name]: StateVariable<
+                    FunctionType<FunctionParams, BlockStatementReturnType>,
+                    FunctionType<FunctionParams, BlockStatementReturnType>
                   >;
                 }
               >,
@@ -357,6 +359,7 @@ type InferVariableDeclaration<
   Name extends string,
   Annotation extends BaseNode<any> | null,
   Init extends BaseNode<any>,
+  Kind extends string,
   State extends StateType,
   StartLine extends number,
 > = InferExpression<Init, State> extends TypeResult<
@@ -370,12 +373,18 @@ type InferVariableDeclaration<
         ? MatchType<ExpectedType, InitExpressionValue> extends true
           ? TypeResult<
               UndefinedType,
-              ObjectMerge<InitExpressionState, { [a in Name]: ExpectedType }>,
+              ObjectMerge<
+                InitExpressionState,
+                { [a in Name]: StateVariable<ExpectedType, ExpectedType> }
+              >,
               InitExpressionErrors
             >
           : TypeResult<
               UndefinedType,
-              ObjectMerge<InitExpressionState, { [a in Name]: ExpectedType }>,
+              ObjectMerge<
+                InitExpressionState,
+                { [a in Name]: StateVariable<ExpectedType, ExpectedType> }
+              >,
               Push<
                 InitExpressionErrors,
                 TypeError<
@@ -388,7 +397,15 @@ type InferVariableDeclaration<
       : never
     : TypeResult<
         UndefinedType,
-        ObjectMerge<State, { [a in Name]: InitExpressionValue }>,
+        ObjectMerge<
+          State,
+          {
+            [a in Name]: StateVariable<
+              InitExpressionValue,
+              InitExpressionValue
+            >;
+          }
+        >,
         InitExpressionErrors
       >
   : never;
@@ -406,7 +423,7 @@ type InferExpression<
   ? TypeResult<BooleanLiteralType<Value>, State>
   : Node extends Identifier<infer Name, any, NodeData<infer StartLine, any>>
   ? Name extends keyof State
-    ? TypeResult<State[Name], State>
+    ? TypeResult<State[Name]['value'], State>
     : TypeResult<
         AnyType,
         State,

@@ -23,7 +23,21 @@ import type {
 } from '../Parser';
 import type { Concat, Push, Tail, TypeError } from '../Utils';
 
-export type StateType = Record<string, StaticType>;
+export type StateVariable<
+  Value extends StaticType,
+  ExpectedType extends StaticType,
+  Mutable extends boolean = false,
+> = {
+  type: 'StateVariable';
+  value: Value;
+  expectedType: ExpectedType;
+  mutable: Mutable;
+};
+
+export type StateType = Record<
+  string,
+  StateVariable<StaticType, StaticType, boolean>
+>;
 
 export type TypeResult<
   Value extends StaticType,
