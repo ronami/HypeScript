@@ -9,6 +9,7 @@ import type {
   Punctuation,
   Numbers,
   Symbols,
+  Comment,
   EatFirstChar,
   GetFirstChar,
   ConcatStrings,
@@ -95,6 +96,8 @@ export type Tokenize<
   ? Result
   : FirstChar extends ' '
   ? Tokenize<InputTail, Result, LineNumber, PrecedingLinebreak>
+  : Input extends `//${infer Commented}\n${infer Rest}`
+  ? Tokenize<Rest, Result, Succ<LineNumber>, true>
   : FirstChar extends '\n'
   ? Tokenize<InputTail, Result, Succ<LineNumber>, true>
   : TokenizeInput<
