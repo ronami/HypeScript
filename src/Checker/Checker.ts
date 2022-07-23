@@ -22,6 +22,7 @@ import type {
   MapAnnotationToType,
   MergeTypes,
   StateVariableType,
+  IsKindMutable,
 } from '.';
 import type {
   ArrayExpression,
@@ -45,6 +46,7 @@ import type {
   VariableDeclarator,
   IfStatement,
   AssignmentExpression,
+  ParseErrorResult,
 } from '../Parser';
 import type { Serialize } from '../Serializer';
 import type {
@@ -375,7 +377,12 @@ type InferVariableDeclaration<
               UndefinedType,
               ObjectMerge<
                 InitExpressionState,
-                { [a in Name]: StateVariableType<ExpectedType, false> }
+                {
+                  [a in Name]: StateVariableType<
+                    ExpectedType,
+                    IsKindMutable<Kind>
+                  >;
+                }
               >,
               InitExpressionErrors
             >
@@ -383,7 +390,12 @@ type InferVariableDeclaration<
               UndefinedType,
               ObjectMerge<
                 InitExpressionState,
-                { [a in Name]: StateVariableType<ExpectedType, false> }
+                {
+                  [a in Name]: StateVariableType<
+                    ExpectedType,
+                    IsKindMutable<Kind>
+                  >;
+                }
               >,
               Push<
                 InitExpressionErrors,
@@ -399,9 +411,16 @@ type InferVariableDeclaration<
         UndefinedType,
         ObjectMerge<
           State,
-          {
-            [a in Name]: StateVariableType<InitExpressionValue, false>;
-          }
+          Kind extends 'const'
+            ? {
+                [a in Name]: StateVariableType<InitExpressionValue, false>;
+              }
+            : {
+                [a in Name]: StateVariableType<
+                  MapLiteralToType<InitExpressionValue>,
+                  true
+                >;
+              }
         >,
         InitExpressionErrors
       >
@@ -443,14 +462,20 @@ type InferExpression<
       NodeData<infer StartLine, any>
     >
   ? InferCallExpression<Callee, Arguments, State, StartLine>
-  : Node extends AssignmentExpression<infer Left, infer Right, '=', any>
-  ? InferAssignmentExpression<Left, Right, State>
+  : Node extends AssignmentExpression<
+      infer Left,
+      infer Right,
+      '=',
+      NodeData<infer LineNumber, any>
+    >
+  ? InferAssignmentExpression<Left, Right, State, LineNumber>
   : UnknownType;
 
 type InferAssignmentExpression<
   Left extends BaseNode<any>,
   Right extends BaseNode<any>,
   State extends StateType,
+  EqualsLineNumber extends number,
 > = InferExpression<Left, State> extends TypeResult<
   infer LeftValue,
   infer LeftState,
@@ -461,15 +486,55 @@ type InferAssignmentExpression<
       infer RightState,
       infer RightErrors
     >
-    ? MatchType<LeftValue, RightValue> extends true
-      ? TypeResult<RightValue, RightState, Concat<LeftErrors, RightErrors>>
-      : TypeResult<
+    ? Left extends Identifier<infer Name, any, any>
+      ? State[Name]['mutable'] extends false
+        ? TypeResult<
+            RightValue,
+            RightState,
+            Push<
+              Concat<LeftErrors, RightErrors>,
+              TypeError<
+                `Cannot assign to '${Name}' because it is a constant.`,
+                EqualsLineNumber
+              >
+            >
+          >
+        : InferAssignmentExpressionHelper<
+            LeftValue,
+            RightValue,
+            RightState,
+            Concat<LeftErrors, RightErrors>,
+            EqualsLineNumber
+          >
+      : InferAssignmentExpressionHelper<
+          LeftValue,
           RightValue,
           RightState,
-          Push<Concat<LeftErrors, RightErrors>, TypeError<'foo', 1>>
+          Concat<LeftErrors, RightErrors>,
+          EqualsLineNumber
         >
     : never
   : never;
+
+type InferAssignmentExpressionHelper<
+  LeftValue extends StaticType,
+  RightValue extends StaticType,
+  RightState extends StateType,
+  Errors extends Array<TypeError<any, any>>,
+  LineNumber extends number,
+> = MatchType<LeftValue, RightValue> extends true
+  ? TypeResult<RightValue, RightState, Errors>
+  : TypeResult<
+      RightValue,
+      RightState,
+      Push<
+        Errors,
+        TypeError<
+          `Type '${Serialize<RightValue>}' is not assignable to type '${Serialize<LeftValue>}'.`,
+          LineNumber
+        >
+      >
+    >;
 
 type InferCallExpression<
   Callee extends BaseNode<any>,

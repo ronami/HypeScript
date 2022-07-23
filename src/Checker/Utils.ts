@@ -100,3 +100,7 @@ export type MergeTypes<
   : TypeB extends UnionType<infer UnionTypesB>
   ? UnionType<Push<UnionTypesB, TypeA>>
   : UnionType<[TypeA, TypeB]>;
+
+export type IsKindMutable<Kind extends string> = Kind extends 'const'
+  ? false
+  : true;

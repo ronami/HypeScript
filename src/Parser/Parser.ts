@@ -361,10 +361,15 @@ type ParseAssignmentExpression<
     ? RightError extends ParsingError<any, any>
       ? ParseError<RightError>
       : Left extends
-          | Identifier<any, any, any>
-          | MemberExpression<any, any, any, any>
+          | Identifier<any, any, NodeData<infer LeftLineNumber, any>>
+          | MemberExpression<any, any, any, NodeData<infer LeftLineNumber, any>>
       ? ParseResult<
-          AssignmentExpression<Left, RightNode, '=', NodeData<1, 1>>,
+          AssignmentExpression<
+            Left,
+            RightNode,
+            '=',
+            NodeData<LeftLineNumber, RightNode['data']['startLineNumber']>
+          >,
           RightTokenList
         >
       : ParseErrorResult<
