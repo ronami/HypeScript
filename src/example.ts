@@ -5,7 +5,7 @@ import type { Check } from './Checker';
 type T = Tokenize<`
 
 const a = { foo: 5 };
-const b: string = 'foo';
+const b = 'foo';
 
 const c: number = a[b];
 
