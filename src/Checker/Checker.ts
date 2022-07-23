@@ -46,7 +46,6 @@ import type {
   VariableDeclarator,
   IfStatement,
   AssignmentExpression,
-  ParseErrorResult,
 } from '../Parser';
 import type { Serialize } from '../Serializer';
 import type {
