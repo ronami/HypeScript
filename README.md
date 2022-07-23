@@ -27,6 +27,39 @@ type Expected = [
 ];
 ```
 
+Or try a more challenging example:
+
+```typescript
+import type { TypeCheck } from 'hypescript';
+
+type Errors = TypeCheck<`
+
+function createObject(someBoolean: boolean) {
+  function getValue() {
+    if (someBoolean) {
+      return someBoolean;
+    }
+
+    return 0;
+  }
+
+  const object = {
+    key: getValue
+  };
+
+  return object;
+}
+
+const result: number = createObject(true).key();
+
+`>;
+
+// Errors is now equal to the following type:
+type Expected = [
+  "19: Type 'boolean | number' is not assignable to type 'number'."
+];
+```
+
 *☝ Please note that this project is meant to be used for fun and learning purposes and not for practical use.*
 
 ### Try running the code
@@ -43,7 +76,7 @@ yarn add hypescript
 
 Some TypeScript syntax and features haven't been implemented and won't work. Here's a list of examples (with browser demo links) for some capabilites:
 
-- [Declaring variables with primitive values]()
+- [Declaring and assigning variables with primitive values]()
 - [Defining and calling functions]()
 - [Instantiating arrays and accessing their members]()
 - [Creating objects and accessing their properties]()
