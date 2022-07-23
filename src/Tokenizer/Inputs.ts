@@ -1,3 +1,5 @@
+export type Comment = '//';
+
 export type Punctuation =
   | ','
   | '('

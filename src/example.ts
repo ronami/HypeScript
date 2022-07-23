@@ -6,7 +6,7 @@ type T = Tokenize<`
 
 const a = { foo: 5 };
 
-a.faoo = '4';
+a.foo = '4';
 
 `>;
 type P = Parse<T>;
