@@ -23,21 +23,16 @@ import type {
 } from '../Parser';
 import type { Concat, Push, Tail, TypeError } from '../Utils';
 
-export type ConstVariableType<Value extends StaticType> = {
+export type StateVariableType<
+  Value extends StaticType,
+  Mutable extends boolean,
+> = {
   type: 'ConstVariableType';
   value: Value;
+  mutable: Mutable;
 };
 
-export type LetVariableType<
-  Value extends StaticType,
-  Constraint extends StaticType,
-> = {
-  type: 'LetVariableType';
-  value: Value;
-  constraint: Constraint;
-};
-
-export type StateType = Record<string, ConstVariableType<StaticType>>;
+export type StateType = Record<string, StateVariableType<StaticType, boolean>>;
 
 export type TypeResult<
   Value extends StaticType,
