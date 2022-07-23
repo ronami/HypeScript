@@ -3035,3 +3035,111 @@ expectType<ParseWrapper<`hello[world()]["foo"]`>>([
     },
   },
 ]);
+
+expectType<ParseWrapper<`a = 1;`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'AssignmentExpression',
+      left: {
+        type: 'Identifier',
+        name: 'a',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      right: {
+        type: 'NumericLiteral',
+        value: '1',
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      operator: '=',
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseWrapper<`a = b = 1;`>>([
+  {
+    type: 'ExpressionStatement',
+    expression: {
+      type: 'AssignmentExpression',
+      left: {
+        type: 'Identifier',
+        name: 'a',
+        typeAnnotation: null,
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      right: {
+        type: 'AssignmentExpression',
+        left: {
+          type: 'Identifier',
+          name: 'b',
+          typeAnnotation: null,
+          data: { startLineNumber: 1, endLineNumber: 1 },
+        },
+        right: {
+          type: 'NumericLiteral',
+          value: '1',
+          data: {
+            startLineNumber: 1,
+            endLineNumber: 1,
+          },
+        },
+        operator: '=',
+        data: {
+          startLineNumber: 1,
+          endLineNumber: 1,
+        },
+      },
+      operator: '=',
+      data: {
+        startLineNumber: 1,
+        endLineNumber: 1,
+      },
+    },
+    data: {
+      startLineNumber: 1,
+      endLineNumber: 1,
+    },
+  },
+]);
+
+expectType<ParseWrapper<`function foo() {}\n let foo = 1;`>>({
+  type: 'ParsingError',
+  message: "Cannot redeclare block-scoped variable 'foo'.",
+  lineNumber: 2,
+});
+
+expectType<ParseWrapper<`let foo = 1;\nfunction foo() {}\n`>>({
+  type: 'ParsingError',
+  message: "Cannot redeclare block-scoped variable 'foo'.",
+  lineNumber: 2,
+});
+
+expectType<ParseWrapper<`let foo = 1;\nlet foo = 2\n`>>({
+  type: 'ParsingError',
+  message: "Cannot redeclare block-scoped variable 'foo'.",
+  lineNumber: 2,
+});
+
+expectType<ParseWrapper<`const foo = 1;\nlet foo =2\n`>>({
+  type: 'ParsingError',
+  message: "Cannot redeclare block-scoped variable 'foo'.",
+  lineNumber: 2,
+});
