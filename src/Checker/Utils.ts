@@ -46,6 +46,17 @@ export type TypeResult<
   errors: Errors;
 };
 
+export type TypeArrayResult<
+  TypeList extends Array<StaticType>,
+  State extends StateType,
+  Errors extends Array<TypeError<any, any>> = [],
+> = {
+  type: 'TypeResult';
+  value: TypeList;
+  state: State;
+  errors: Errors;
+};
+
 export type MapLiteralToType<Type extends StaticType> =
   Type extends NumberLiteralType<any>
     ? NumberType
