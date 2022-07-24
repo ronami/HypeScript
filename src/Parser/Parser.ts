@@ -32,6 +32,7 @@ import type {
   ParseResult,
   ScopeType,
   NodeRequiresSemicolon,
+  BinaryExpression,
 } from '.';
 import type {
   GenericToken,
@@ -464,6 +465,24 @@ type ParseCallExpressionArgumentsHelper<
       >
   : null;
 
+type ParseBinaryExpression<
+  LeftNode extends BaseNode<NodeData<number, number>>,
+  TokenList extends Array<Token<any>>,
+> = TokenList[0] extends GenericToken<'==', any>
+  ? ParseExpression<Tail<TokenList>> extends ParseResult<
+      infer RightNode,
+      infer TokenList,
+      infer Error
+    >
+    ? Error extends ParsingError<any, any>
+      ? ParseError<Error>
+      : ParseResult<
+          BinaryExpression<LeftNode, RightNode, '==', NodeData<1, 1>>,
+          TokenList
+        >
+    : never
+  : null;
+
 type CheckExpression<
   Node extends BaseNode<any>,
   TokenList extends Array<Token<any>>,
@@ -476,6 +495,14 @@ type CheckExpression<
     ? ParseError<Error>
     : CheckExpression<Node, TokenList>
   : ParseAssignmentExpression<Node, TokenList> extends ParseResult<
+      infer Node,
+      infer TokenList,
+      infer Error
+    >
+  ? Error extends ParsingError<any, any>
+    ? ParseError<Error>
+    : CheckExpression<Node, TokenList>
+  : ParseBinaryExpression<Node, TokenList> extends ParseResult<
       infer Node,
       infer TokenList,
       infer Error
