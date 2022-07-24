@@ -4,8 +4,14 @@ import type { Check } from './Checker';
 
 type T = Tokenize<`
 
-1 == 2 == 3
+const b = ['2', null];
+const c = ['2'];
+const d = ['2'];
+
+const a = d == c == b;
+
+// b[1] = 2
 
 `>;
-type P = Parse<T>[0]['expression'];
+type P = Parse<T>;
 type C = Check<P>;
