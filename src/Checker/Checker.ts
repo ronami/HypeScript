@@ -25,6 +25,7 @@ import type {
   IsKindMutable,
   MergeFunctionTypesArray,
   BooleanType,
+  MismatchBinaryErrorHelper,
 } from '.';
 import type {
   ArrayExpression,
@@ -452,12 +453,11 @@ type InferBinaryExpression<
         ? TypeResult<
             BooleanType,
             RightState,
-            Push<
-              Concat<LeftErrors, RightErrors>,
-              TypeError<
-                `This condition will always return 'false' since the types '${Serialize<LeftValue>}' and '${Serialize<RightValue>}' have no overlap.`,
-                LineNumber
-              >
+            MismatchBinaryErrorHelper<
+              LeftValue,
+              RightValue,
+              LineNumber,
+              Concat<LeftErrors, RightErrors>
             >
           >
         : TypeResult<BooleanType, RightState, Concat<LeftErrors, RightErrors>>

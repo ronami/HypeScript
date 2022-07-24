@@ -4,10 +4,10 @@ import type { TypeCheck } from '../src';
 type Errors = TypeCheck<`
 
 // Define a string
-let hello = 'world';
+const hello = 'world';
 
 // Define a number
-let foo = 5;
+const foo = 5;
 
 // Can we compare them?
 const result = foo === hello;

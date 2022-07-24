@@ -14,39 +14,55 @@ import type {
   UnknownType,
   VoidType,
   MapLiteralToType,
+  StringLiteralType,
+  BooleanLiteralType,
+  NumberLiteralType,
 } from '../Checker';
 import type { Tail } from '../Utils';
 
-export type Serialize<Type extends StaticType> =
-  MapLiteralToType<Type> extends infer MappedType
-    ? MappedType extends StringType
-      ? 'string'
-      : MappedType extends BooleanType
-      ? 'boolean'
-      : MappedType extends NumberType
-      ? 'number'
-      : MappedType extends NullType
-      ? 'null'
-      : MappedType extends UndefinedType
-      ? 'undefined'
-      : MappedType extends VoidType
-      ? 'void'
-      : MappedType extends AnyType
-      ? 'any'
-      : MappedType extends UnknownType
-      ? 'unknown'
-      : MappedType extends NeverType
-      ? 'never'
-      : MappedType extends ArrayType<infer ElementsType>
-      ? SerializeArray<ElementsType>
-      : MappedType extends UnionType<infer UnionTypes>
-      ? SerializeUnion<UnionTypes>
-      : MappedType extends ObjectType<infer Properties>
-      ? SerializeObject<Properties>
-      : MappedType extends FunctionType<infer Params, infer Return>
-      ? SerializeFunction<Params, Return>
-      : never
-    : never;
+type SerializeHelper<
+  Type extends StaticType,
+  ShouldMapLiterals extends boolean,
+> = ShouldMapLiterals extends true ? Type : MapLiteralToType<Type>;
+
+export type Serialize<
+  Type extends StaticType,
+  ShouldMapLiterals extends boolean = false,
+> = SerializeHelper<Type, ShouldMapLiterals> extends infer MappedType
+  ? MappedType extends StringType
+    ? 'string'
+    : MappedType extends StringLiteralType<infer Value>
+    ? Value
+    : MappedType extends BooleanType
+    ? 'boolean'
+    : MappedType extends BooleanLiteralType<infer Value>
+    ? Value
+    : MappedType extends NumberType
+    ? 'number'
+    : MappedType extends NumberLiteralType<infer Value>
+    ? Value
+    : MappedType extends NullType
+    ? 'null'
+    : MappedType extends UndefinedType
+    ? 'undefined'
+    : MappedType extends VoidType
+    ? 'void'
+    : MappedType extends AnyType
+    ? 'any'
+    : MappedType extends UnknownType
+    ? 'unknown'
+    : MappedType extends NeverType
+    ? 'never'
+    : MappedType extends ArrayType<infer ElementsType>
+    ? SerializeArray<ElementsType>
+    : MappedType extends UnionType<infer UnionTypes>
+    ? SerializeUnion<UnionTypes>
+    : MappedType extends ObjectType<infer Properties>
+    ? SerializeObject<Properties>
+    : MappedType extends FunctionType<infer Params, infer Return>
+    ? SerializeFunction<Params, Return>
+    : never
+  : never;
 
 type SerializeFunction<
   Params extends Array<[string, StaticType]>,
