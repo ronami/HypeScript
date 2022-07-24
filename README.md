@@ -81,6 +81,7 @@ Some TypeScript syntax and features haven't been implemented and won't work. Her
 - [Instantiating arrays and accessing their members]()
 - [Creating objects and accessing their properties]()
 - [Inferring complex return value of functions]()
+- [Comparing between different types of values]()
 
 ### Additional links
 
