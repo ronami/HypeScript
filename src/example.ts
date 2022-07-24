@@ -8,7 +8,7 @@ const b = ['2', null];
 const c = ['2'];
 const d = ['2'];
 
-const a = d == c == b;
+const a = d === c == b;
 
 // b[1] = 2
 
