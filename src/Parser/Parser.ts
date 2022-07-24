@@ -468,7 +468,7 @@ type ParseCallExpressionArgumentsHelper<
 type ParseBinaryExpression<
   LeftNode extends BaseNode<NodeData<number, number>>,
   TokenList extends Array<Token<any>>,
-> = TokenList[0] extends GenericToken<'==', any>
+> = TokenList[0] extends GenericToken<'===' | '==', any>
   ? ParseExpression<Tail<TokenList>> extends ParseResult<
       infer RightNode,
       infer TokenList,

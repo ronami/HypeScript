@@ -23,7 +23,9 @@ type TokenizeInput<
   PrecedingLinebreak extends boolean,
   LineNumber extends number,
   Data extends TokenData<any, any> = TokenData<PrecedingLinebreak, LineNumber>,
-> = Input extends `==${infer InputTail}`
+> = Input extends `===${infer InputTail}`
+  ? [GenericToken<'===', Data>, InputTail]
+  : Input extends `==${infer InputTail}`
   ? [GenericToken<'==', Data>, InputTail]
   : FirstChar extends Punctuation
   ? [GenericToken<FirstChar, Data>, InputTail]
