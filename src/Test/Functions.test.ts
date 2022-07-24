@@ -1,5 +1,5 @@
-import type { TypeCheck } from '../..';
-import { expectType } from '../../TestUtils';
+import type { TypeCheck } from '..';
+import { expectType } from '../TestUtils';
 
 expectType<
   TypeCheck<`
