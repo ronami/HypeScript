@@ -785,9 +785,16 @@ type InferMemberExpressionHelper<
   ? InferMemberExpressionUnionHelper<UnionTypes, Key, State, StartLine, Errors>
   : Object extends AnyType
   ? TypeResult<AnyType, State, Errors>
-  : TypeError<
-      `Property '${Key}' does not exist on type '${Serialize<Object>}'.`,
-      StartLine
+  : TypeResult<
+      AnyType,
+      State,
+      Push<
+        Errors,
+        TypeError<
+          `Property '${Key}' does not exist on type '${Serialize<Object>}'.`,
+          StartLine
+        >
+      >
     >;
 
 type InferMemberExpressionUnionHelper<
