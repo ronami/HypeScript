@@ -9,7 +9,6 @@ import type {
   Punctuation,
   Numbers,
   Symbols,
-  Comment,
   EatFirstChar,
   GetFirstChar,
   ConcatStrings,
@@ -24,7 +23,9 @@ type TokenizeInput<
   PrecedingLinebreak extends boolean,
   LineNumber extends number,
   Data extends TokenData<any, any> = TokenData<PrecedingLinebreak, LineNumber>,
-> = FirstChar extends Punctuation
+> = Input extends `==${infer InputTail}`
+  ? [GenericToken<'==', Data>, InputTail]
+  : FirstChar extends Punctuation
   ? [GenericToken<FirstChar, Data>, InputTail]
   : FirstChar extends Numbers
   ? TokenizeNumber<Input, '', Data, FirstChar>

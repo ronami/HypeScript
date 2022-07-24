@@ -4,14 +4,8 @@ import type { Check } from './Checker';
 
 type T = Tokenize<`
 
-function foo(a: number, b: number) {}
-
-foo(
-  1,
-  2,
-)
-
+1 == 2 == 3
 
 `>;
-type P = Parse<T>;
+type P = Parse<T>[0]['expression'];
 type C = Check<P>;
