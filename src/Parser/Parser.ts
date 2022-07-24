@@ -447,6 +447,14 @@ type ParseCallExpressionArgumentsHelper<
 >
   ? Error extends ParsingError<any, any>
     ? ParseError<Error>
+    : TokenList[0] extends GenericToken<',', any>
+    ? ParseCallExpressionArguments<
+        Tail<TokenList>,
+        ParenLineNumber,
+        ClosingString,
+        false,
+        Push<Result, Node>
+      >
     : ParseCallExpressionArguments<
         TokenList,
         ParenLineNumber,
@@ -560,26 +568,50 @@ type ParseObjectItem<
       >
       ? Error extends ParsingError<any, any>
         ? ParseError<Error>
-        : ParseObject<
-            TokenList,
+        : TokenList[0] extends GenericToken<',', any>
+        ? ParseObjectItemHelper<
+            Tail<TokenList>,
+            Node,
             InitialLineNumber,
-            Push<
-              Result,
-              ObjectProperty<
-                Identifier<
-                  Name,
-                  null,
-                  NodeData<NameLineNumber, NameLineNumber>
-                >,
-                Node,
-                NodeData<NameLineNumber, Node['data']['endLineNumber']>
-              >
-            >,
+            Result,
+            Name,
+            NameLineNumber,
+            false
+          >
+        : ParseObjectItemHelper<
+            TokenList,
+            Node,
+            InitialLineNumber,
+            Result,
+            Name,
+            NameLineNumber,
             true
           >
       : ParseErrorResult<'Expression expected.', InitialLineNumber>
     : ParseErrorResult<"'}' expected.", InitialLineNumber>
   : ParseErrorResult<"'}' expected.", InitialLineNumber>;
+
+type ParseObjectItemHelper<
+  TokenList extends Array<Token<any>>,
+  Node extends BaseNode<any>,
+  InitialLineNumber extends number,
+  Result extends Array<ObjectProperty<any, any, any>>,
+  Name extends string,
+  NameLineNumber extends number,
+  NeedComma extends boolean,
+> = ParseObject<
+  TokenList,
+  InitialLineNumber,
+  Push<
+    Result,
+    ObjectProperty<
+      Identifier<Name, null, NodeData<NameLineNumber, NameLineNumber>>,
+      Node,
+      NodeData<NameLineNumber, Node['data']['endLineNumber']>
+    >
+  >,
+  NeedComma
+>;
 
 type ParseArrayExpression<
   TokenList extends Array<Token<any>>,
