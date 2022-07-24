@@ -22,6 +22,7 @@ import type {
   NumberTypeAnnotation,
   StringTypeAnnotation,
 } from '../Parser';
+import type { Serialize } from '../Serializer';
 import type { Concat, Push, Tail, TypeError } from '../Utils';
 
 export type StateVariableType<
@@ -164,3 +165,35 @@ type MergeFunctionParams<
       Tail<ParamsB>,
       Push<Return, [ParamsA[0][0], NeverType]>
     >;
+
+export type MismatchBinaryErrorHelper<
+  Left extends StaticType,
+  Right extends StaticType,
+  LineNumber extends number,
+  Errors extends Array<TypeError<any, any>>,
+  ShouldMapLiterals extends boolean = IsSameLiteralType<Left, Right>,
+> = Push<
+  Errors,
+  TypeError<
+    `This condition will always return 'false' since the types '${Serialize<
+      Left,
+      ShouldMapLiterals
+    >}' and '${Serialize<Right, ShouldMapLiterals>}' have no overlap.`,
+    LineNumber
+  >
+>;
+
+type IsSameLiteralType<LeftValue, RightValue> =
+  RightValue extends StringLiteralType<any>
+    ? LeftValue extends StringLiteralType<any>
+      ? true
+      : false
+    : RightValue extends NumberLiteralType<any>
+    ? LeftValue extends NumberLiteralType<any>
+      ? true
+      : false
+    : RightValue extends BooleanLiteralType<any>
+    ? LeftValue extends BooleanLiteralType<any>
+      ? true
+      : false
+    : false;
