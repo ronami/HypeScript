@@ -44,7 +44,7 @@ function createObject(someBoolean: boolean) {
   }
 
   const object = {
-    key: getValue
+    key: getValue,
   };
 
   return object;
