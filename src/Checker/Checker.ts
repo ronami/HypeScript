@@ -24,6 +24,7 @@ import type {
   StateVariableType,
   IsKindMutable,
   MergeFunctionTypesArray,
+  BooleanType,
 } from '.';
 import type {
   ArrayExpression,
@@ -47,6 +48,7 @@ import type {
   VariableDeclarator,
   IfStatement,
   AssignmentExpression,
+  BinaryExpression,
 } from '../Parser';
 import type { Serialize } from '../Serializer';
 import type {
@@ -414,6 +416,13 @@ type InferExpression<
       NodeData<infer StartLine, any>
     >
   ? InferCallExpression<Callee, Arguments, State, StartLine>
+  : Node extends BinaryExpression<
+      infer Left,
+      infer Right,
+      '==' | '===',
+      NodeData<infer LineNumber, any>
+    >
+  ? InferBinaryExpression<Left, Right, State, LineNumber>
   : Node extends AssignmentExpression<
       infer Left,
       infer Right,
@@ -422,6 +431,39 @@ type InferExpression<
     >
   ? InferAssignmentExpression<Left, Right, State, LineNumber>
   : UnknownType;
+
+type InferBinaryExpression<
+  Left extends BaseNode<any>,
+  Right extends BaseNode<any>,
+  State extends StateType,
+  LineNumber extends number,
+> = InferExpression<Left, State> extends TypeResult<
+  infer LeftValue,
+  infer LeftState,
+  infer LeftErrors
+>
+  ? InferExpression<Right, LeftState> extends TypeResult<
+      infer RightValue,
+      infer RightState,
+      infer RightErrors
+    >
+    ? MatchType<LeftValue, RightValue> extends false
+      ? MatchType<RightValue, LeftValue> extends false
+        ? TypeResult<
+            BooleanType,
+            RightState,
+            Push<
+              Concat<LeftErrors, RightErrors>,
+              TypeError<
+                `This condition will always return 'false' since the types '${Serialize<LeftValue>}' and '${Serialize<RightValue>}' have no overlap.`,
+                LineNumber
+              >
+            >
+          >
+        : TypeResult<BooleanType, RightState, Concat<LeftErrors, RightErrors>>
+      : TypeResult<BooleanType, RightState, Concat<LeftErrors, RightErrors>>
+    : never
+  : never;
 
 type InferAssignmentExpression<
   Left extends BaseNode<any>,

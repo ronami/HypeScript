@@ -477,7 +477,15 @@ type ParseBinaryExpression<
     ? Error extends ParsingError<any, any>
       ? ParseError<Error>
       : ParseResult<
-          BinaryExpression<LeftNode, RightNode, '==', NodeData<1, 1>>,
+          BinaryExpression<
+            LeftNode,
+            RightNode,
+            '==',
+            NodeData<
+              LeftNode['data']['startLineNumber'],
+              RightNode['data']['endLineNumber']
+            >
+          >,
           TokenList
         >
     : never

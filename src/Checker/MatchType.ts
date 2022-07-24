@@ -9,6 +9,7 @@ import type {
   StringLiteralType,
   StringType,
   UnionType,
+  ArrayType,
 } from '.';
 import type { Tail } from '../Utils';
 
@@ -23,6 +24,10 @@ export type MatchType<
   ? true
   : TypeB extends AnyType
   ? true
+  : TypeA extends ArrayType<infer ArrayTypeA>
+  ? TypeB extends ArrayType<infer ArrayTypeB>
+    ? MatchType<ArrayTypeA, ArrayTypeB>
+    : false
   : TypeA extends TypeB
   ? TypeB extends TypeA
     ? true
@@ -51,10 +56,10 @@ type UnionMatchUnion<
   UnionTypesA extends Array<StaticType>,
   UnionTypesB extends Array<StaticType>,
 > = UnionTypesB extends []
-  ? true
-  : TypeMatchUnion<UnionTypesA, UnionTypesB[0]> extends true
+  ? false
+  : TypeMatchUnion<UnionTypesA, UnionTypesB[0]> extends false
   ? UnionMatchUnion<UnionTypesA, Tail<UnionTypesB>>
-  : false;
+  : true;
 
 type TypeMatchUnion<
   UnionTypes extends Array<StaticType>,
