@@ -4,14 +4,9 @@ import type { Check } from './Checker';
 
 type T = Tokenize<`
 
-// Define a string
-const hello = '5';
+let a: number = [1, 2, 3];
 
-// Define a number
-const foo = 'world';
-
-// Can we compare them?
-const result = foo === hello;
+a[0];
 
 `>;
 type P = Parse<T>;
