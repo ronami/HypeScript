@@ -9,7 +9,7 @@ const hello = 'world';
 // Define a number
 const foo = 5;
 
-// Can we compare them?
+// Can we compare them? What's the type of 'result'?
 const result = foo === hello;
 
 `>;
