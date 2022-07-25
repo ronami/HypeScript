@@ -1,4 +1,4 @@
-## 🦄 HypeScript
+## 🐬 HypeScript
 
 > A simplified implementation of TypeScript's type-system written in TypeScript's own type-system
 
