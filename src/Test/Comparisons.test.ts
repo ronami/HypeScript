@@ -32,3 +32,41 @@ const c: boolean = a === b;
 
 `>
 >([]);
+
+expectType<
+  TypeCheck<`
+
+let a = [1, 2];
+
+let b = [1];
+
+const c: boolean = a[0] === b[0];
+
+`>
+>([]);
+
+expectType<
+  TypeCheck<`
+
+let a = [1, '2'];
+
+let b = [1];
+
+const c: boolean = a[0] === b[0];
+
+`>
+>([]);
+
+expectType<
+  TypeCheck<`
+
+let a = [true, '2'];
+
+let b = [1];
+
+const c: boolean = a[0] === b[0];
+
+`>
+>([
+  "7: This condition will always return 'false' since the types 'boolean | string' and 'number' have no overlap.",
+]);
