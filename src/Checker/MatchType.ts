@@ -56,10 +56,10 @@ type UnionMatchUnion<
   UnionTypesA extends Array<StaticType>,
   UnionTypesB extends Array<StaticType>,
 > = UnionTypesB extends []
-  ? false
-  : TypeMatchUnion<UnionTypesA, UnionTypesB[0]> extends false
+  ? true
+  : TypeMatchUnion<UnionTypesA, UnionTypesB[0]> extends true
   ? UnionMatchUnion<UnionTypesA, Tail<UnionTypesB>>
-  : true;
+  : false;
 
 type TypeMatchUnion<
   UnionTypes extends Array<StaticType>,
