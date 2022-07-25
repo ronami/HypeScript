@@ -70,7 +70,7 @@ yarn add hypescript
 
 ### Example showcase
 
-Some TypeScript syntax and features haven't been implemented and won't work. Here's a list of examples (with browser demo links) for some capabilities:
+Only a subset of TypeScript's syntax and features are available. Here's a list of examples (with browser demo links) for some capabilities:
 
 - [Declaring and assigning variables with primitive values]()
 - [Defining and calling functions]()
