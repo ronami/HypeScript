@@ -4,15 +4,15 @@ import type { TypeCheck } from '../src';
 type Errors = TypeCheck<`
 
 // Define a function, what does this function return?
-// (Try to ommit the type annotation and see what happens)
 function bar(a: number) {
+  // (Try to ommit the type annotation on 'a' and see what happens)
   return a;
 }
 
-// Let's check its return value (No arguments have been passed, is there an error?)
+// Not passing any arguments, should this show an error?
 const result1 = bar();
 
-// Try again by passing arguments (Wrong argument type for 'b')
+// Passing the wrong type of argument (string instead of a number)
 const result2 = bar('bazz');
 
 // Calling the function correctly and trying to match its value to 'boolean'
