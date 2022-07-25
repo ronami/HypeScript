@@ -20,7 +20,7 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": false,
 
-    "rootDirs": ["src", "examples"],
+    "rootDirs": ["src", "test", "examples"],
     "outDir": "build"
   }
 }
