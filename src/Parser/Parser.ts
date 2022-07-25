@@ -467,8 +467,8 @@ type ParseCallExpressionArgumentsHelper<
 
 type ParseBinaryExpression<
   LeftNode extends BaseNode<NodeData<number, number>>,
-  TokenList extends Array<Token<any>>,
-> = TokenList[0] extends GenericToken<'===' | '==', any>
+  TokenList extends Array<Token<TokenData<boolean, number>>>,
+> = TokenList[0] extends GenericToken<'===' | '==', TokenData<boolean, number>>
   ? ParseExpression<Tail<TokenList>> extends ParseResult<
       infer RightNode,
       infer TokenList,
@@ -488,7 +488,10 @@ type ParseBinaryExpression<
           >,
           TokenList
         >
-    : never
+    : ParseErrorResult<
+        'Expression expected.',
+        TokenList[0]['data']['lineNumber']
+      >
   : null;
 
 type CheckExpression<
