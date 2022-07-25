@@ -26,6 +26,7 @@ import type {
   MergeFunctionTypesArray,
   BooleanType,
   MismatchBinaryErrorHelper,
+  OverlapType,
 } from '.';
 import type {
   ArrayExpression,
@@ -448,19 +449,17 @@ type InferBinaryExpression<
       infer RightState,
       infer RightErrors
     >
-    ? MatchType<LeftValue, RightValue> extends false
-      ? MatchType<RightValue, LeftValue> extends false
-        ? TypeResult<
-            BooleanType,
-            RightState,
-            MismatchBinaryErrorHelper<
-              LeftValue,
-              RightValue,
-              LineNumber,
-              Concat<LeftErrors, RightErrors>
-            >
+    ? OverlapType<RightValue, LeftValue> extends false
+      ? TypeResult<
+          BooleanType,
+          RightState,
+          MismatchBinaryErrorHelper<
+            LeftValue,
+            RightValue,
+            LineNumber,
+            Concat<LeftErrors, RightErrors>
           >
-        : TypeResult<BooleanType, RightState, Concat<LeftErrors, RightErrors>>
+        >
       : TypeResult<BooleanType, RightState, Concat<LeftErrors, RightErrors>>
     : never
   : never;

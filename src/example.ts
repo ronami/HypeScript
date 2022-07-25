@@ -4,9 +4,7 @@ import type { Check } from './Checker';
 
 type T = Tokenize<`
 
-let a = [1, '2'][0];
-
-[true, 1][0] = a;
+const a = {a: ['a', true][0]} == {a: [null, 'a', 1][0]}
 
 `>;
 type P = Parse<T>;

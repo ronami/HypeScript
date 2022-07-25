@@ -10,10 +10,90 @@ import type {
   StringType,
   UnionType,
   ArrayType,
+  ObjectType,
+  GetObjectValueByKey,
 } from '.';
 import type { Tail } from '../Utils';
 
+export type OverlapType<
+  TypeA extends StaticType,
+  TypeB extends StaticType,
+> = TypeA extends ArrayType<infer ArrayTypeA>
+  ? TypeB extends ArrayType<infer ArrayTypeB>
+    ? OverlapType<ArrayTypeA, ArrayTypeB>
+    : false
+  : TypeA extends ObjectType<infer PropertiesA>
+  ? TypeB extends ObjectType<infer PropertiesB>
+    ? OverlapObjectProperties<PropertiesA, PropertiesB>
+    : false
+  : TypeA extends UnionType<infer UnionTypesA>
+  ? TypeB extends UnionType<infer UnionTypesB>
+    ? UnionsOverlap<UnionTypesA, UnionTypesB>
+    : TypeMatchUnion<UnionTypesA, TypeB>
+  : TypeB extends UnionType<infer UnionTypesB>
+  ? TypeMatchUnion<UnionTypesB, TypeA>
+  : MatchPrimitive<TypeA, TypeB> extends true
+  ? true
+  : MatchPrimitive<TypeB, TypeA> extends true
+  ? true
+  : false;
+
 export type MatchType<
+  TypeA extends StaticType,
+  TypeB extends StaticType,
+> = TypeA extends ArrayType<infer ArrayTypeA>
+  ? TypeB extends ArrayType<infer ArrayTypeB>
+    ? MatchType<ArrayTypeA, ArrayTypeB>
+    : false
+  : TypeA extends ObjectType<infer PropertiesA>
+  ? TypeB extends ObjectType<infer PropertiesB>
+    ? MatchObjectProperties<PropertiesA, PropertiesB>
+    : false
+  : TypeA extends UnionType<infer UnionTypesA>
+  ? TypeB extends UnionType<infer UnionTypesB>
+    ? UnionMatchUnion<UnionTypesA, UnionTypesB>
+    : TypeMatchUnion<UnionTypesA, TypeB>
+  : TypeB extends UnionType<infer UnionTypesB>
+  ? UnionMatchType<TypeA, UnionTypesB>
+  : MatchPrimitive<TypeA, TypeB> extends true
+  ? true
+  : false;
+
+type MatchObjectProperties<
+  PropertiesA extends Array<[string, StaticType]>,
+  PropertiesB extends Array<[string, StaticType]>,
+  Length extends number = PropertiesA['length'],
+> = PropertiesA extends []
+  ? PropertiesB['length'] extends Length
+    ? true
+    : false
+  : PropertiesB extends []
+  ? false
+  : MatchType<
+      GetObjectValueByKey<PropertiesA, PropertiesA[0][0]>,
+      GetObjectValueByKey<PropertiesB, PropertiesA[0][0]>
+    > extends true
+  ? MatchObjectProperties<Tail<PropertiesA>, PropertiesB, Length>
+  : false;
+
+type OverlapObjectProperties<
+  PropertiesA extends Array<[string, StaticType]>,
+  PropertiesB extends Array<[string, StaticType]>,
+  Length extends number = PropertiesA['length'],
+> = PropertiesA extends []
+  ? PropertiesB['length'] extends Length
+    ? true
+    : false
+  : PropertiesB extends []
+  ? false
+  : OverlapType<
+      GetObjectValueByKey<PropertiesA, PropertiesA[0][0]>,
+      GetObjectValueByKey<PropertiesB, PropertiesA[0][0]>
+    > extends true
+  ? OverlapObjectProperties<Tail<PropertiesA>, PropertiesB, Length>
+  : false;
+
+type MatchPrimitive<
   TypeA extends StaticType,
   TypeB extends StaticType,
 > = TypeA extends NeverType
@@ -24,10 +104,6 @@ export type MatchType<
   ? true
   : TypeB extends AnyType
   ? true
-  : TypeA extends ArrayType<infer ArrayTypeA>
-  ? TypeB extends ArrayType<infer ArrayTypeB>
-    ? MatchType<ArrayTypeA, ArrayTypeB>
-    : false
   : TypeA extends TypeB
   ? TypeB extends TypeA
     ? true
@@ -44,13 +120,16 @@ export type MatchType<
   ? TypeB extends NumberLiteralType<any>
     ? true
     : false
-  : TypeA extends UnionType<infer UnionTypesA>
-  ? TypeB extends UnionType<infer UnionTypesB>
-    ? UnionMatchUnion<UnionTypesA, UnionTypesB>
-    : TypeMatchUnion<UnionTypesA, TypeB>
-  : TypeB extends UnionType<infer UnionTypesB>
-  ? UnionMatchType<TypeA, UnionTypesB>
   : false;
+
+type UnionsOverlap<
+  UnionTypesA extends Array<StaticType>,
+  UnionTypesB extends Array<StaticType>,
+> = UnionTypesB extends []
+  ? false
+  : TypeMatchUnion<UnionTypesA, UnionTypesB[0]> extends false
+  ? UnionMatchUnion<UnionTypesA, Tail<UnionTypesB>>
+  : true;
 
 type UnionMatchUnion<
   UnionTypesA extends Array<StaticType>,
