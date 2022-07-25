@@ -27,6 +27,7 @@ import type {
   BooleanType,
   MismatchBinaryErrorHelper,
   OverlapType,
+  NumberType,
 } from '.';
 import type {
   ArrayExpression,
@@ -421,10 +422,10 @@ type InferExpression<
   : Node extends BinaryExpression<
       infer Left,
       infer Right,
-      '==' | '===',
+      infer Operator,
       NodeData<infer LineNumber, any>
     >
-  ? InferBinaryExpression<Left, Right, State, LineNumber>
+  ? InferBinaryExpression<Left, Right, State, Operator, LineNumber>
   : Node extends AssignmentExpression<
       infer Left,
       infer Right,
@@ -438,6 +439,7 @@ type InferBinaryExpression<
   Left extends BaseNode<any>,
   Right extends BaseNode<any>,
   State extends StateType,
+  Operator extends string,
   LineNumber extends number,
 > = InferExpression<Left, State> extends TypeResult<
   infer LeftValue,
@@ -449,20 +451,71 @@ type InferBinaryExpression<
       infer RightState,
       infer RightErrors
     >
-    ? OverlapType<RightValue, LeftValue> extends false
-      ? TypeResult<
-          BooleanType,
+    ? Operator extends '==' | '==='
+      ? InferComparisonExpression<
+          RightValue,
+          LeftValue,
           RightState,
-          MismatchBinaryErrorHelper<
-            LeftValue,
-            RightValue,
-            LineNumber,
-            Concat<LeftErrors, RightErrors>
-          >
+          Concat<LeftErrors, RightErrors>,
+          LineNumber
         >
-      : TypeResult<BooleanType, RightState, Concat<LeftErrors, RightErrors>>
+      : Operator extends '+' | '-' | '*' | '/'
+      ? InferArithmeticExpression<
+          RightValue,
+          LeftValue,
+          RightState,
+          Concat<LeftErrors, RightErrors>,
+          LineNumber
+        >
+      : never
     : never
   : never;
+
+type InferComparisonExpression<
+  RightValue extends StaticType,
+  LeftValue extends StaticType,
+  State extends StateType,
+  Errors extends Array<TypeError<any, any>>,
+  LineNumber extends number,
+> = OverlapType<RightValue, LeftValue> extends false
+  ? TypeResult<
+      BooleanType,
+      State,
+      MismatchBinaryErrorHelper<LeftValue, RightValue, LineNumber, Errors>
+    >
+  : TypeResult<BooleanType, State, Errors>;
+
+type InferArithmeticExpression<
+  RightValue extends StaticType,
+  LeftValue extends StaticType,
+  State extends StateType,
+  Errors extends Array<TypeError<any, any>>,
+  LineNumber extends number,
+> = MatchType<NumberType, RightValue> extends true
+  ? MatchType<NumberType, LeftValue> extends true
+    ? TypeResult<NumberType, State, Errors>
+    : TypeResult<
+        NumberType,
+        State,
+        Push<
+          Errors,
+          TypeError<
+            "The left-hand side of an arithmetic operation must be of type 'any' or 'number'.",
+            LineNumber
+          >
+        >
+      >
+  : TypeResult<
+      NumberType,
+      State,
+      Push<
+        Errors,
+        TypeError<
+          "The right-hand side of an arithmetic operation must be of type 'any' or 'number'.",
+          LineNumber
+        >
+      >
+    >;
 
 type InferAssignmentExpression<
   Left extends BaseNode<any>,

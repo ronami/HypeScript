@@ -468,25 +468,28 @@ type ParseCallExpressionArgumentsHelper<
 type ParseBinaryExpression<
   LeftNode extends BaseNode<NodeData<number, number>>,
   TokenList extends Array<Token<TokenData<boolean, number>>>,
-> = TokenList[0] extends GenericToken<'===' | '==', TokenData<boolean, number>>
+> = TokenList[0] extends GenericToken<
+  '===' | '==' | '+' | '-' | '*' | '/',
+  TokenData<boolean, number>
+>
   ? ParseExpression<Tail<TokenList>> extends ParseResult<
       infer RightNode,
-      infer TokenList,
-      infer Error
+      infer RightTokenList,
+      infer RightError
     >
-    ? Error extends ParsingError<any, any>
-      ? ParseError<Error>
+    ? RightError extends ParsingError<any, any>
+      ? ParseError<RightError>
       : ParseResult<
           BinaryExpression<
             LeftNode,
             RightNode,
-            '==',
+            TokenList[0]['value'],
             NodeData<
               LeftNode['data']['startLineNumber'],
               RightNode['data']['endLineNumber']
             >
           >,
-          TokenList
+          RightTokenList
         >
     : ParseErrorResult<
         'Expression expected.',
