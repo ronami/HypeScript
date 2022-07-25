@@ -1,12 +1,12 @@
 ## 🐬 HypeScript
 
-> A simplified implementation of TypeScript's type-system written in TypeScript's own type-system
+> A simplified implementation of TypeScript's type system written in TypeScript's own type system
 
 ### Introduction
 
-This is a simplified implementation of [TypeScript](https://github.com/microsoft/TypeScript)'s type-system that's written in TypeScript's type annotations. This means that it uses types only — with no runtime code whatsoever.
+This is a simplified implementation of [TypeScript](https://github.com/microsoft/TypeScript)'s type system that's written in TypeScript's type annotations. This means that it uses types only — with no runtime code whatsoever.
 
-You pass TypeScript code as string to the `TypeCheck` generic and get possible type errors back (**[See the live demo]()**):
+You pass TypeScript code as a string to the `TypeCheck` generic and get possible type errors back (**[See the live demo]()**):
 
 ```typescript
 import type { TypeCheck } from 'hypescript';
@@ -62,7 +62,7 @@ type Expected = [
 
 See a live demo in your browser on the [TypeScript Playground]().
 
-Alternatively, install `hypescript` in your own project with `yarn` or `npm` (TypeScript 4.7 or later is required):
+Alternatively, install `hypescript` in your project with `yarn` or `npm` (TypeScript 4.7 or later is required):
 
 ```
 yarn add hypescript
@@ -70,7 +70,7 @@ yarn add hypescript
 
 ### Example showcase
 
-Some TypeScript syntax and features haven't been implemented and won't work. Here's a list of examples (with browser demo links) for some capabilites:
+Some TypeScript syntax and features haven't been implemented and won't work. Here's a list of examples (with browser demo links) for some capabilities:
 
 - [Declaring and assigning variables with primitive values]()
 - [Defining and calling functions]()
@@ -85,4 +85,4 @@ Some TypeScript syntax and features haven't been implemented and won't work. Her
 - [Typing the Technical Interview in TypeScript](https://gal.hagever.com/posts/typing-the-technical-interview-in-typescript/)
 - [Functions and algorithms implemented purely with TypeScript's type system](https://github.com/ronami/meta-typing)
 - [A SQL database implemented purely in TypeScript type annotations](https://github.com/codemix/ts-sql)
-- [Collection of TypeScript type challenges with online judge](https://github.com/type-challenges/type-challenges)
+- [A collection of TypeScript type challenges with online judge](https://github.com/type-challenges/type-challenges)
