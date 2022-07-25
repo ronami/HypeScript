@@ -13,11 +13,11 @@ import type { TypeCheck } from 'hypescript';
 
 type Errors = TypeCheck<`
 
-function foo(name: number) {
-  return name;
+function square(n: number) {
+  return n * n;
 }
 
-foo('not a number');
+square("2");
 
 `>;
 
@@ -27,36 +27,32 @@ type Expected = [
 ];
 ```
 
-Or you can try a more challenging example (**[See the live demo]()**):
+Or you can try a more complex example (**[See the live demo]()**):
 
 ```typescript
 import type { TypeCheck } from 'hypescript';
 
 type Errors = TypeCheck<`
 
-function createObject(someBoolean: boolean) {
-  function getValue() {
-    if (someBoolean) {
-      return someBoolean;
-    }
-
-    return 0;
+function foo(num: number) {
+  if (num) {
+    return num;
   }
 
-  const object = {
-    key: getValue,
-  };
-
-  return object;
+  return "default string";
 }
 
-const result: number = createObject(true).key();
+const obj = {
+  func: foo,
+};
+
+const result: number = obj.func(1);
 
 `>;
 
 // Errors is now equal to the following type:
 type Expected = [
-  "19: Type 'boolean | number' is not assignable to type 'number'."
+  "15: Type 'number | string' is not assignable to type 'number'."
 ];
 ```
 
