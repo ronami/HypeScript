@@ -87,12 +87,25 @@ export type VariableDeclarator<
 };
 
 export type FunctionDeclaration<
-  Id extends Identifier<any, any, any>,
+  Id extends BaseNode<any>,
   Params extends Array<BaseNode<any>>,
   Body extends BaseNode<any>,
   Data extends NodeData<number, number>,
 > = {
   type: 'FunctionDeclaration';
+  id: Id;
+  params: Params;
+  body: Body;
+  data: Data;
+};
+
+export type FunctionExpression<
+  Id extends BaseNode<any> | null,
+  Params extends Array<BaseNode<any>>,
+  Body extends BaseNode<any>,
+  Data extends NodeData<number, number>,
+> = {
+  type: 'FunctionExpression';
   id: Id;
   params: Params;
   body: Body;
@@ -249,6 +262,7 @@ export type BaseNode<Data extends NodeData<number, number>> =
   | VariableDeclaration<any, any, Data>
   | VariableDeclarator<any, any, Data>
   | FunctionDeclaration<any, any, any, Data>
+  | FunctionExpression<any, any, any, Data>
   | Identifier<any, any, Data>
   | NullLiteral<Data>
   | ExpressionStatement<any, Data>

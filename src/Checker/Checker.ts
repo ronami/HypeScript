@@ -57,6 +57,7 @@ import type {
   IfStatement,
   AssignmentExpression,
   BinaryExpression,
+  FunctionExpression,
 } from '../Parser';
 import type { Serialize } from '../Serializer';
 import type {
@@ -407,6 +408,13 @@ type InferExpression<
         State,
         [TypeError<`Cannot find name '${Name}'.`, StartLine>]
       >
+  : Node extends FunctionExpression<
+      any,
+      infer Params,
+      BlockStatement<infer Body, any>,
+      any
+    >
+  ? InferFunctionExpression<Params, Body, State>
   : Node extends ObjectExpression<infer Properties, any>
   ? InferObjectProperties<Properties, State>
   : Node extends MemberExpression<
@@ -439,6 +447,37 @@ type InferExpression<
     >
   ? InferAssignmentExpression<Left, Right, State, LineNumber>
   : UnknownType;
+
+type InferFunctionExpression<
+  Params extends Array<BaseNode<any>>,
+  Body extends Array<BaseNode<any>>,
+  State extends StateType,
+> = InferFunctionParams<Params> extends [
+  infer FunctionParams,
+  infer ParamsByName,
+  infer Errors,
+]
+  ? FunctionParams extends Array<[string, StaticType]>
+    ? ParamsByName extends StateType
+      ? Errors extends Array<TypeError<any, any>>
+        ? InferBlockStatement<
+            Body,
+            ObjectMerge<State, ParamsByName>
+          > extends TypeResult<
+            infer BlockStatementReturnType,
+            any,
+            infer BlockStatementErrors
+          >
+          ? TypeResult<
+              FunctionType<FunctionParams, BlockStatementReturnType>,
+              State,
+              Concat<Errors, BlockStatementErrors>
+            >
+          : never
+        : never
+      : never
+    : never
+  : never;
 
 type InferBinaryExpression<
   Left extends BaseNode<any>,
