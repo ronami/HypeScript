@@ -8,6 +8,7 @@ import type {
   VariableDeclaration,
   VariableDeclarator,
   FunctionDeclaration,
+  FunctionExpression,
   Identifier,
   NullLiteral,
   ExpressionStatement,
@@ -565,6 +566,12 @@ type ParseExpressionHelper<
   ? ParseResult<NumericLiteral<Value, Data>, TokenTail>
   : TokenList[0] extends StringToken<infer Value, any>
   ? ParseResult<StringLiteral<Value, Data>, TokenTail>
+  : ParseFunctionExpression<TokenList> extends ParseResult<
+      infer Node,
+      infer TokenList,
+      infer Error
+    >
+  ? ParseResult<Node, TokenList, Error>
   : TokenList[0] extends SymbolToken<infer Value, any>
   ? ParseResult<Identifier<Value, null, Data>, TokenTail>
   : TokenList[0] extends GenericToken<'[', TokenData<any, infer LineNumber>>
@@ -740,6 +747,62 @@ type ParseFunctionDeclaration<
       : ParseErrorResult<"'(' expected.", FunctionNameLineNumber>
     : ParseErrorResult<'Identifier expected.', FunctionLineNumber>
   : null;
+
+type ParseFunctionExpression<TokenList extends Array<Token<any>>> =
+  TokenList[0] extends SymbolToken<
+    'function',
+    TokenData<any, infer FunctionLineNumber>
+  >
+    ? TokenList[1] extends SymbolToken<
+        infer Name,
+        TokenData<any, infer FunctionNameLineNumber>
+      >
+      ? ParseFunctionExpressionHelper<
+          TailBy<TokenList, 2>,
+          Identifier<
+            Name,
+            null,
+            NodeData<FunctionNameLineNumber, FunctionNameLineNumber>
+          >,
+          FunctionLineNumber
+        >
+      : ParseFunctionExpressionHelper<Tail<TokenList>, null, FunctionLineNumber>
+    : null;
+
+type ParseFunctionExpressionHelper<
+  TokenList extends Array<Token<any>>,
+  Id extends BaseNode<any> | null,
+  FunctionLineNumber extends number,
+> = TokenList[0] extends GenericToken<
+  '(',
+  TokenData<any, infer ParenLineNumber>
+>
+  ? ParseFunctionParams<
+      Tail<TokenList>,
+      ParenLineNumber
+    > extends ParseArrayResult<infer NodeList, infer TokenList, infer Error>
+    ? Error extends ParsingError<any, any>
+      ? ParseError<Error>
+      : ParseBlockStatement<
+          Tail<TokenList>,
+          {},
+          FunctionLineNumber,
+          true
+        > extends ParseResult<infer Node, infer TokenList, infer Error>
+      ? Error extends ParsingError<any, any>
+        ? ParseError<Error>
+        : ParseResult<
+            FunctionExpression<
+              Id,
+              NodeList,
+              Node,
+              NodeData<FunctionLineNumber, Node['data']['endLineNumber']>
+            >,
+            TokenList
+          >
+      : never
+    : never
+  : ParseErrorResult<"'(' expected.", FunctionLineNumber>;
 
 type ParseFunctionParams<
   TokenList extends Array<Token<any>>,
