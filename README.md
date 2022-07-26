@@ -34,25 +34,25 @@ import type { TypeCheck } from 'hypescript';
 
 type Errors = TypeCheck<`
 
-function foo(num: number) {
-  if (num) {
-    return num;
+function foo(message: string) {
+  if (message.includes("hello")) {
+    return message;
   }
 
-  return "default string";
+  return message.length;
 }
 
 const obj = {
   func: foo,
 };
 
-const result: number = obj.func(1);
+const result: number = obj.func("hello world");
 
 `>;
 
 // Errors is now equal to the following type:
 type Expected = [
-  "15: Type 'number | string' is not assignable to type 'number'."
+  "15: Type 'string | number' is not assignable to type 'number'."
 ];
 ```
 
