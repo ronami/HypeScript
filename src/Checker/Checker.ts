@@ -873,7 +873,7 @@ type InferMemberExpressionHelper<
     : Key extends keyof ArrayTypeMembers<ElementsType>
     ? TypeResult<ArrayTypeMembers<ElementsType>[Key], State, Errors>
     : PropertyDoesNotExistResult<State, Errors, Key, Object, StartLine>
-  : MatchType<StringType, Object> extends true
+  : Object extends StringType | StringLiteralType<any>
   ? Key extends keyof StringTypeMembers
     ? TypeResult<StringTypeMembers[Key], State, Errors>
     : PropertyDoesNotExistResult<State, Errors, Key, Object, StartLine>
