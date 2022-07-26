@@ -84,7 +84,8 @@ Only a subset of TypeScript's syntax and features are available. Here's a list o
 ### Additional links
 
 - [TypeScripts Type System is Turing Complete](https://github.com/microsoft/TypeScript/issues/14833)
-- [Typing the Technical Interview in TypeScript](https://gal.hagever.com/posts/typing-the-technical-interview-in-typescript/)
 - [Functions and algorithms implemented purely with TypeScript's type system](https://github.com/ronami/meta-typing)
-- [A SQL database implemented purely in TypeScript type annotations](https://github.com/codemix/ts-sql)
+- [Typing the Technical Interview in TypeScript](https://gal.hagever.com/posts/typing-the-technical-interview-in-typescript/)
 - [A collection of TypeScript type challenges with online judge](https://github.com/type-challenges/type-challenges)
+- [Extreme Explorations of TypeScript's Type System](https://www.learningtypescript.com/articles/extreme-explorations-of-typescripts-type-system)
+- [A SQL database implemented purely in TypeScript type annotations](https://github.com/codemix/ts-sql)
