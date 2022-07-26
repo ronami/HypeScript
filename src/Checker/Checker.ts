@@ -31,6 +31,8 @@ import type {
   IsNumeric,
   StringType,
   PropertyDoesNotExistResult,
+  ArrayTypeMembers,
+  StringTypeMembers,
 } from '.';
 import type {
   ArrayExpression,
@@ -803,24 +805,6 @@ type InferMemberExpression<
     : never
   : never;
 
-type StringTypeMembers = {
-  length: NumberType;
-  includes: FunctionType<[['searchString', StringType]], BooleanType>;
-  charAt: FunctionType<[['pos', NumberType]], StringType>;
-  indexOf: FunctionType<[['searchString', StringType]], NumberType>;
-  startsWith: FunctionType<[['searchString', StringType]], BooleanType>;
-  endsWith: FunctionType<[['searchString', StringType]], BooleanType>;
-  split: FunctionType<[['separator', StringType]], ArrayType<StringType>>;
-  replace: FunctionType<
-    [['searchValue', StringType], ['replaceValue', StringType]],
-    StringType
-  >;
-};
-
-type ArrayTypeMembers = {
-  length: NumberType;
-};
-
 type InferMemberExpressionHelper<
   Object extends StaticType,
   Key extends string,
@@ -846,8 +830,8 @@ type InferMemberExpressionHelper<
   : Object extends ArrayType<infer ElementsType>
   ? IsNumeric<Key> extends true
     ? TypeResult<ElementsType, State, Errors>
-    : Key extends keyof ArrayTypeMembers
-    ? TypeResult<ArrayTypeMembers[Key], State, Errors>
+    : Key extends keyof ArrayTypeMembers<ElementsType>
+    ? TypeResult<ArrayTypeMembers<ElementsType>[Key], State, Errors>
     : PropertyDoesNotExistResult<State, Errors, Key, Object, StartLine>
   : MatchType<StringType, Object> extends true
   ? Key extends keyof StringTypeMembers

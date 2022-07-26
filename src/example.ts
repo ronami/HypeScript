@@ -4,8 +4,7 @@ import type { Check } from './Checker';
 
 type T = Tokenize<`
 
-const a = [[1, 'a'], [true]]
-const b: number = a[0].length
+const a: string = [1, 2].reverse()
 
 `>;
 type P = Parse<T>;
