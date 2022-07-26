@@ -80,6 +80,7 @@ Only a subset of TypeScript's syntax and features are available. Here's a list o
 - [Inferring complex return value of functions]()
 - [Comparing between different types of values]()
 - [Using arithmetic operations on numbers]()
+- [Using globally available types]()
 
 ### Additional links
 

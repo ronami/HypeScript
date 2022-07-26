@@ -8,7 +8,25 @@ import type {
   AnyType,
   UndefinedType,
   MergeTypes,
+  ObjectType,
+  StateVariableType,
+  VoidType,
 } from '.';
+
+export type GlobalTypeMembers = {
+  console: StateVariableType<
+    ObjectType<[['log', FunctionType<[['data', AnyType]], UndefinedType>]]>,
+    true
+  >;
+  eval: StateVariableType<FunctionType<[['x', StringType]], AnyType>, false>;
+  setTimeout: StateVariableType<
+    FunctionType<
+      [['handler', FunctionType<[], VoidType>], ['timeout', NumberType]],
+      NumberType
+    >,
+    false
+  >;
+};
 
 export type StringTypeMembers = {
   length: NumberType;

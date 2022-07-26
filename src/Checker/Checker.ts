@@ -34,6 +34,7 @@ import type {
   ArrayTypeMembers,
   StringTypeMembers,
   FunctionTypeMembers,
+  GlobalTypeMembers,
 } from '.';
 import type {
   ArrayExpression,
@@ -72,7 +73,7 @@ import type {
 
 export type Check<NodeList extends Array<BaseNode<any>>> = InferBlockStatement<
   NodeList,
-  {}
+  GlobalTypeMembers
 > extends TypeResult<any, any, infer Errors>
   ? Errors
   : never;
