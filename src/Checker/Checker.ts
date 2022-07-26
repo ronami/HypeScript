@@ -33,6 +33,7 @@ import type {
   PropertyDoesNotExistResult,
   ArrayTypeMembers,
   StringTypeMembers,
+  FunctionTypeMembers,
 } from '.';
 import type {
   ArrayExpression,
@@ -875,6 +876,10 @@ type InferMemberExpressionHelper<
   : MatchType<StringType, Object> extends true
   ? Key extends keyof StringTypeMembers
     ? TypeResult<StringTypeMembers[Key], State, Errors>
+    : PropertyDoesNotExistResult<State, Errors, Key, Object, StartLine>
+  : Object extends FunctionType<any, any>
+  ? Key extends keyof FunctionTypeMembers
+    ? TypeResult<FunctionTypeMembers[Key], State, Errors>
     : PropertyDoesNotExistResult<State, Errors, Key, Object, StartLine>
   : Object extends UnionType<infer UnionTypes>
   ? InferMemberExpressionUnionHelper<UnionTypes, Key, State, StartLine, Errors>

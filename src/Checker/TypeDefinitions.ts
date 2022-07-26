@@ -5,6 +5,7 @@ import type {
   FunctionType,
   ArrayType,
   StaticType,
+  AnyType,
 } from '.';
 
 export type StringTypeMembers = {
@@ -30,4 +31,11 @@ export type ArrayTypeMembers<ElementsType extends StaticType> = {
   indexOf: FunctionType<[['searchElement', ElementsType]], NumberType>;
   push: FunctionType<[['item', ElementsType]], NumberType>;
   unshift: FunctionType<[['item', ElementsType]], NumberType>;
+};
+
+export type FunctionTypeMembers = {
+  length: NumberType;
+  name: StringType;
+  prototype: AnyType;
+  toString: FunctionType<[], StringType>;
 };
