@@ -4,7 +4,7 @@ import type { Check } from './Checker';
 
 type T = Tokenize<`
 
-const a: string = function () {}
+const a = [1, 2].map(function (a: number) {})
 
 `>;
 type P = Parse<T>;

@@ -11,6 +11,7 @@ import type {
   UnionType,
   ArrayType,
   ObjectType,
+  FunctionType,
   GetObjectValueByKey,
 } from '.';
 import type { Tail } from '../Utils';
@@ -49,6 +50,10 @@ export type MatchType<
   ? TypeB extends ObjectType<infer PropertiesB>
     ? MatchObjectProperties<PropertiesA, PropertiesB>
     : false
+  : TypeA extends FunctionType<infer ParamsA, infer ReturnA>
+  ? TypeB extends FunctionType<infer ParamsB, infer ReturnB>
+    ? MatchFunction<ParamsA, ParamsB, ReturnA, ReturnB>
+    : false
   : TypeA extends UnionType<infer UnionTypesA>
   ? TypeB extends UnionType<infer UnionTypesB>
     ? UnionMatchUnion<UnionTypesA, UnionTypesB>
@@ -57,6 +62,21 @@ export type MatchType<
   ? UnionMatchType<TypeA, UnionTypesB>
   : MatchPrimitive<TypeA, TypeB> extends true
   ? true
+  : false;
+
+type MatchFunction<
+  ParamsA extends Array<[string, StaticType]>,
+  ParamsB extends Array<[string, StaticType]>,
+  ReturnA extends StaticType,
+  ReturnB extends StaticType,
+> = ParamsA extends []
+  ? ParamsB extends []
+    ? MatchType<ReturnA, ReturnB>
+    : false
+  : ParamsB extends []
+  ? false
+  : MatchType<ParamsB[0][1], ParamsA[0][1]> extends true
+  ? MatchFunction<Tail<ParamsA>, Tail<ParamsB>, ReturnA, ReturnB>
   : false;
 
 type MatchObjectProperties<
