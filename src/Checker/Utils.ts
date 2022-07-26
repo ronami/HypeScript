@@ -22,6 +22,7 @@ import type {
   NumberTypeAnnotation,
   StringTypeAnnotation,
 } from '../Parser';
+import type { Numbers } from '../Tokenizer';
 import type { Serialize } from '../Serializer';
 import type { Concat, Push, Tail, TypeError } from '../Utils';
 
@@ -197,3 +198,28 @@ type IsSameLiteralType<LeftValue, RightValue> =
       ? true
       : false
     : false;
+
+export type PropertyDoesNotExistResult<
+  State extends StateType,
+  Errors extends Array<TypeError<any, any>>,
+  Key extends string,
+  Object extends StaticType,
+  LineNumber extends number,
+  Value extends StaticType = AnyType,
+> = TypeResult<
+  Value,
+  State,
+  Push<
+    Errors,
+    TypeError<
+      `Property '${Key}' does not exist on type '${Serialize<Object>}'.`,
+      LineNumber
+    >
+  >
+>;
+
+export type IsNumeric<Input extends string> = Input extends ''
+  ? true
+  : Input extends `${Numbers}${infer Rest}`
+  ? IsNumeric<Rest>
+  : false;

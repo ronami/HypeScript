@@ -35,8 +35,10 @@ function foo(a: number, b: string) {
   return 5;
 }
 
+foo(1);
+
 `>
->([]);
+>(['7: Expected 2 arguments, but got 1.']);
 
 expectType<
   TypeCheck<`
