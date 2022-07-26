@@ -6,6 +6,8 @@ import type {
   ArrayType,
   StaticType,
   AnyType,
+  UndefinedType,
+  MergeTypes,
 } from '.';
 
 export type StringTypeMembers = {
@@ -30,6 +32,11 @@ export type ArrayTypeMembers<ElementsType extends StaticType> = {
   join: FunctionType<[['separator', StringType]], StringType>;
   indexOf: FunctionType<[['searchElement', ElementsType]], NumberType>;
   push: FunctionType<[['item', ElementsType]], NumberType>;
+  pop: MergeTypes<ElementsType, UndefinedType> extends infer ReturnType
+    ? ReturnType extends StaticType
+      ? FunctionType<[], ReturnType>
+      : never
+    : never;
   unshift: FunctionType<[['item', ElementsType]], NumberType>;
 };
 
