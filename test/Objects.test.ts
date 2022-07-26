@@ -45,7 +45,7 @@ const e: number = c[0].world;
 `>
 >([
   "13: Type 'string | number' is not assignable to type 'number'.",
-  "15: Type 'undefined | undefined' is not assignable to type 'number'.",
+  "15: Type 'undefined' is not assignable to type 'number'.",
 ]);
 
 expectType<

@@ -4,11 +4,8 @@ import type { Check } from './Checker';
 
 type T = Tokenize<`
 
-function square(n: number) {
-  return n * n;
-}
-  
-square("2");  
+const a = [[1, 'a'], [true]]
+const b: number = a[0].length
 
 `>;
 type P = Parse<T>;

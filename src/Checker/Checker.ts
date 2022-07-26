@@ -28,6 +28,9 @@ import type {
   MismatchBinaryErrorHelper,
   OverlapType,
   NumberType,
+  IsNumeric,
+  StringType,
+  PropertyDoesNotExistResult,
 } from '.';
 import type {
   ArrayExpression,
@@ -769,15 +772,9 @@ type InferMemberExpression<
         infer PropertyExpressionErrors
       >
     ? Property extends BaseNode<NodeData<infer StartLine, any>>
-      ? PropertyExpressionValue extends StringLiteralType<infer Value>
-        ? InferMemberExpressionHelper<
-            ObjectExpressionValue,
-            Value,
-            PropertyExpressionState,
-            StartLine,
-            Concat<ObjectExpressionErrors, PropertyExpressionErrors>
-          >
-        : PropertyExpressionValue extends NumberLiteralType<infer Value>
+      ? PropertyExpressionValue extends
+          | StringLiteralType<infer Value>
+          | NumberLiteralType<infer Value>
         ? InferMemberExpressionHelper<
             ObjectExpressionValue,
             Value,
@@ -806,6 +803,24 @@ type InferMemberExpression<
     : never
   : never;
 
+type StringTypeMembers = {
+  length: NumberType;
+  includes: FunctionType<[['searchString', StringType]], BooleanType>;
+  charAt: FunctionType<[['pos', NumberType]], StringType>;
+  indexOf: FunctionType<[['searchString', StringType]], NumberType>;
+  startsWith: FunctionType<[['searchString', StringType]], BooleanType>;
+  endsWith: FunctionType<[['searchString', StringType]], BooleanType>;
+  split: FunctionType<[['separator', StringType]], ArrayType<StringType>>;
+  replace: FunctionType<
+    [['searchValue', StringType], ['replaceValue', StringType]],
+    StringType
+  >;
+};
+
+type ArrayTypeMembers = {
+  length: NumberType;
+};
+
 type InferMemberExpressionHelper<
   Object extends StaticType,
   Key extends string,
@@ -819,35 +834,30 @@ type InferMemberExpressionHelper<
     > extends infer MemberExpressionValue
     ? MemberExpressionValue extends StaticType
       ? TypeResult<MemberExpressionValue, State, Errors>
-      : TypeResult<
-          UndefinedType,
+      : PropertyDoesNotExistResult<
           State,
-          Push<
-            Errors,
-            TypeError<
-              `Property '${Key}' does not exist on type '${Serialize<Object>}'.`,
-              StartLine
-            >
-          >
+          Errors,
+          Key,
+          Object,
+          StartLine,
+          UndefinedType
         >
     : never
   : Object extends ArrayType<infer ElementsType>
-  ? TypeResult<ElementsType, State, Errors>
+  ? IsNumeric<Key> extends true
+    ? TypeResult<ElementsType, State, Errors>
+    : Key extends keyof ArrayTypeMembers
+    ? TypeResult<ArrayTypeMembers[Key], State, Errors>
+    : PropertyDoesNotExistResult<State, Errors, Key, Object, StartLine>
+  : MatchType<StringType, Object> extends true
+  ? Key extends keyof StringTypeMembers
+    ? TypeResult<StringTypeMembers[Key], State, Errors>
+    : PropertyDoesNotExistResult<State, Errors, Key, Object, StartLine>
   : Object extends UnionType<infer UnionTypes>
   ? InferMemberExpressionUnionHelper<UnionTypes, Key, State, StartLine, Errors>
   : Object extends AnyType
   ? TypeResult<AnyType, State, Errors>
-  : TypeResult<
-      AnyType,
-      State,
-      Push<
-        Errors,
-        TypeError<
-          `Property '${Key}' does not exist on type '${Serialize<Object>}'.`,
-          StartLine
-        >
-      >
-    >;
+  : PropertyDoesNotExistResult<State, Errors, Key, Object, StartLine>;
 
 type InferMemberExpressionUnionHelper<
   UnionTypes extends Array<StaticType>,
@@ -855,9 +865,9 @@ type InferMemberExpressionUnionHelper<
   State extends StateType,
   StartLine extends number,
   Errors extends Array<TypeError<any, any>>,
-  Result extends Array<any> = [],
+  Result extends StaticType = NeverType,
 > = UnionTypes extends []
-  ? TypeResult<UnionType<Result>, State, Errors>
+  ? TypeResult<Result, State, Errors>
   : InferMemberExpressionHelper<
       UnionTypes[0],
       Key,
@@ -869,14 +879,18 @@ type InferMemberExpressionUnionHelper<
       infer ExpressionState,
       infer ExpressionErrors
     >
-  ? InferMemberExpressionUnionHelper<
-      Tail<UnionTypes>,
-      Key,
-      ExpressionState,
-      StartLine,
-      Errors,
-      Push<Result, ExpressionValue>
-    >
+  ? MergeTypes<Result, ExpressionValue> extends infer ReturnType
+    ? ReturnType extends StaticType
+      ? InferMemberExpressionUnionHelper<
+          Tail<UnionTypes>,
+          Key,
+          ExpressionState,
+          StartLine,
+          Errors,
+          ReturnType
+        >
+      : never
+    : never
   : never;
 
 type InferObjectProperties<
