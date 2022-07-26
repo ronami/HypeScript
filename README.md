@@ -76,6 +76,7 @@ Only a subset of TypeScript's syntax and features are available. Here's a list o
 - [Defining and calling functions]()
 - [Instantiating arrays and accessing their members]()
 - [Creating objects and accessing their properties]()
+- [Using built-in members for string, array, and function types]()
 - [Inferring complex return value of functions]()
 - [Comparing between different types of values]()
 - [Using arithmetic operations on numbers]()
