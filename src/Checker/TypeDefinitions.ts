@@ -23,10 +23,7 @@ export type StringTypeMembers = {
 
 export type ArrayTypeMembers<ElementsType extends StaticType> = {
   length: NumberType;
-  fill: FunctionType<
-    [['value', ElementsType], ['start', NumberType], ['end', NumberType]],
-    ArrayType<ElementsType>
-  >;
+  fill: FunctionType<[['value', ElementsType]], ArrayType<ElementsType>>;
   reverse: FunctionType<[], ArrayType<ElementsType>>;
   includes: FunctionType<[['searchElement', ElementsType]], BooleanType>;
   join: FunctionType<[['separator', StringType]], StringType>;
