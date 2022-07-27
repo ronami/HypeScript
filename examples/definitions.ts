@@ -3,48 +3,31 @@ import type { TypeCheck } from '../src';
 // Hover over `Errors1` to see what's wrong with this input
 type Errors1 = TypeCheck<`
 
-// Define a constant
-const a = 5;
-
-// Can it be changed?
-a = 3;
+// Checking if an element is included in the array
+const a = [1, 2, 'a', 'b'].includes('a');
 
 `>;
 
 // Hover over `Errors2` to see what's wrong with this input
 type Errors2 = TypeCheck<`
 
-// Define a let variable
-let b = "hello";
-
-// Can it be changed?
-b = "world";
-
-// What about changing its type?
-b = true;
+// Trying to push a string into an array of numbers
+[1, 2, 3].push('a');
 
 `>;
 
 // Hover over `Errors3` to see what's wrong with this input
 type Errors3 = TypeCheck<`
 
-// Now with type annotations
-let c: number = true;
+// Checking for the index of a substring
+const b = 'hello world'.indexOf(true);
 
 `>;
 
 // Hover over `Errors4` to see what's wrong with this input
 type Errors4 = TypeCheck<`
 
-// Even local references
-if (true) {
-  let a = 5;
-
-  // This works
-  console.log(a);
-}
-
-// This doesn't :(
-console.log(a);
+// Trying to split a string but forgetting the separator
+const c = "a, b, c".split();
 
 `>;
