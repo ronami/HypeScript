@@ -1,5 +1,5 @@
 {
-  "name": "hypescript",
+  "name": "@ronami/hypescript",
   "version": "1.0.0",
   "description": "A simplified implementation of TypeScript's type system written in TypeScript's own type system",
   "license": "MIT",

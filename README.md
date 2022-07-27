@@ -9,7 +9,7 @@ This is a simplified implementation of [TypeScript](https://github.com/microsoft
 You pass TypeScript code as a string to the `TypeCheck` generic and get possible type errors back (**[See the live demo]()**):
 
 ```typescript
-import type { TypeCheck } from 'hypescript';
+import type { TypeCheck } from '@ronami/hypescript';
 
 type Errors = TypeCheck<`
 
@@ -30,7 +30,7 @@ type Expected = [
 Or you can try a more complex example (**[See the live demo]()**):
 
 ```typescript
-import type { TypeCheck } from 'hypescript';
+import type { TypeCheck } from '@ronami/hypescript';
 
 type Errors = TypeCheck<`
 
@@ -62,10 +62,10 @@ type Expected = [
 
 See a live demo in your browser on the [TypeScript Playground]().
 
-Alternatively, install `hypescript` in your project with `yarn` or `npm` (TypeScript 4.7 or later is required):
+Alternatively, install `@ronami/hypescript` in your project with `yarn` or `npm` (TypeScript 4.7 or later is required):
 
 ```
-yarn add hypescript
+yarn add @ronami/hypescript
 ```
 
 ### Code examples
