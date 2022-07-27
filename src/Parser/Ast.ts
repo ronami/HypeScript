@@ -54,7 +54,7 @@ export type ObjectExpression<
 };
 
 export type ObjectProperty<
-  Key extends Identifier<any, any, any>,
+  Key extends BaseNode<any>,
   Value extends BaseNode<any>,
   Data extends NodeData<number, number>,
 > = {

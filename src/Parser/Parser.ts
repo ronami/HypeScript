@@ -618,56 +618,65 @@ type ParseObjectItem<
 >
   ? TokenList[1] extends GenericToken<':', any>
     ? ParseExpression<TailBy<TokenList, 2>> extends ParseResult<
-        infer Node,
+        infer ValueNode,
         infer TokenList,
         infer Error
       >
       ? Error extends ParsingError<any, any>
         ? ParseError<Error>
-        : TokenList[0] extends GenericToken<',', any>
-        ? ParseObjectItemHelper<
-            Tail<TokenList>,
-            Node,
-            InitialLineNumber,
-            Result,
-            Name,
-            NameLineNumber,
-            false
-          >
         : ParseObjectItemHelper<
             TokenList,
-            Node,
+            Identifier<Name, null, NodeData<NameLineNumber, NameLineNumber>>,
+            ValueNode,
             InitialLineNumber,
             Result,
-            Name,
-            NameLineNumber,
-            true
+            NameLineNumber
           >
       : ParseErrorResult<'Expression expected.', InitialLineNumber>
-    : ParseErrorResult<"'}' expected.", InitialLineNumber>
+    : ParseObjectItemHelper<
+        Tail<TokenList>,
+        Identifier<Name, null, NodeData<NameLineNumber, NameLineNumber>>,
+        Identifier<Name, null, NodeData<NameLineNumber, NameLineNumber>>,
+        InitialLineNumber,
+        Result,
+        NameLineNumber
+      >
   : ParseErrorResult<"'}' expected.", InitialLineNumber>;
 
 type ParseObjectItemHelper<
   TokenList extends Array<Token<any>>,
-  Node extends BaseNode<any>,
+  Key extends BaseNode<any>,
+  Value extends BaseNode<any>,
   InitialLineNumber extends number,
   Result extends Array<ObjectProperty<any, any, any>>,
-  Name extends string,
   NameLineNumber extends number,
-  NeedComma extends boolean,
-> = ParseObject<
-  TokenList,
-  InitialLineNumber,
-  Push<
-    Result,
-    ObjectProperty<
-      Identifier<Name, null, NodeData<NameLineNumber, NameLineNumber>>,
-      Node,
-      NodeData<NameLineNumber, Node['data']['endLineNumber']>
+> = TokenList[0] extends GenericToken<',', any>
+  ? ParseObject<
+      Tail<TokenList>,
+      InitialLineNumber,
+      Push<
+        Result,
+        ObjectProperty<
+          Key,
+          Value,
+          NodeData<NameLineNumber, Value['data']['endLineNumber']>
+        >
+      >,
+      false
     >
-  >,
-  NeedComma
->;
+  : ParseObject<
+      TokenList,
+      InitialLineNumber,
+      Push<
+        Result,
+        ObjectProperty<
+          Key,
+          Value,
+          NodeData<NameLineNumber, Value['data']['endLineNumber']>
+        >
+      >,
+      true
+    >;
 
 type ParseArrayExpression<
   TokenList extends Array<Token<any>>,
