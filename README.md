@@ -68,21 +68,21 @@ Alternatively, install `hypescript` in your project with `yarn` or `npm` (TypeSc
 yarn add hypescript
 ```
 
-### Example showcase
+### Code examples
 
 Only a subset of TypeScript's syntax and features are available. Here's a list of examples (with browser demo links) for some capabilities:
 
-- [Declaring and assigning variables with primitive values]()
-- [Defining and calling functions]()
-- [Instantiating arrays and accessing their members]()
-- [Creating objects and accessing their properties]()
-- [Using built-in members for string, array, and function types]()
-- [Inferring complex return value of functions]()
-- [Comparing between different types of values]()
-- [Using arithmetic operations on numbers]()
-- [Using globally available types]()
+- [Variables]()
+- [Functions]()
+- [Arrays]()
+- [Objects]()
+- [Methods]()
+- [Function return type]()
+- [Equality]()
+- [Arithmetic operations]()
+- [Globally types]()
 
-### Additional links
+### Inspiration
 
 - [TypeScripts Type System is Turing Complete](https://github.com/microsoft/TypeScript/issues/14833)
 - [Functions and algorithms implemented purely with TypeScript's type system](https://github.com/ronami/meta-typing)
