@@ -5,10 +5,12 @@ import type {
   StringToken,
   TokenData,
   GenericToken,
+  KeywordToken,
   Succ,
   Punctuation,
   Numbers,
   Symbols,
+  Keywords,
   EatFirstChar,
   GetFirstChar,
   ConcatStrings,
@@ -73,7 +75,12 @@ type TokenizeSymbol<
       ConcatStrings<Result, FirstChar>,
       PrecedingLinebreak
     >
-  : [SymbolToken<Result, PrecedingLinebreak>, Input];
+  : [
+      Result extends Keywords
+        ? KeywordToken<Result, PrecedingLinebreak>
+        : SymbolToken<Result, PrecedingLinebreak>,
+      Input,
+    ];
 
 type TokenizeHelper<
   TokenizeResult,

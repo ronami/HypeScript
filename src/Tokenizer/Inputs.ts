@@ -1,3 +1,13 @@
+export type Keywords =
+  | 'const'
+  | 'let'
+  | 'if'
+  | 'return'
+  | 'null'
+  | 'true'
+  | 'false'
+  | 'function';
+
 export type Punctuation =
   | ','
   | '('

@@ -15,6 +15,15 @@ export type GenericToken<
   data: Data;
 };
 
+export type KeywordToken<
+  Value extends string,
+  Data extends TokenData<boolean, number>,
+> = {
+  type: 'keyword';
+  value: Value;
+  data: Data;
+};
+
 export type NumberToken<
   Value extends string,
   Data extends TokenData<boolean, number>,
@@ -49,4 +58,5 @@ export type Token<
   | GenericToken<Value, Data>
   | NumberToken<Value, Data>
   | StringToken<Value, Data>
-  | SymbolToken<Value, Data>;
+  | SymbolToken<Value, Data>
+  | KeywordToken<Value, Data>;

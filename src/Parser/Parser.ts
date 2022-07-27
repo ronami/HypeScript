@@ -40,6 +40,7 @@ import type {
   NumberToken,
   StringToken,
   SymbolToken,
+  KeywordToken,
   Token,
   TokenData,
 } from '../Tokenizer';
@@ -111,7 +112,10 @@ type ParseTypeAnnotation<TokenList extends Array<Token<any>>> =
         >,
         Tail<TokenList>
       >
-    : TokenList[0] extends SymbolToken<'null', TokenData<any, infer LineNumber>>
+    : TokenList[0] extends KeywordToken<
+        'null',
+        TokenData<any, infer LineNumber>
+      >
     ? ParseResult<
         TypeAnnotation<
           NullLiteralTypeAnnotation<NodeData<LineNumber, LineNumber>>,
@@ -266,7 +270,7 @@ type ParseVariableDeclarationHelper<
 type ParseVariableDeclaration<
   TokenList extends Array<Token<any>>,
   Scope extends ScopeType,
-> = TokenList[0] extends SymbolToken<
+> = TokenList[0] extends KeywordToken<
   infer Kind,
   TokenData<any, infer KindLineNumber>
 >
@@ -281,6 +285,10 @@ type ParseVariableDeclaration<
         : Kind extends 'const'
         ? ParseConstVariableDeclaration<TokenList, Scope, Node, KindLineNumber>
         : ParseLetVariableDeclaration<TokenList, Scope, Node, KindLineNumber>
+      : TokenList[1] extends KeywordToken<infer Value, any>
+      ? ParseError<
+          ParsingError<`Unexpected reserved word '${Value}'.`, KindLineNumber>
+        >
       : ParseError<
           ParsingError<
             'Variable declaration list cannot be empty.',
@@ -556,11 +564,11 @@ type ParseExpressionHelper<
   TokenList extends Array<Token<any>>,
   TokenTail extends Array<Token<any>> = Tail<TokenList>,
   Data extends NodeData<any, any> = TokenToNodeData<TokenList[0]>,
-> = TokenList[0] extends SymbolToken<'true', any>
+> = TokenList[0] extends KeywordToken<'true', any>
   ? ParseResult<BooleanLiteral<true, Data>, TokenTail>
-  : TokenList[0] extends SymbolToken<'false', any>
+  : TokenList[0] extends KeywordToken<'false', any>
   ? ParseResult<BooleanLiteral<false, Data>, TokenTail>
-  : TokenList[0] extends SymbolToken<'null', any>
+  : TokenList[0] extends KeywordToken<'null', any>
   ? ParseResult<NullLiteral<Data>, TokenTail>
   : TokenList[0] extends NumberToken<infer Value, any>
   ? ParseResult<NumericLiteral<Value, Data>, TokenTail>
@@ -694,7 +702,7 @@ type ParseExpressionStatement<TokenList extends Array<Token<any>>> =
 type ParseFunctionDeclaration<
   TokenList extends Array<Token<any>>,
   Scope extends ScopeType,
-> = TokenList[0] extends SymbolToken<
+> = TokenList[0] extends KeywordToken<
   'function',
   TokenData<any, infer FunctionLineNumber>
 >
@@ -749,7 +757,7 @@ type ParseFunctionDeclaration<
   : null;
 
 type ParseFunctionExpression<TokenList extends Array<Token<any>>> =
-  TokenList[0] extends SymbolToken<
+  TokenList[0] extends KeywordToken<
     'function',
     TokenData<any, infer FunctionLineNumber>
   >
@@ -953,7 +961,7 @@ type ParseTopLevelHelper<
 type ParseIfStatement<
   TokenList extends Array<Token<any>>,
   InFunctionScope extends boolean,
-> = TokenList[0] extends SymbolToken<'if', TokenData<any, infer IfLineNumber>>
+> = TokenList[0] extends KeywordToken<'if', TokenData<any, infer IfLineNumber>>
   ? TokenList[1] extends GenericToken<
       '(',
       TokenData<any, infer ParenLineNumber>
@@ -1001,12 +1009,15 @@ type ParseReturnStatementHelper<
         >,
         TokenList
       >
-  : never;
+  : ParseErrorResult<'Expression expected.', 1>;
 
 type ParseReturnStatement<
   TokenList extends Array<Token<any>>,
   InFunctionScope extends boolean,
-> = TokenList[0] extends SymbolToken<'return', TokenData<any, infer LineNumber>>
+> = TokenList[0] extends KeywordToken<
+  'return',
+  TokenData<any, infer LineNumber>
+>
   ? InFunctionScope extends true
     ? TokenList[1] extends Token<TokenData<infer PrecedingLinebreak, any>, any>
       ? PrecedingLinebreak extends false
