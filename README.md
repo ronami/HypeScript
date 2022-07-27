@@ -70,7 +70,7 @@ yarn add hypescript
 
 ### Code examples
 
-Only a subset of TypeScript's syntax and features are available. Here's a list of examples (with browser demo links) for some capabilities:
+Only a subset of TypeScript's syntax and features are available. Here's a list of examples (with browser demo links) for some code examples:
 
 - [Variables]()
 - [Functions]()
