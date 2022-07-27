@@ -1,7 +1,5 @@
 ## 🐬 HypeScript
 
-> A simplified implementation of TypeScript's type system written in TypeScript's own type system
-
 ### Introduction
 
 This is a simplified implementation of [TypeScript](https://github.com/microsoft/TypeScript)'s type system that's written in TypeScript's type annotations. This means that it uses types only — with no runtime code whatsoever.
