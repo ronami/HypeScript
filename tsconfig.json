@@ -3,14 +3,14 @@
     "target": "es2019",
     "module": "es2022",
     "lib": ["esnext"],
-    "declaration": false,
+    "declaration": true,
     "composite": false,
     "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "diagnostics": false,
 
     "strict": true,
-    "noEmit": true,
+    "emitDeclarationOnly": true,
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
 
