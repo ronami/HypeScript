@@ -3,10 +3,10 @@ import type { TypeCheck } from '../src';
 // Hover over the `Errors` type to see its value
 type Errors = TypeCheck<`
 
-function foo(name: number) {
-  return name;
+function square(n: number) {
+  return n * n;
 }
 
-foo('not a number');
+square("2");
 
 `>;
