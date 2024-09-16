@@ -12,7 +12,7 @@ You pass TypeScript code as a string to the `TypeCheck` generic and get possible
 
 ### Try running the code
 
-See a live demo in your browser on the [TypeScript Playground](https://github.dev/ronami/HypeScript/blob/master/examples/simple.ts).
+See a live demo in your browser on the [the github.dev editor](https://github.dev/ronami/HypeScript/blob/master/examples/simple.ts).
 
 Alternatively, install `@ronami/hypescript` in your project with `yarn` or `npm` (TypeScript 4.7 or later is required):
 
