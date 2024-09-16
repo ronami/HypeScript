@@ -6,7 +6,7 @@
     "declaration": false,
     "composite": false,
     "isolatedModules": true,
-    "importsNotUsedAsValues": "error",
+    "verbatimModuleSyntax": true,
     "diagnostics": false,
 
     "strict": true,
